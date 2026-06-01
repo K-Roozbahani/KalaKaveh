@@ -118,3 +118,24 @@ USE_TZ = True
 STATIC_URL = 'static/'
 AUTH_USER_MODEL = "users.User"
 
+#____________________django-rest-farmwork----------------------
+
+REST_FRAMEWORK = {
+    # تعیین سطح دسترسی پیش‌فرض (مثلاً فقط کاربران احراز هویت شده)
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+
+    # تعیین سیستم احراز هویت پیش‌فرض
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+
+    # تنظیمات صفحه‌بندی (Pagination)
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
+
+# ____________________________________________________________________________
+
