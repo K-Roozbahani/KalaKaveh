@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 class Category(models.Model):
@@ -6,8 +7,20 @@ class Category(models.Model):
     دسته‌بندی محصولات (مثلاً موبایل، پوشاک، لوازم خانگی).
     """
     name = models.CharField(_("نام"), max_length=100)
-    slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True) # برای URL های خوانا
-    parent = models.ForeignKey('self', related_name="sub-categories", verbose_name=_("دسته اصلی"), on_delete=models.CASCADE)
+    slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True, blank=True) # برای URL های خوانا
+    parent = models.ForeignKey(
+        'self',
+        related_name='subcategories',
+        verbose_name=_("دسته اصلی"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.slug:  # اگر slug خالی بود، آن را بساز
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -17,8 +30,13 @@ class Brand(models.Model):
     اطلاعات برند محصولات.
     """
     name = models.CharField(_("نام برند"), max_length=100)
-    slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True)  # برای URL های خوانا
+    slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True, blank=True)  # برای URL های خوانا
     logo = models.ImageField(_("لوگو"), upload_to='brands/logos/', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:  # اگر slug خالی بود، آن را بساز
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -38,9 +56,10 @@ class Product(models.Model):
     مدل اصلی محصول شامل نام، توضیحات، قیمت، عکس، موجودی، ویژگی‌ها و …
     """
     name = models.CharField(_("نام محصول"), max_length=255)
+    slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True, blank=True)  # برای URL های خوانا
     description = models.TextField(_("توضیحات"), blank=True)
     price = models.DecimalField(_("قیمت"), max_digits=10, decimal_places=2)
-    discount_price = models.DecimalField(_("قیمت در تخفیف"), max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField(_("قیمت با تخفیف"), max_digits=10, decimal_places=2, null=True, blank=True)
     stock = models.PositiveIntegerField(_("موجودی"), default=0)
     category = models.ForeignKey(Category, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
     brand = models.ForeignKey(Brand, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
@@ -49,6 +68,11 @@ class Product(models.Model):
     updated_at = models.DateTimeField(_("تاریخ بروزرسانی"), auto_now=True)
     attributes = models.ManyToManyField(ProductAttribute, through='ProductAttributeValue', related_name='products')
     is_active = models.BooleanField(_("موجود"), default=True, )
+
+    def save(self, *args, **kwargs):
+        if not self.slug:  # اگر slug خالی بود، آن را بساز
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
