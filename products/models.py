@@ -7,6 +7,7 @@ class Category(models.Model):
     """
     name = models.CharField(_("نام"), max_length=100)
     slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True) # برای URL های خوانا
+    parent = models.ForeignKey('self', related_name="sub-categories", verbose_name=_("دسته اصلی"), on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -16,6 +17,7 @@ class Brand(models.Model):
     اطلاعات برند محصولات.
     """
     name = models.CharField(_("نام برند"), max_length=100)
+    slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True)  # برای URL های خوانا
     logo = models.ImageField(_("لوگو"), upload_to='brands/logos/', blank=True, null=True)
 
     def __str__(self):
@@ -38,6 +40,7 @@ class Product(models.Model):
     name = models.CharField(_("نام محصول"), max_length=255)
     description = models.TextField(_("توضیحات"), blank=True)
     price = models.DecimalField(_("قیمت"), max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField(_("قیمت در تخفیف"), max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(_("موجودی"), default=0)
     category = models.ForeignKey(Category, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
     brand = models.ForeignKey(Brand, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
@@ -45,6 +48,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
     updated_at = models.DateTimeField(_("تاریخ بروزرسانی"), auto_now=True)
     attributes = models.ManyToManyField(ProductAttribute, through='ProductAttributeValue', related_name='products')
+    is_active = models.BooleanField(_("موجود"), default=True, )
 
     def __str__(self):
         return self.name
