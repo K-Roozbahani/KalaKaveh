@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import User
+from ..models import User, Address
 from phonenumber_field.serializerfields import PhoneNumberField
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,3 +31,22 @@ class UserSerializer(serializers.ModelSerializer):
         #     instance.set_password(password)
         instance.save()
         return instance
+
+class AddressSerializer(serializers.ModelSerializer):
+    # نمایش نام کاربر به جای فقط ID (اختیاری برای خواندن)
+    user_name = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = Address
+        fields = [
+            'id', 'user', 'user_name', 'title', 'state',
+            'city', 'street', 'postal_code', 'phone_number',
+            'address_details', 'created_at'
+        ]
+        # کاربر نباید بتواند فیلد user را در درخواست POST/PUT تغییر دهد
+        read_only_fields = ['user']
+
+    def validate_postal_code(self, value):
+        if len(value) != 10:
+            raise serializers.ValidationError("کد پستی باید ۱۰ رقم باشد.")
+        return value
