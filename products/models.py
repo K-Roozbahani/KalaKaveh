@@ -1,6 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class Category(models.Model):
     """
@@ -107,14 +111,15 @@ class Review(models.Model):
     برای ثبت نظرات و امتیازات کاربران درباره محصولات.
     """
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
-    user_name = models.CharField(_("نام کاربر"), max_length=100) # در صورت نداشتن سیستم احراز هویت کاربر
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews', verbose_name=_('کاربر')) # تغییر از user_name به ForeignKey
     comment = models.TextField(_("نظر"), blank=True)
     rating = models.PositiveSmallIntegerField(_("امتیاز"), choices=[(i, i) for i in range(1, 6)]) # امتیاز از 1 تا 5
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
 
     class Meta:
+        unique_together = ('product', 'user')  # اطمینان از اینکه هر کاربر فقط یک نظر و امتیاز میتواند برای هر محصول ثبت کند
         ordering = ['-created_at'] # نمایش جدیدترین نظرها اول
 
     def __str__(self):
-        return f"Review for {self.product.name} by {self.user_name}"
+        return f"Review for {self.product.name} by {self.user}"
 
