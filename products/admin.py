@@ -86,6 +86,6 @@ class ProductImageAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('product', 'user_name', 'rating', 'created_at')
+    list_display = ('product', 'user', 'rating', 'created_at')
     list_filter = ('rating', 'created_at')
     autocomplete_fields = ('product',)
