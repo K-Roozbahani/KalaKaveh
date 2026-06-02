@@ -29,7 +29,7 @@ class UserApiView(ModelViewSet):
             self.permission_classes = [IsAdminUser]
         else:
             print("**************************step else*******************")
-            self.permission_classes = [IsAuthenticated()]
+            self.permission_classes = [IsAuthenticated]
         print("**************************step skip all*******************")
         return super().get_permissions()
 
