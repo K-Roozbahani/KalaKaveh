@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from products.modesl import (
+from products.models import (
     Category, Brand, ProductAttribute, Product,
     ProductAttributeValue, ProductImage, Review
 )

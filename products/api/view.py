@@ -5,11 +5,11 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from utils.permissions import IsOwnerOrReadOnly
 
-from .models import (
+from products.models import (
     Category, Brand, ProductAttribute, Product,
     ProductAttributeValue, ProductImage, Review
 )
-from .serializers import (
+from products.api.serializer import (
     CategorySerializer, BrandSerializer, ProductAttributeSerializer,
     ProductSerializer, ProductImageSerializer, ReviewCreateSerializer
 )

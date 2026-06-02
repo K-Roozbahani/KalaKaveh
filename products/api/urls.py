@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
+from products.api.view import (
     CategoryViewSet, BrandViewSet, ProductAttributeViewSet,
     ProductViewSet, ReviewViewSet
 )
@@ -12,6 +12,5 @@ router.register(r'attributes', ProductAttributeViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'reviews', ReviewViewSet)
 
-urlpatterns = [
-    path('', include(router.urls)),
-]
+urlpatterns = router.urls
+
