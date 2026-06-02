@@ -22,8 +22,9 @@ class Category(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if not self.slug:  # اگر slug خالی بود، آن را بساز
-            self.slug = slugify(self.name)
+        if not self.slug: # اگر slug خالی بود، آن را بساز
+            self.slug = slugify(self.name, allow_unicode=True)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -38,8 +39,9 @@ class Brand(models.Model):
     logo = models.ImageField(_("لوگو"), upload_to='brands/logos/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.slug:  # اگر slug خالی بود، آن را بساز
-            self.slug = slugify(self.name)
+        if not self.slug: # اگر slug خالی بود، آن را بساز
+            self.slug = slugify(self.name, allow_unicode=True)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -74,8 +76,9 @@ class Product(models.Model):
     is_active = models.BooleanField(_("موجود"), default=True, )
 
     def save(self, *args, **kwargs):
-        if not self.slug:  # اگر slug خالی بود، آن را بساز
-            self.slug = slugify(self.name)
+        if not self.slug: # اگر slug خالی بود، آن را بساز
+            self.slug = slugify(self.name, allow_unicode=True)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
