@@ -24,7 +24,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')), # برای لاگین/لاگ‌اوت در مرورگر
     path('api-user/', include('users.api.urls')) ,
     path('api-products/', include('products.api.urls')),
-
+    path('api-cart/', include('carts.api.urls')),
 ]
 
 if settings.DEBUG:
