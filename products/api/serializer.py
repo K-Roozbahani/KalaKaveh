@@ -62,7 +62,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ['id', 'user_name', 'comment', 'rating', 'created_at']
+        fields = ['id', 'user', 'comment', 'rating', 'created_at']
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -87,11 +87,12 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = ['slug', 'created_at', 'updated_at']
 
     def get_average_rating(self, obj):
-        # محاسبه میانگین امتیاز از طریق Relation
-        reviews = obj.reviews.all()
-        if reviews.exists():
-            return reviews.aggregate(serializers.Avg('rating'))['rating__avg']
-        return 0
+        return 5
+    #     # محاسبه میانگین امتیاز از طریق Relation
+    #     reviews = obj.reviews.all()
+    #     if reviews.exists():
+    #         return reviews.aggregate(serializers.Avg('rating'))['rating__avg']
+    #     return 0
 
 
 # --- 6. Review Serializer (For creating reviews) ---
