@@ -1,4 +1,4 @@
-from django.db.models import Avg
+from django.db.models import Avg, Min
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -44,9 +44,14 @@ class ProductViewSet(viewsets.ModelViewSet):
         queryset = Product.objects.select_related('category', 'brand').prefetch_related(
             'images',
             'attribute_values',
-            'attribute_values__attribute'
+            'attribute_values__attribute',
+            'variants',
+            'variants__variant_attributes'
         ).filter(is_active=True).annotate(
-        average_rating=Avg('reviews__rating'))
+            average_rating=Avg('reviews__rating'),
+            price=Min("variants__price"),
+            discount_price=Min("variants__discount_price"),
+        )
 
         # امکان فیلتر بر اساس دسته‌بندی از طریق URL (مثلاً ?category=1)
         category_id = self.request.query_params.get('category')
