@@ -109,6 +109,128 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image for {self.product.name}"
 
+class ProductVariant(models.Model):
+    """
+    تنوع محصول
+    مثال:
+    آیفون 15 مشکی 128 گیگ
+    """
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="variants",
+        verbose_name="محصول"
+    )
+
+    sku = models.CharField(
+        "کد انبار (SKU)",
+        max_length=100,
+        unique=True
+    )
+
+    price = models.DecimalField(
+        "قیمت",
+        max_digits=12,
+        decimal_places=0
+    )
+
+    stock = models.PositiveIntegerField(
+        "موجودی",
+        default=0
+    )
+
+    attribute_values = models.ManyToManyField(
+        ProductAttributeValue,
+        through="ProductVariantAttribute",
+        related_name="product_variants",
+        verbose_name="ویژگی‌های تنوع"
+    )
+
+    is_active = models.BooleanField(
+        "فعال",
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        "تاریخ ایجاد",
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = "تنوع محصول"
+        verbose_name_plural = "تنوع‌های محصول"
+
+    def __str__(self):
+        return f"{self.product.name} - {self.sku}"
+
+
+class ProductVariantAttribute(models.Model):
+    """
+    مدل واسط بین تنوع محصول و مقدار ویژگی
+    """
+
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.CASCADE,
+        related_name="variant_attributes",
+        verbose_name="تنوع محصول"
+    )
+
+    attribute_value = models.ForeignKey(
+        ProductAttributeValue,
+        on_delete=models.CASCADE,
+        related_name="variant_attributes",
+        verbose_name="مقدار ویژگی"
+    )
+
+    class Meta:
+        verbose_name = "ویژگی تنوع محصول"
+        verbose_name_plural = "ویژگی‌های تنوع محصول"
+        unique_together = (
+            "variant",
+            "attribute_value"
+        )
+
+    def __str__(self):
+        return (
+            f"{self.variant.sku} - "
+            f"{self.attribute_value.attribute.name}: "
+            f"{self.attribute_value.value}"
+        )
+
+
+class VariantImage(models.Model):
+    """
+    تصاویر مخصوص هر تنوع
+    """
+
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.CASCADE,
+        related_name="images",
+        verbose_name="تنوع محصول"
+    )
+
+    image = models.ImageField(
+        "تصویر",
+        upload_to="products/variants/"
+    )
+
+    is_primary = models.BooleanField(
+        "تصویر اصلی",
+        default=False
+    )
+
+    class Meta:
+        verbose_name = "تصویر تنوع محصول"
+        verbose_name_plural = "تصاویر تنوع محصول"
+
+    def __str__(self):
+        return f"تصویر {self.variant.sku}"
+
+
+
 class Review(models.Model):
     """
     برای ثبت نظرات و امتیازات کاربران درباره محصولات.
