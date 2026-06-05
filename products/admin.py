@@ -87,7 +87,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('is_active', 'category', 'brand')
     readonly_fields = ('created_at', 'updated_at')
     autocomplete_fields = ('category', 'brand')
-    inlines = [ProductAttributeValueInline, ProductImageInline, ReviewInline]
+    inlines = [ProductAttributeValueInline, ProductImageInline, ProductVariantInline, ReviewInline]
     prepopulated_fields = {'slug': ('name',)}
 
 
