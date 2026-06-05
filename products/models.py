@@ -64,12 +64,12 @@ class Product(models.Model):
     name = models.CharField(_("نام محصول"), max_length=255)
     slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True, blank=True)  # برای URL های خوانا
     description = models.TextField(_("توضیحات"), blank=True)
-    price = models.DecimalField(_("قیمت"), max_digits=10, decimal_places=2)
-    discount_price = models.DecimalField(_("قیمت با تخفیف"), max_digits=10, decimal_places=2, null=True, blank=True)
-    stock = models.PositiveIntegerField(_("موجودی"), default=0)
+    # price = models.DecimalField(_("قیمت"), max_digits=10, decimal_places=2)
+    # discount_price = models.DecimalField(_("قیمت با تخفیف"), max_digits=10, decimal_places=2, null=True, blank=True)
+    # stock = models.PositiveIntegerField(_("موجودی"), default=0)
     category = models.ForeignKey(Category, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
     brand = models.ForeignKey(Brand, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
-    main_image = models.ImageField(_("عکس اصلی"), upload_to='products/images/')
+    # main_image = models.ImageField(_("عکس اصلی"), upload_to='products/images/')
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
     updated_at = models.DateTimeField(_("تاریخ بروزرسانی"), auto_now=True)
     attributes = models.ManyToManyField(ProductAttribute, through='ProductAttributeValue', related_name='products')
@@ -93,7 +93,7 @@ class ProductAttributeValue(models.Model):
     value = models.CharField(_("مقدار"), max_length=255)
 
     class Meta:
-        unique_together = ('product', 'attribute') # اطمینان از اینکه هر ویژگی برای یک محصول فقط یک بار تعریف شده است
+        unique_together = ('product', 'attribute', 'value') # اطمینان از اینکه هر ویژگی برای یک محصول فقط یک بار تعریف شده است
 
     def __str__(self):
         return f"{self.product.name} - {self.attribute.name}: {self.value}"
@@ -120,23 +120,26 @@ class ProductVariant(models.Model):
         Product,
         on_delete=models.CASCADE,
         related_name="variants",
-        verbose_name="محصول"
+        verbose_name=_("محصول")
     )
 
     sku = models.CharField(
-        "کد انبار (SKU)",
+       _("کد انبار (SKU)"),
         max_length=100,
         unique=True
     )
 
-    price = models.DecimalField(
-        "قیمت",
-        max_digits=12,
-        decimal_places=0
+    price = models.PositiveIntegerField(
+        _("قیمت"),
     )
 
+    discount_price = models.PositiveIntegerField(
+        _("قیمت با تخفیف"),
+        null=True,
+        blank=True)
+
     stock = models.PositiveIntegerField(
-        "موجودی",
+        _("موجودی"),
         default=0
     )
 
@@ -144,22 +147,22 @@ class ProductVariant(models.Model):
         ProductAttributeValue,
         through="ProductVariantAttribute",
         related_name="product_variants",
-        verbose_name="ویژگی‌های تنوع"
+        verbose_name=_("ویژگی‌های تنوع")
     )
 
     is_active = models.BooleanField(
-        "فعال",
+        _("فعال"),
         default=True
     )
 
     created_at = models.DateTimeField(
-        "تاریخ ایجاد",
+        _("تاریخ ایجاد"),
         auto_now_add=True
     )
 
     class Meta:
-        verbose_name = "تنوع محصول"
-        verbose_name_plural = "تنوع‌های محصول"
+        verbose_name = _("تنوع محصول")
+        verbose_name_plural = _("تنوع‌های محصول")
 
     def __str__(self):
         return f"{self.product.name} - {self.sku}"
@@ -174,19 +177,19 @@ class ProductVariantAttribute(models.Model):
         ProductVariant,
         on_delete=models.CASCADE,
         related_name="variant_attributes",
-        verbose_name="تنوع محصول"
+        verbose_name=_("تنوع محصول")
     )
 
     attribute_value = models.ForeignKey(
         ProductAttributeValue,
         on_delete=models.CASCADE,
         related_name="variant_attributes",
-        verbose_name="مقدار ویژگی"
+        verbose_name=_("مقدار ویژگی")
     )
 
     class Meta:
-        verbose_name = "ویژگی تنوع محصول"
-        verbose_name_plural = "ویژگی‌های تنوع محصول"
+        verbose_name = _("ویژگی تنوع محصول")
+        verbose_name_plural = _("ویژگی‌های تنوع محصول")
         unique_together = (
             "variant",
             "attribute_value"
@@ -209,25 +212,25 @@ class VariantImage(models.Model):
         ProductVariant,
         on_delete=models.CASCADE,
         related_name="images",
-        verbose_name="تنوع محصول"
+        verbose_name=_("تنوع محصول")
     )
 
     image = models.ImageField(
-        "تصویر",
+        _("تصویر"),
         upload_to="products/variants/"
     )
 
     is_primary = models.BooleanField(
-        "تصویر اصلی",
+        _("تصویر اصلی"),
         default=False
     )
 
     class Meta:
-        verbose_name = "تصویر تنوع محصول"
-        verbose_name_plural = "تصاویر تنوع محصول"
+        verbose_name = _("تصویر تنوع محصول")
+        verbose_name_plural = _("تصاویر تنوع محصول")
 
     def __str__(self):
-        return f"تصویر {self.variant.sku}"
+        return f"{_('تصویر')} {self.variant.sku}"
 
 
 
