@@ -6,7 +6,7 @@ from django.db.models import Sum # برای جمع در CartDetailSerializer
 
 # وارد کردن مدل‌های لازم
 from products.models import Product, ProductAttributeValue
-from .models import Cart, CartItem, CartItemAttribute # فرض می‌کنیم این مدل‌ها در cart/models.py هستند
+from carts.models import Cart, CartItem, CartItemAttribute
 
 # -----------------------------------------------------------------------------
 # Serializers برای خواندن داده‌ها (نمایش سبد خرید)
