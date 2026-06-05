@@ -74,7 +74,7 @@ class ProductSerializer(serializers.ModelSerializer):
     reviews = ProductReviewSerializer(many=True, read_only=True)
 
     # محاسبه میانگین امتیازات به صورت خودکار
-    average_rating = serializers.SerializerMethodField()
+    average_rating = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Product
@@ -86,8 +86,8 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at']
 
-    def get_average_rating(self, obj):
-        return 5
+    # def get_average_rating(self, obj):
+    #     return 5
     #     # محاسبه میانگین امتیاز از طریق Relation
     #     reviews = obj.reviews.all()
     #     if reviews.exists():

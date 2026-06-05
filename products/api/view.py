@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -44,7 +45,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             'images',
             'attribute_values',
             'attribute_values__attribute'
-        ).filter(is_active=True)
+        ).filter(is_active=True).annotate(
+        average_rating=Avg('reviews__rating'))
 
         # امکان فیلتر بر اساس دسته‌بندی از طریق URL (مثلاً ?category=1)
         category_id = self.request.query_params.get('category')
