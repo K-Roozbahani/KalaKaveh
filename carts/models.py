@@ -52,9 +52,10 @@ class CartItem(models.Model):
         default=1,
         validators=[MinValueValidator(1), MaxValueValidator(1000)]
     )
-    unit_price = models.DecimalField(_("قیمت واحد"), max_digits=10, decimal_places=2)
+    unit_price = models.PositiveIntegerField(_("قیمت واحد"))
     product_name_snapshot = models.CharField(_("نام محصول"), max_length=255)
-    total_price = models.DecimalField(_("قیمت کل"), max_digits=12, decimal_places=2)
+    product_sku_snapshot = models.CharField(_('شناسه انباز'), max_length=255)
+    total_price = models.PositiveIntegerField(_("قیمت کل"))
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
     updated_at = models.DateTimeField(_("تاریخ بروزرسانی"), auto_now=True)
 
