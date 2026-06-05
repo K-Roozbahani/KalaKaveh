@@ -20,40 +20,29 @@ from carts.api.serializer import (
 # برای این مثال، یک permission ساده تر IsAuthenticated یا AllowAny را استفاده می‌کنیم،
 # اما در پروژه واقعی، permission سفارشی شما باید اینجا قرار گیرد.
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from utils.permissions import IsOwnerOrAdmin
 
 
 # ---------- پیاده‌سازی یک permission سفارشی برای مثال ----------
 from rest_framework import permissions
 
-class IsOwnerOrAdmin(permissions.BasePermission):
-    """
-    اجازه دسترسی فقط به صاحب آبجکت یا ادمین.
-    """
-    def has_object_permission(self, request, view, obj):
-        # اگر کاربر ادمین است، اجازه دسترسی کامل دارد
-        if request.user.is_staff:
-            return True
-        # اگر کاربر، صاحب آبجکت است، اجازه دسترسی دارد
-        # فرض می‌کنیم obj دارای فیلد 'user' باشد (مانند Cart)
-        return obj.user == request.user
-
-class IsCartOwnerOrAdmin(permissions.BasePermission):
-    """
-    اجازه دسترسی به سبد خرید فقط برای کاربر صاحب سبد یا ادمین.
-    """
-    def has_permission(self, request, view):
-        # برای اکشن 'list'، اجازه دسترسی عمومی (برای کاربران مهمان) را می‌دهیم.
-        # برای سایر اکشن‌ها، باید کاربر احراز هویت شده باشد.
-        if view.action == 'list':
-            return True
-        return request.user.is_authenticated
-
-    def has_object_permission(self, request, view, obj):
-        # obj در اینجا Cart است
-        if request.user.is_staff:
-            return True
-        # اگر سبد خرید مربوط به کاربر است
-        return obj.user == request.user and obj.is_active
+# class IsCartOwnerOrAdmin(permissions.BasePermission):
+#     """
+#     اجازه دسترسی به سبد خرید فقط برای کاربر صاحب سبد یا ادمین.
+#     """
+#     def has_permission(self, request, view):
+#         # برای اکشن 'list'، اجازه دسترسی عمومی (برای کاربران مهمان) را می‌دهیم.
+#         # برای سایر اکشن‌ها، باید کاربر احراز هویت شده باشد.
+#         if view.action == 'list':
+#             return True
+#         return request.user.is_authenticated
+#
+#     def has_object_permission(self, request, view, obj):
+#         # obj در اینجا Cart است
+#         if request.user.is_staff:
+#             return True
+#         # اگر سبد خرید مربوط به کاربر است
+#         return obj.user == request.user and obj.is_active
 
 
 # ------------------------------------------------------------------
@@ -76,14 +65,14 @@ class CartViewSet(viewsets.GenericViewSet):
         """
         if self.action == 'list':
             # مشاهده سبد خرید برای همه (کاربر احراز هویت شده یا مهمان)
-            permission_classes = [AllowAny, IsCartOwnerOrAdmin]
+            permission_classes = [IsOwnerOrAdmin]
         elif self.action in ['add_item', 'update_item', 'remove_item', 'clear_cart']:
             # عملیات بر روی سبد فقط برای کاربران احراز هویت شده و صاحب سبد
-            permission_classes = [IsAuthenticated, IsCartOwnerOrAdmin]
+            permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
         else:
             # حالت های دیگر
-            permission_classes = [IsAuthenticated, IsCartOwnerOrAdmin]
-        return [permission() for permission in permission_classes]
+            permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+        return [IsOwnerOrAdmin]
 
     def get_queryset(self):
         """
