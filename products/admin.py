@@ -81,8 +81,8 @@ class ProductAttributeAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'slug', 'category', 'price', 'discount_price', 'stock', 'is_active',)
-    list_editable = ('slug', 'price', 'discount_price', 'stock', 'is_active')
+    list_display = ('id', 'name', 'slug', 'category', 'is_active',)
+    list_editable = ('slug', 'is_active')
     search_fields = ('name', 'category__name', 'brand__name')
     list_filter = ('is_active', 'category', 'brand')
     readonly_fields = ('created_at', 'updated_at')
