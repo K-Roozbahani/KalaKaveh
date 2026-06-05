@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from products.models import (
     Category, Brand, ProductAttribute, Product,
-    ProductAttributeValue, ProductImage, Review
+    ProductAttributeValue, ProductImage, Review,
+    VariantImage, ProductVariant, ProductVariantAttribute
 )
 
 
@@ -56,6 +57,65 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['id', 'image', 'alt_text']
 
+# --- 5. Variants serializer ---
+
+class VariantImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = VariantImage
+        fields = (
+            "id",
+            "image",
+            "is_primary",
+        )
+
+class ProductVariantAttributeSerializer(
+    serializers.ModelSerializer
+):
+    attribute = serializers.CharField(
+        source="attribute_value.attribute.name",
+        read_only=True
+    )
+
+    value = serializers.CharField(
+        source="attribute_value.value",
+        read_only=True
+    )
+
+    class Meta:
+        model = ProductVariantAttribute
+        fields = (
+            "id",
+            "attribute",
+            "value",
+        )
+
+class ProductVariantSerializer(
+        serializers.ModelSerializer
+    ):
+        attributes = ProductVariantAttributeSerializer(
+            source="variant_attributes",
+            many=True,
+            read_only=True
+        )
+
+        images = VariantImageSerializer(
+            many=True,
+            read_only=True
+        )
+
+        class Meta:
+            model = ProductVariant
+            fields = (
+                "id",
+                "sku",
+                "price",
+                'discount_price',
+                "stock",
+                "is_active",
+                "attributes",
+                "images",
+            )
 
 # --- 5. Product Serializers (The Core) ---
 
@@ -69,8 +129,11 @@ class ProductSerializer(serializers.ModelSerializer):
     # فیلدهای خواندنی (Read-only) برای نمایش اطلاعات کامل در GET
     category_name = serializers.ReadOnlyField(source='category.name')
     brand_name = serializers.ReadOnlyField(source='brand.name')
+    price = serializers.IntegerField(read_only=True)
+    discount_price = serializers.IntegerField(read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
     attribute_values = ProductAttributeValueSerializer(many=True, read_only=True)
+    variants = ProductVariantSerializer(many=True, read_only=True)
     reviews = ProductReviewSerializer(many=True, read_only=True)
 
     # محاسبه میانگین امتیازات به صورت خودکار
@@ -80,9 +143,9 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'name', 'slug', 'description', 'price', 'discount_price',
-            'stock', 'category', 'category_name', 'brand', 'brand_name',
-            'main_image', 'images', 'attributes', 'attribute_values',
-            'reviews', 'average_rating', 'is_active', 'created_at', 'updated_at'
+            'category', 'category_name', 'brand', 'brand_name',
+            'images', 'attributes', 'attribute_values',
+            'reviews', 'average_rating', 'is_active', 'created_at', 'updated_at', 'variants'
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at']
 
