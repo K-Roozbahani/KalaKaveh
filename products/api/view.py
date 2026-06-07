@@ -12,7 +12,8 @@ from products.models import (
 )
 from products.api.serializer import (
     CategorySerializer, BrandSerializer, ProductAttributeSerializer,
-    ProductSerializer, ProductImageSerializer, ReviewCreateSerializer
+    ProductDetailSerializer, ProductImageSerializer, ReviewCreateSerializer,
+    ProductListSerializer, ProductCreateUpdateSerializer
 )
 
 
@@ -33,8 +34,19 @@ class ProductAttributeViewSet(viewsets.ModelViewSet):
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
     lookup_field = 'slug'
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ProductListSerializer
+
+        if self.action == "retrieve":
+            return ProductDetailSerializer
+
+        return ProductCreateUpdateSerializer
+
+
+
 
     def get_queryset(self):
         """
@@ -49,8 +61,12 @@ class ProductViewSet(viewsets.ModelViewSet):
             'variants__variant_attributes'
         ).filter(is_active=True).annotate(
             average_rating=Avg('reviews__rating'),
-            price=Min("variants__price"),
-            discount_price=Min("variants__discount_price"),
+            min_price=Min(
+                "variants__price"
+            ),
+            min_final_price=Min(
+                "variants__final_price"
+            ),
         )
 
         # امکان فیلتر بر اساس دسته‌بندی از طریق URL (مثلاً ?category=1)
