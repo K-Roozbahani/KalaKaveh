@@ -134,6 +134,7 @@ class DiscountTarget(models.Model):
     class Meta:
         verbose_name = _("هدف تخفیف")
         verbose_name_plural = _("اهداف تخفیف")
+        indexes = [models.Index(fields=["discount"]),]
 
 
 class Coupon(models.Model):
