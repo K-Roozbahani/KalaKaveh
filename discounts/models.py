@@ -69,6 +69,15 @@ class DiscountTarget(models.Model):
         related_name="targets"
     )
 
+    target_type = models.PositiveSmallIntegerField(
+        choices=(
+            (1, _("برند")),
+            (2, _("دسته بندی")),
+            (3, _("محصول")),
+            (4, _("محصول انتخوابی")),
+        )
+    )
+
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
