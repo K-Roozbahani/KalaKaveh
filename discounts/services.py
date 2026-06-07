@@ -1,53 +1,39 @@
+from django.db.models import Q
 from django.utils import timezone
 
-from discounts.models import Discount
+from discounts.models import DiscountTarget, Discount
 
 
 def get_variant_discount(variant):
     """
-    مقدار تخفیف اعمال‌شده روی Variant را برمی‌گرداند.
+    مقدار تخفیف اعمال شده روی یک Variant
     """
 
     now = timezone.now()
 
-    discounts = (
-        Discount.objects.filter(
-            is_active=True,
-            start_date__lte=now,
-            end_date__gte=now,
+    target = (
+        DiscountTarget.objects
+        .filter(
+            Q(variant=variant) |
+            Q(product=variant.product) |
+            Q(category=variant.product.category) |
+            Q(brand=variant.product.brand),
+
+            discount__is_active=True,
+            discount__start_date__lte=now,
+            discount__end_date__gte=now,
         )
-        .prefetch_related("targets")
-        .order_by("-priority")
+        .select_related("discount")
+        .order_by("-discount__priority", "-target_type")
+        .first()
     )
 
-    for discount in discounts:
+    if not target:
+        return 0
 
-        target_exists = (
-            discount.targets.filter(variant=variant).exists()
-            or
-            discount.targets.filter(product=variant.product).exists()
-            or
-            (
-                variant.product.category and
-                discount.targets.filter(
-                    category=variant.product.category
-                ).exists()
-            )
-            or
-            (
-                variant.product.brand and
-                discount.targets.filter(
-                    brand=variant.product.brand
-                ).exists()
-            )
-        )
+    discount = target.discount
 
-        if not target_exists:
-            continue
+    if discount.discount_type == Discount.PERCENT:
+        return (variant.price * discount.value) // 100
 
-        if discount.discount_type == Discount.PERCENT:
-            return (variant.price * discount.value) // 100
-
-        return min(discount.value, variant.price)
-
-    return 0
+    return min(discount.value, variant.price)
