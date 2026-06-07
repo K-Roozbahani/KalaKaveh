@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -105,6 +106,30 @@ class DiscountTarget(models.Model):
         null=True,
         blank=True
     )
+
+    def clean(self):
+        targets = [
+            self.variant,
+            self.product,
+            self.category,
+            self.brand,
+        ]
+
+        filled = sum(
+            1
+            for item in targets
+            if item is not None
+        )
+
+        if filled != 1:
+            raise ValidationError(
+                "دقیقاً یکی از فیلدهای variant, product, category, brand باید مقدار داشته باشد."
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
 
     class Meta:
         verbose_name = _("هدف تخفیف")
