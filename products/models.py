@@ -165,19 +165,6 @@ class ProductVariant(models.Model):
         auto_now_add=True
     )
 
-    # @property
-    # def discount_amount(self):
-    #     from discounts.services import get_variant_discount
-    #
-    #     return get_variant_discount(self)
-    #
-    # @property
-    # def final_price(self):
-    #     return max(
-    #         self.price - self.discount_amount,
-    #         0
-    #     )
-
     def save(self, *args, **kwargs):
         if not self.final_price:
             self.final_price = self.price
