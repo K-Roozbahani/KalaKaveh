@@ -130,7 +130,8 @@ class ProductSerializer(serializers.ModelSerializer):
     category_name = serializers.ReadOnlyField(source='category.name')
     brand_name = serializers.ReadOnlyField(source='brand.name')
     price = serializers.IntegerField(read_only=True)
-    discount_price = serializers.IntegerField(read_only=True)
+    discount_amount = serializers.IntegerField(read_only=True)
+    final_price = serializers.IntegerField(read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
     attribute_values = ProductAttributeValueSerializer(many=True, read_only=True)
     variants = ProductVariantSerializer(many=True, read_only=True)
@@ -142,8 +143,8 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'slug', 'description', 'price', 'discount_price',
-            'category', 'category_name', 'brand', 'brand_name',
+            'id', 'name', 'slug', 'description', 'price', 'discount_amount',
+            'final_price', 'category', 'category_name', 'brand', 'brand_name',
             'images', 'attributes', 'attribute_values',
             'reviews', 'average_rating', 'is_active', 'created_at', 'updated_at', 'variants'
         ]
