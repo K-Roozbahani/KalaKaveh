@@ -133,6 +133,16 @@ class ProductVariant(models.Model):
         _("قیمت"),
     )
 
+    discount_amount = models.PositiveIntegerField(
+        _("مبلغ تخفیف"),
+        default=0
+    )
+
+    final_price = models.PositiveIntegerField(
+        _("قیمت نهایی"),
+        default=0
+    )
+
     stock = models.PositiveIntegerField(
         _("موجودی"),
         default=0
@@ -155,16 +165,24 @@ class ProductVariant(models.Model):
         auto_now_add=True
     )
 
-    @property
-    def final_price(self):
-        from discounts.services import get_variant_discount
+    # @property
+    # def discount_amount(self):
+    #     from discounts.services import get_variant_discount
+    #
+    #     return get_variant_discount(self)
+    #
+    # @property
+    # def final_price(self):
+    #     return max(
+    #         self.price - self.discount_amount,
+    #         0
+    #     )
 
-        discount_amount = get_variant_discount(self)
+    def save(self, *args, **kwargs):
+        if not self.final_price:
+            self.final_price = self.price
 
-        return max(
-            self.price - discount_amount,
-            0
-        )
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("تنوع محصول")
