@@ -1,6 +1,6 @@
 from django.db.models import Prefetch
 
-from .models import Cart, CartItem
+from .models import Cart
 
 
 def get_cart_queryset():
@@ -9,19 +9,17 @@ def get_cart_queryset():
     """
 
     return (
-        Cart.objects
-        .select_related(
+        Cart.objects.select_related(
             "user",
             "coupon",
+            "coupon__discount",
         )
         .prefetch_related(
-            Prefetch(
-                "items",
-                queryset=CartItem.objects.select_related(
-                    "variant",
-                    "variant__product",
-                )
-            )
+            "items",
+            "items__variant",
+            "items__variant__product",
+            "items__variant__product__brand",
+            "items__variant__product__category",
         )
     )
 
