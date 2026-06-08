@@ -84,3 +84,13 @@ def remove_cart_item(item):
     """
 
     item.delete()
+
+
+def clear_cart(*, cart: Cart):
+    """
+    حذف تمام آیتم‌های سبد خرید.
+    """
+
+    cart.items.all().delete()
+
+    return cart
