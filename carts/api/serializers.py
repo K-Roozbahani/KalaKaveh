@@ -1,3 +1,5 @@
+from tabnanny import verbose
+
 from rest_framework import serializers
 
 from carts.models import Cart, CartItem
@@ -20,6 +22,17 @@ class CartItemSerializer(serializers.ModelSerializer):
         source="variant.product.id",
         read_only=True,
     )
+
+    product_category = serializers.CharField(
+        source="variant.product.category.name",
+        read_only=True,
+    )
+
+    product_brand = serializers.CharField(
+        source="variant.product.brand.name",
+        read_only=True,
+    )
+
 
     product_name = serializers.CharField(
         source="variant.product.name",
@@ -63,6 +76,8 @@ class CartItemSerializer(serializers.ModelSerializer):
 
             # اطلاعات نمایشی محصول
             "product_id",
+            "product_category",
+            "product_brand",
             "product_name",
             "sku",
 
