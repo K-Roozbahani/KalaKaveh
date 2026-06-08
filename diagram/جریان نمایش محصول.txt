@@ -1,0 +1,9 @@
+Product
+   │
+   ▼
+Variants
+   │
+   ├── price
+   ├── discount_amount
+   ├── final_price
+   └── stock

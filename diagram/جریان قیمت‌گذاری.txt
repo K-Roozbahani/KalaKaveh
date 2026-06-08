@@ -1,0 +1,14 @@
+ProductVariant
+│
+├── price
+│
+└── Discount Engine
+        │
+        ▼
+calculate_discount_for_variant()
+        │
+        ▼
+discount_amount
+        │
+        ▼
+final_price

@@ -1,0 +1,63 @@
+Category
+├── id
+├── name
+├── slug
+└── parent -> Category
+
+Brand
+├── id
+├── name
+├── slug
+└── logo
+
+ProductAttribute
+├── id
+├── name
+└── description
+
+Product
+├── id
+├── name
+├── slug
+├── description
+├── category -> Category
+├── brand -> Brand
+├── is_active
+├── created_at
+└── updated_at
+
+ProductAttributeValue
+├── product -> Product
+├── attribute -> ProductAttribute
+└── value
+
+ProductImage
+├── product -> Product
+├── image
+└── alt_text
+
+ProductVariant
+├── product -> Product
+├── sku
+├── price
+├── discount_amount
+├── final_price
+├── stock
+├── is_active
+└── created_at
+
+ProductVariantAttribute
+├── variant -> ProductVariant
+└── attribute_value -> ProductAttributeValue
+
+VariantImage
+├── variant -> ProductVariant
+├── image
+└── is_primary
+
+Review
+├── product -> Product
+├── user -> User
+├── rating
+├── comment
+└── created_at

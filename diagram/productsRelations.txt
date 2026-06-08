@@ -1,0 +1,28 @@
+Category
+    │
+    └──────────────┐
+                   │
+Brand             Product
+    │               │
+    └───────────────┘
+                    │
+        ┌───────────┼───────────┐
+        │           │           │
+        ▼           ▼           ▼
+ ProductImage   Review   ProductAttributeValue
+                                │
+                                ▼
+                        ProductAttribute
+
+                    │
+                    ▼
+
+              ProductVariant
+                    │
+         ┌──────────┴─────────┐
+         ▼                    ▼
+
+ VariantImage    ProductVariantAttribute
+                            │
+                            ▼
+                   ProductAttributeValue
