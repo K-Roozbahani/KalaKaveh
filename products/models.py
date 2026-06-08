@@ -1,9 +1,9 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 
+# from discounts.models import
 User = get_user_model()
 
 class Category(models.Model):
@@ -133,10 +133,15 @@ class ProductVariant(models.Model):
         _("قیمت"),
     )
 
-    discount_price = models.PositiveIntegerField(
-        _("قیمت با تخفیف"),
-        null=True,
-        blank=True)
+    discount_amount = models.PositiveIntegerField(
+        _("مبلغ تخفیف"),
+        default=0
+    )
+
+    final_price = models.PositiveIntegerField(
+        _("قیمت نهایی"),
+        default=0
+    )
 
     stock = models.PositiveIntegerField(
         _("موجودی"),
@@ -159,6 +164,12 @@ class ProductVariant(models.Model):
         _("تاریخ ایجاد"),
         auto_now_add=True
     )
+
+    def save(self, *args, **kwargs):
+        if not self.final_price:
+            self.final_price = self.price
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("تنوع محصول")

@@ -110,12 +110,57 @@ class ProductVariantSerializer(
                 "id",
                 "sku",
                 "price",
-                'discount_price',
+                'discount_amount',
+                'final_price',
                 "stock",
                 "is_active",
                 "attributes",
                 "images",
             )
+
+
+class ProductVariantDetailSerializer(
+    serializers.ModelSerializer
+):
+
+    images = VariantImageSerializer(
+        many=True,
+        read_only=True
+    )
+
+    attributes = ProductAttributeValueSerializer(
+        source="attribute_values",
+        many=True,
+        read_only=True
+    )
+
+    discount_percent = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductVariant
+
+        fields = (
+            "id",
+            "sku",
+            "price",
+            "discount_amount",
+            "discount_percent",
+            "final_price",
+            "stock",
+            "images",
+            "attributes",
+        )
+
+    def get_discount_percent(
+        self,
+        obj
+    ):
+        if obj.price == 0:
+            return 0
+
+        return round(
+            (obj.discount_amount / obj.price) * 100
+        )
 
 # --- 5. Product Serializers (The Core) ---
 
@@ -124,13 +169,34 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['id', 'user', 'comment', 'rating', 'created_at']
 
+class ProductListSerializer(
+    serializers.ModelSerializer
+):
 
-class ProductSerializer(serializers.ModelSerializer):
+    min_price = serializers.IntegerField(
+        read_only=True
+    )
+
+    min_final_price = serializers.IntegerField(
+        read_only=True
+    )
+
+    class Meta:
+        model = Product
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "min_price",
+            "min_final_price",
+        )
+
+
+
+class ProductDetailSerializer(serializers.ModelSerializer):
     # فیلدهای خواندنی (Read-only) برای نمایش اطلاعات کامل در GET
     category_name = serializers.ReadOnlyField(source='category.name')
     brand_name = serializers.ReadOnlyField(source='brand.name')
-    price = serializers.IntegerField(read_only=True)
-    discount_price = serializers.IntegerField(read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
     attribute_values = ProductAttributeValueSerializer(many=True, read_only=True)
     variants = ProductVariantSerializer(many=True, read_only=True)
@@ -142,21 +208,13 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'slug', 'description', 'price', 'discount_price',
-            'category', 'category_name', 'brand', 'brand_name',
-            'images', 'attributes', 'attribute_values',
-            'reviews', 'average_rating', 'is_active', 'created_at', 'updated_at', 'variants'
+            'id', 'name', 'slug', 'description',
+            'category_name', 'brand_name',
+            'images', 'attribute_values',
+            'reviews', 'average_rating',
+            'is_active', 'variants'
         ]
-        read_only_fields = ['slug', 'created_at', 'updated_at']
-
-    # def get_average_rating(self, obj):
-    #     return 5
-    #     # محاسبه میانگین امتیاز از طریق Relation
-    #     reviews = obj.reviews.all()
-    #     if reviews.exists():
-    #         return reviews.aggregate(serializers.Avg('rating'))['rating__avg']
-    #     return 0
-
+        read_only_fields = '__all__'
 
 # --- 6. Review Serializer (For creating reviews) ---
 
@@ -172,7 +230,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
 
 # --- 7. Extra: Specialized Product Serializer for Writing ---
 
-class ProductWriteSerializer(serializers.ModelSerializer):
+class ProductCreateUpdateSerializer(serializers.ModelSerializer):
     """
     اگر نیاز دارید هنگام ساخت محصول، مقادیر ویژگی‌ها (AttributeValues) را هم همزمان بفرستید
     """
