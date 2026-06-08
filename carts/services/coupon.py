@@ -2,6 +2,8 @@ from django.utils import timezone
 
 from discounts.models import Coupon
 
+from carts.models import Cart
+
 
 def apply_coupon(
     *,
@@ -26,5 +28,20 @@ def apply_coupon(
     cart.save(
         update_fields=["coupon"]
     )
+
+    return cart
+
+
+def remove_coupon(*, cart: Cart):
+    """
+    حذف کوپن از سبد خرید.
+    """
+
+    if not cart.coupon_id:
+        return
+
+    cart.coupon = None
+
+    cart.save(update_fields=["coupon"])
 
     return cart
