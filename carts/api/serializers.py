@@ -163,51 +163,26 @@ class AddCartItemSerializer(serializers.Serializer):
     }
     """
 
-    variant_id = serializers.IntegerField()
+    variant = serializers.PrimaryKeyRelatedField(
+        queryset=ProductVariant.objects.all(),
+    )
 
     quantity = serializers.IntegerField(
         min_value=1,
     )
 
-    def validate_variant_id(self, value):
-        """
-        بررسی وجود Variant
-        """
-
-        try:
-            variant = ProductVariant.objects.get(
-                pk=value,
-            )
-
-        except ProductVariant.DoesNotExist:
-            raise serializers.ValidationError(
-                "تنوع محصول یافت نشد."
-            )
-
-        # اگر محصول غیرفعال شده باشد
-        if hasattr(variant, "is_active"):
-            if not variant.is_active:
-                raise serializers.ValidationError(
-                    "این محصول در حال حاضر قابل خرید نیست."
-                )
-
-        return value
-
     def validate(self, attrs):
         """
-        بررسی موجودی کالا
+        بررسی موجودی محصول قبل از افزودن به سبد.
         """
 
-        variant = ProductVariant.objects.get(
-            pk=attrs["variant_id"]
-        )
-
+        variant = attrs["variant"]
         quantity = attrs["quantity"]
 
         if quantity > variant.stock:
             raise serializers.ValidationError(
                 {
-                    "quantity": "موجودی کافی نیست."
+                    "quantity": "تعداد درخواستی بیشتر از موجودی کالا است."
                 }
             )
 
@@ -232,14 +207,14 @@ class UpdateCartItemSerializer(serializers.Serializer):
 
     def validate_quantity(self, value):
         """
-        بررسی موجودی هنگام تغییر تعداد
+        بررسی موجودی هنگام تغییر تعداد.
         """
 
         cart_item = self.context["cart_item"]
 
         if value > cart_item.variant.stock:
             raise serializers.ValidationError(
-                "موجودی کافی نیست."
+                "تعداد درخواستی بیشتر از موجودی کالا است."
             )
 
         return value
