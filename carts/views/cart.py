@@ -8,7 +8,7 @@ from carts.api.serializers import ApplyCouponSerializer, CartSerializer
 
 from carts.services.cart import get_or_create_cart
 
-from carts.services.coupon import apply_coupon
+from carts.services.coupon import apply_coupon, remove_coupon
 
 from carts.services.totals import calculate_cart_totals
 
@@ -50,15 +50,11 @@ class CartViewSet(GenericViewSet):
 
         return Response(totals, status=status.HTTP_200_OK)
 
-
     @action(detail=False, methods=["delete"])
     def remove_coupon(self, request):
-
         cart = get_or_create_cart(user=request.user)
 
-        cart.coupon = None
-
-        cart.save(update_fields=["coupon"])
+        remove_coupon(cart=cart)
 
         totals = calculate_cart_totals(cart)
 
