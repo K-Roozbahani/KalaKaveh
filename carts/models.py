@@ -70,6 +70,13 @@ class Cart(models.Model):
                 fields=["session_key", "status"],
                 name="cart_session_status_idx",
             ),
+            models.Index(
+                fields=[
+                    "status",
+                    "updated_at",
+                ],
+                name="cart_status_updated_idx",
+            ),
         ]
 
     def __str__(self):
