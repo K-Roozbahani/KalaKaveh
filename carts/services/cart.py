@@ -113,4 +113,8 @@ def clear_cart(*, cart: Cart):
 
     cart.items.all().delete()
 
+    cart.coupon = None
+
+    cart.save(update_fields=["coupon"])
+
     return cart
