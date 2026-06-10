@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.test import TestCase
 
+from carts.services.merge import merge_guest_cart
 from users.models import User
 
 from carts.models import Cart, CartItem
@@ -213,4 +214,169 @@ class CartServicesTestCase(TestCase):
             Decimal("18000000"),
         )
 
+    def test_merge_guest_cart(self):
+        guest_cart = Cart.objects.create(
+            session_key="guest-session",
+        )
+
+        CartItem.objects.create(
+            cart=guest_cart,
+            variant=self.variant,
+            quantity=2,
+        )
+
+        merge_guest_cart(
+            guest_cart=guest_cart,
+            user_cart=self.cart,
+        )
+
+        self.assertEqual(
+            self.cart.items.count(),
+            1,
+        )
+
+        item = self.cart.items.first()
+
+        self.assertEqual(
+            item.quantity,
+            2,
+        )
+
+        self.assertFalse(
+            Cart.objects.filter(
+                pk=guest_cart.pk,
+            ).exists()
+        )
+
+    def test_merge_guest_cart_duplicate_variant(self):
+        guest_cart = Cart.objects.create(
+            session_key="guest-session",
+        )
+
+        CartItem.objects.create(
+            cart=self.cart,
+            variant=self.variant,
+            quantity=2,
+        )
+
+        CartItem.objects.create(
+            cart=guest_cart,
+            variant=self.variant,
+            quantity=3,
+        )
+
+        merge_guest_cart(
+            guest_cart=guest_cart,
+            user_cart=self.cart,
+        )
+
+        item = CartItem.objects.get(
+            cart=self.cart,
+            variant=self.variant,
+        )
+
+        self.assertEqual(
+            item.quantity,
+            5,
+        )
+
+    def test_merge_guest_cart_respects_stock_limit(self):
+        self.variant.stock = 5
+
+        self.variant.save(
+            update_fields=["stock"],
+        )
+
+        guest_cart = Cart.objects.create(
+            session_key="guest-session",
+        )
+
+        CartItem.objects.create(
+            cart=self.cart,
+            variant=self.variant,
+            quantity=4,
+        )
+
+        CartItem.objects.create(
+            cart=guest_cart,
+            variant=self.variant,
+            quantity=3,
+        )
+
+        merge_guest_cart(
+            guest_cart=guest_cart,
+            user_cart=self.cart,
+        )
+
+        item = CartItem.objects.get(
+            cart=self.cart,
+            variant=self.variant,
+        )
+
+        self.assertEqual(
+            item.quantity,
+            5,
+        )
+
+    def test_merge_guest_cart_removes_out_of_stock_items(self):
+        self.variant.stock = 0
+
+        self.variant.save(
+            update_fields=["stock"],
+        )
+
+        guest_cart = Cart.objects.create(
+            session_key="guest-session",
+        )
+
+        CartItem.objects.create(
+            cart=guest_cart,
+            variant=self.variant,
+            quantity=2,
+        )
+
+        merge_guest_cart(
+            guest_cart=guest_cart,
+            user_cart=self.cart,
+        )
+
+        self.assertEqual(
+            self.cart.items.count(),
+            0,
+        )
+
+    def test_merge_guest_cart_multiple_items(self):
+        second_variant = ProductVariant.objects.create(
+            product=self.product,
+            price=Decimal("5000000"),
+            final_price=Decimal("4500000"),
+            stock=10,
+            sku="SECOND",
+        )
+
+        guest_cart = Cart.objects.create(
+            session_key="guest-session",
+        )
+
+        CartItem.objects.create(
+            cart=guest_cart,
+            variant=self.variant,
+            quantity=2,
+        )
+
+        CartItem.objects.create(
+            cart=guest_cart,
+            variant=second_variant,
+            quantity=1,
+        )
+
+        merge_guest_cart(
+            guest_cart=guest_cart,
+            user_cart=self.cart,
+        )
+
+        self.assertEqual(
+            self.cart.items.count(),
+            2,
+        )
 
