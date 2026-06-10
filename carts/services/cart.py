@@ -2,6 +2,9 @@ from django.db import transaction
 
 from carts.models import Cart, CartItem
 
+from carts.services.validators import validate_variant_availability
+
+
 
 def get_or_create_cart(
     *,
@@ -46,11 +49,24 @@ def add_to_cart(
         },
     )
 
-    if not created:
-        item.quantity += quantity
-        item.save(
-            update_fields=["quantity"]
+    if created:
+        validate_variant_availability(
+            variant=variant,
+            quantity=quantity,
         )
+
+        return item
+
+    new_quantity = item.quantity + quantity
+
+    validate_variant_availability(
+        variant=variant,
+        quantity=new_quantity,
+    )
+
+    item.quantity = new_quantity
+
+    item.save(update_fields=["quantity"])
 
     return item
 
@@ -64,6 +80,10 @@ def update_cart_item(
     """
     تغییر تعداد
     """
+    validate_variant_availability(
+        variant=item.variant,
+        quantity=quantity,
+    )
 
     item.quantity = quantity
 
