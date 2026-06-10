@@ -6,7 +6,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from carts.api.serializers import ApplyCouponSerializer, CartSerializer
 
-from carts.services.cart import get_or_create_cart
+from carts.services.cart import get_or_create_cart, clear_cart
 
 from carts.services.coupon import apply_coupon, remove_coupon
 
@@ -55,6 +55,20 @@ class CartViewSet(GenericViewSet):
         cart = get_or_create_cart(user=request.user)
 
         remove_coupon(cart=cart)
+
+        totals = calculate_cart_totals(cart)
+
+        return Response(totals, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["delete"])
+    def clear(self, request):
+        """
+        حذف تمام آیتم‌های سبد خرید.
+        """
+
+        cart = get_or_create_cart(user=request.user)
+
+        clear_cart(cart=cart)
 
         totals = calculate_cart_totals(cart)
 
