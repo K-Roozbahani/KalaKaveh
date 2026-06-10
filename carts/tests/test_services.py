@@ -1,6 +1,9 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from django.test import TestCase
+from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 
 from carts.services.merge import merge_guest_cart
 from users.models import User
@@ -14,11 +17,11 @@ from carts.services.cart import (
     update_cart_item,
 )
 
-from carts.services.coupon import remove_coupon
+from carts.services.coupon import remove_coupon, validate_coupon
 
 from carts.services.totals import calculate_cart_totals
 
-from discounts.models import Coupon
+from discounts.models import Coupon, Discount
 
 from products.models import (
     Brand,
@@ -379,4 +382,206 @@ class CartServicesTestCase(TestCase):
             self.cart.items.count(),
             2,
         )
+
+
+    #کد تخفیف معتبر
+    def test_validate_coupon_success(self):
+        discount = Discount.objects.create(
+            name="Test Discount",
+            discount_type=Discount.DiscountType.PERCENT,
+            value=10,
+            is_active=True,
+        )
+
+        coupon = Coupon.objects.create(
+            code="TEST10",
+            discount=discount,
+        )
+
+        result = validate_coupon(
+            code="TEST10",
+        )
+
+        self.assertEqual(
+            result.pk,
+            coupon.pk,
+        )
+
+
+    #کد تخفیف وجود ندارد
+    def test_validate_coupon_not_found(self):
+        with self.assertRaises(
+                ValidationError,
+        ):
+            validate_coupon(
+                code="INVALID",
+            )
+
+
+    #کد تخفیف معتبر
+    def test_validate_coupon_success(self):
+        discount = Discount.objects.create(
+            name="Test Discount",
+            discount_type=Discount.DiscountType.PERCENT,
+            value=10,
+            is_active=True,
+        )
+
+        coupon = Coupon.objects.create(
+            code="TEST10",
+            discount=discount,
+        )
+
+        result = validate_coupon(
+            code="TEST10",
+        )
+
+        self.assertEqual(
+            result.pk,
+            coupon.pk,
+        )
+
+
+    #تخفیف غیرفعال است
+    def test_validate_coupon_inactive_discount(self):
+        discount = Discount.objects.create(
+            name="Inactive Discount",
+            discount_type=Discount.DiscountType.PERCENT,
+            value=10,
+            is_active=False,
+        )
+
+        Coupon.objects.create(
+            code="TEST10",
+            discount=discount,
+        )
+
+        with self.assertRaises(
+                ValidationError,
+        ):
+            validate_coupon(
+                code="TEST10",
+            )
+
+
+    #زمان شروع هنوز نرسیده
+    def test_validate_coupon_not_started(self):
+        discount = Discount.objects.create(
+            name="Future Discount",
+            discount_type=Discount.DiscountType.PERCENT,
+            value=10,
+            is_active=True,
+            start_date=timezone.now() + timedelta(days=1),
+        )
+
+        Coupon.objects.create(
+            code="TEST10",
+            discount=discount,
+        )
+
+        with self.assertRaises(
+                ValidationError,
+        ):
+            validate_coupon(
+                code="TEST10",
+            )
+
+
+    #زمان تخفیف تمام شده
+    def test_validate_coupon_expired(self):
+        discount = Discount.objects.create(
+            name="Expired Discount",
+            discount_type=Discount.DiscountType.PERCENT,
+            value=10,
+            is_active=True,
+            end_date=timezone.now() - timedelta(days=1),
+        )
+
+        Coupon.objects.create(
+            code="TEST10",
+            discount=discount,
+        )
+
+        with self.assertRaises(
+                ValidationError,
+        ):
+            validate_coupon(
+                code="TEST10",
+            )
+
+
+    #ظرفیت استفاده تکمیل شده
+    def test_validate_coupon_usage_limit_reached(self):
+        discount = Discount.objects.create(
+            name="Limited Discount",
+            discount_type=Discount.DiscountType.PERCENT,
+            value=10,
+            is_active=True,
+        )
+
+        Coupon.objects.create(
+            code="TEST10",
+            discount=discount,
+            usage_limit=10,
+            used_count=10,
+        )
+
+        with self.assertRaises(
+                ValidationError,
+        ):
+            validate_coupon(
+                code="TEST10",
+            )
+
+
+    #یک استفاده تا سقف باقی مانده
+    def test_validate_coupon_usage_limit_not_reached(self):
+        discount = Discount.objects.create(
+            name="Limited Discount",
+            discount_type=Discount.DiscountType.PERCENT,
+            value=10,
+            is_active=True,
+        )
+
+        coupon = Coupon.objects.create(
+            code="TEST10",
+            discount=discount,
+            usage_limit=10,
+            used_count=9,
+        )
+
+        result = validate_coupon(
+            code="TEST10",
+        )
+
+        self.assertEqual(
+            result.pk,
+            coupon.pk,
+        )
+
+
+    #بدون محدودیت استفاده
+    def test_validate_coupon_without_usage_limit(self):
+        discount = Discount.objects.create(
+            name="Unlimited Discount",
+            discount_type=Discount.DiscountType.PERCENT,
+            value=10,
+            is_active=True,
+        )
+
+        coupon = Coupon.objects.create(
+            code="TEST10",
+            discount=discount,
+            usage_limit=None,
+        )
+
+        result = validate_coupon(
+            code="TEST10",
+        )
+
+        self.assertEqual(
+            result.pk,
+            coupon.pk,
+        )
+
 
