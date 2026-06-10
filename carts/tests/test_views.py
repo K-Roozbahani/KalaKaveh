@@ -309,3 +309,56 @@ class CartViewsTestCase(APITestCase):
             response.status_code,
             status.HTTP_401_UNAUTHORIZED,
         )
+
+    def test_clear_cart(self):
+        coupon = Coupon.objects.create(
+            code="TEST10",
+        )
+
+        self.cart.coupon = coupon
+
+        self.cart.save()
+
+        CartItem.objects.create(
+            cart=self.cart,
+            variant=self.variant,
+            quantity=2,
+        )
+
+        url = reverse(
+            "cart-clear",
+        )
+
+        response = self.client.delete(url)
+
+        self.cart.refresh_from_db()
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.assertEqual(
+            self.cart.items.count(),
+            0,
+        )
+
+        self.assertIsNone(
+            self.cart.coupon,
+        )
+
+    def test_anonymous_user_cannot_clear_cart(self):
+        self.client.force_authenticate(
+            user=None,
+        )
+
+        url = reverse(
+            "cart-clear",
+        )
+
+        response = self.client.delete(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
