@@ -137,5 +137,5 @@ class CartItem(models.Model):
     def __str__(self):
         return (
             f"{self.variant} "
-            f"({self.quantity} عدد)"
+            f"{self.quantity}(عدد)"
         )
