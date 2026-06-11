@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from addresses import selectors
 
-from .factories import address_factory
+from addresses.tests.factories import address_factory
 
 User = get_user_model()
 

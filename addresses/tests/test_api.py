@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .factories import address_factory
+from addresses.tests.factories import address_factory
 
 User = get_user_model()
 
