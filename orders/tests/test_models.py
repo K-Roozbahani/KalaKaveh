@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from orders.constants import OrderStatus
 from orders.tests.factories import create_user, create_order
 
 
@@ -13,4 +14,4 @@ class OrderModelTest(TestCase):
 
         self.assertEqual(order.user, self.user)
         self.assertTrue(order.order_number.startswith("ORD"))
-        self.assertEqual(order.status, order.Status.PENDING)
+        self.assertEqual(order.status, OrderStatus.PENDING)

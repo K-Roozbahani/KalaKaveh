@@ -1,5 +1,6 @@
 from django.db.models import Prefetch
 
+from .constants import CartStatus
 from .models import Cart
 
 
@@ -33,7 +34,7 @@ def get_user_active_cart(user):
         get_cart_queryset()
         .filter(
             user=user,
-            status=Cart.Status.ACTIVE,
+            status=CartStatus.ACTIVE,
         )
         .first()
     )

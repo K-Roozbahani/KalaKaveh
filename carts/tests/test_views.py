@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.urls import reverse
+from django.utils.timezone import now, timedelta
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -271,6 +272,8 @@ class CartViewsTestCase(APITestCase):
 
         coupon = Coupon.objects.create(
             code="TEST10",
+            start_date=now(),
+            end_date=now() + timedelta(days=7),
         )
 
         self.cart.coupon = coupon
