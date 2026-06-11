@@ -12,22 +12,17 @@ class UserApiView(ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        print("**************************step main*******************")
         if self.action == 'create':
             # اینجا چون داریم لیست رو برمیکردونیم باید از () استفاده شود
-            return [AllowAny()]
+            return [AllowAny(),]
 
 
         elif self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
-            #جایی که از داریم کلاس معرفی میکنیم نباید () استفاده شود وگرنه خطا میگیرد
-            print("**************************step update, others*******************")
             self.permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
         elif self.action == 'list':
-            print("**************************step list*******************")
             self.permission_classes = [IsAdminUser]
         else:
-            print("**************************step else*******************")
             self.permission_classes = [IsAuthenticated()]
-        print("**************************step skip all*******************")
+
         return super().get_permissions()
