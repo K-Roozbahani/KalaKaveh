@@ -40,8 +40,11 @@ def create_order_from_cart(
     *,
     user,
     address_id,
+    note="",
+
 ):
     cart = get_user_active_cart(user)
+    note = note
 
     validate_cart_exists(cart)
     validate_cart_status(cart)
@@ -60,6 +63,7 @@ def create_order_from_cart(
     order = Order.objects.create(
         user=user,
         order_number=generate_order_number(),
+        note=note,
 
         address_snapshot=build_address_snapshot(
             address
