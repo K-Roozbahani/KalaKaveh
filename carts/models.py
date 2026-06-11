@@ -2,13 +2,10 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from carts.constants import CartStatus
+
 
 class Cart(models.Model):
-
-    class Status(models.TextChoices):
-        ACTIVE = "active", _("فعال")
-        CONVERTED = "converted", _("تبدیل شده به سفارش")
-        ABANDONED = "abandoned", _("رها شده")
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -39,8 +36,8 @@ class Cart(models.Model):
 
     status = models.CharField(
         max_length=20,
-        choices=Status.choices,
-        default=Status.ACTIVE,
+        choices=CartStatus.CHOICES,
+        default=CartStatus.ACTIVE,
         db_index=True,
         verbose_name=_("وضعیت"),
     )
