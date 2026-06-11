@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'utils',
     'rest_framework',
+    'rest_framework_simplejwt',
     'users',
     'products',
     'discounts',
@@ -138,10 +139,9 @@ REST_FRAMEWORK = {
     ],
 
     # تعیین سیستم احراز هویت پیش‌فرض
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 
     # تنظیمات صفحه‌بندی (Pagination)
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
