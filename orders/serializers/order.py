@@ -3,7 +3,32 @@ from rest_framework import serializers
 from orders.models import Order, OrderItem
 
 
+class OrderBaseSerializer(serializers.ModelSerializer):
+    """
+    Base serializer for order serializers.
+    """
+
+    status_display = serializers.CharField(
+        source="get_status_display",
+        read_only=True,
+    )
+
+    class Meta:
+        model = Order
+        fields = (
+            "id",
+            "order_number",
+            "status",
+            "status_display",
+        )
+        read_only_fields = fields
+
+
 class OrderItemSerializer(serializers.ModelSerializer):
+    """
+    Order item serializer.
+    """
+
     class Meta:
         model = OrderItem
 
@@ -19,40 +44,43 @@ class OrderItemSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class OrderListSerializer(serializers.ModelSerializer):
+class OrderListSerializer(OrderBaseSerializer):
+    """
+    Order list serializer.
+    """
+
     items_count = serializers.IntegerField(
         source="items.count",
         read_only=True,
     )
 
-    class Meta:
-        model = Order
-
+    class Meta(OrderBaseSerializer.Meta):
         fields = (
-            "id",
-            "order_number",
-            "status",
+            *OrderBaseSerializer.Meta.fields,
+
             "total_amount",
+
             "items_count",
+
             "created_at",
         )
 
         read_only_fields = fields
 
 
-class OrderDetailSerializer(serializers.ModelSerializer):
+class OrderDetailSerializer(OrderBaseSerializer):
+    """
+    Order detail serializer.
+    """
+
     items = OrderItemSerializer(
         many=True,
         read_only=True,
     )
 
-    class Meta:
-        model = Order
-
+    class Meta(OrderBaseSerializer.Meta):
         fields = (
-            "id",
-            "order_number",
-            "status",
+            *OrderBaseSerializer.Meta.fields,
 
             "address_snapshot",
 
@@ -73,6 +101,10 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 
 
 class CreateOrderSerializer(serializers.Serializer):
+    """
+    Create order serializer.
+    """
+
     address_id = serializers.IntegerField(
         min_value=1,
     )
