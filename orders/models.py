@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from orders.constants import OrderStatus
+from orders.managers import OrderManager
 
 
 class Order(models.Model):
@@ -73,6 +74,8 @@ class Order(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True,
     )
+
+    objects = OrderManager()
 
     class Meta:
         verbose_name = _("سفارش")
