@@ -79,7 +79,7 @@ def create_order_from_cart(
     for cart_item in (
         cart.items
         .select_related(
-            "product",
+            "variant__product",
             "variant",
         )
     ):
@@ -89,7 +89,7 @@ def create_order_from_cart(
             OrderItem(
                 order=order,
 
-                product=cart_item.product,
+                product=cart_item.variant.product,
                 variant=variant,
 
                 quantity=cart_item.quantity,
