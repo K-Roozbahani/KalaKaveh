@@ -1,13 +1,15 @@
 from addresses.models import Province, City, Address
 
 
-def create_province(name="تهران"):
-    return Province.objects.create(name=name)
+def province_factory(name="تهران"):
+    return Province.objects.create(
+        name=name,
+    )
 
 
-def create_city(province=None, name="تهران"):
+def city_factory(province=None, name="تهران"):
     if province is None:
-        province = create_province()
+        province = province_factory()
 
     return City.objects.create(
         province=province,
@@ -15,9 +17,16 @@ def create_city(province=None, name="تهران"):
     )
 
 
-def create_address(user, **kwargs):
-    province = kwargs.pop("province", None) or create_province()
-    city = kwargs.pop("city", None) or create_city(province=province)
+def address_factory(user, **kwargs):
+    province = kwargs.pop("province", None)
+
+    if province is None:
+        province = province_factory()
+
+    city = kwargs.pop("city", None)
+
+    if city is None:
+        city = city_factory(province=province)
 
     defaults = {
         "title": "خانه",
