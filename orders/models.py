@@ -4,15 +4,10 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from orders.constants import OrderStatus
+
 
 class Order(models.Model):
-
-    class Status(models.TextChoices):
-        PENDING = "pending", _("در انتظار پرداخت")
-        CONFIRMED = "confirmed", _("تایید شده")
-        PROCESSING = "processing", _("در حال آماده سازی")
-        COMPLETED = "completed", _("تکمیل شده")
-        CANCELED = "canceled", _("لغو شده")
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -30,8 +25,8 @@ class Order(models.Model):
 
     status = models.CharField(
         max_length=20,
-        choices=Status.choices,
-        default=Status.PENDING,
+        choices=OrderStatus.CHOICES,
+        default=OrderStatus.PENDING,
         db_index=True,
         verbose_name=_("وضعیت"),
     )
