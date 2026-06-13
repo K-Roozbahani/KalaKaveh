@@ -3,6 +3,7 @@ from django.db import transaction
 from addresses.selectors import (
     get_address_by_id,
 )
+from carts.constants import CartStatus
 
 from carts.selectors import (
     get_user_active_cart,
@@ -22,7 +23,7 @@ from .validators import (
     validate_cart_not_empty,
     validate_cart_status,
     validate_cart_stock,
-    validate_address_owner,
+    validate_address_owner, validate_address_exists,
 )
 
 from .snapshot import (
@@ -51,7 +52,11 @@ def create_order_from_cart(
     validate_cart_not_empty(cart)
     validate_cart_stock(cart)
 
-    address = get_address_by_id(address_id)
+    address = get_address_by_id(
+        address_id=address_id,
+    )
+
+    validate_address_exists(address)
 
     validate_address_owner(
         address,
@@ -70,7 +75,7 @@ def create_order_from_cart(
         ),
 
         subtotal=totals["subtotal"],
-        discount_amount=totals["discount_amount"],
+        discount_amount=totals["discount"],
         shipping_cost=totals.get(
             "shipping_cost",
             0,
@@ -105,7 +110,7 @@ def create_order_from_cart(
                 final_price=variant.price,
 
                 product_snapshot=build_product_snapshot(
-                    product=cart_item.product,
+                    product=cart_item.variant.product,
                     variant=variant,
                 ),
             )
@@ -120,7 +125,7 @@ def create_order_from_cart(
         order_items
     )
 
-    cart.status = cart.Status.CONVERTED
+    cart.status = CartStatus.CONVERTED
     cart.save(
         update_fields=["status"]
     )

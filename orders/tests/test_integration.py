@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from accounts.models import User
+from users.models import User
 
 from addresses.models import (
     Address,
@@ -57,14 +57,12 @@ class CartToOrderIntegrationTest(TestCase):
         # استان
         self.province = Province.objects.create(
             name="تهران",
-            slug="tehran",
         )
 
         # شهر
         self.city = City.objects.create(
             province=self.province,
             name="تهران",
-            slug="tehran",
         )
 
         # آدرس

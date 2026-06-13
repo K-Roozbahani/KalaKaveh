@@ -1,5 +1,6 @@
 from django.db import transaction
 
+from carts.constants import CartStatus
 from carts.models import Cart, CartItem
 
 from carts.services.validators import validate_variant_availability
@@ -18,13 +19,13 @@ def get_or_create_cart(
     if user:
         cart, _ = Cart.objects.get_or_create(
             user=user,
-            status=Cart.Status.ACTIVE,
+            status=CartStatus.ACTIVE,
         )
         return cart
 
     cart, _ = Cart.objects.get_or_create(
         session_key=session_key,
-        status=Cart.Status.ACTIVE,
+        status=CartStatus.ACTIVE,
     )
 
     return cart

@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from carts.models import Cart
 from carts.constants import CartStatus
@@ -18,6 +19,12 @@ def validate_cart_not_empty(cart):
     if not cart.items.exists():
         raise ValidationError("سبد خرید خالی است.")
 
+def validate_address_exists(address):
+
+    if address is None:
+        raise ValidationError(
+            _("آدرس یافت نشد.")
+        )
 
 def validate_address_owner(address, user):
     if address.user_id != user.id:

@@ -26,15 +26,18 @@ def get_default_address(*, user):
     )
 
 
-def get_address_by_id(*, user, address_id: int):
+def get_address_by_id(*, address_id: int):
     """
     دریافت یک آدرس متعلق به کاربر (security safe)
     """
 
     return (
         Address.objects
-        .filter(id=address_id, user=user)
-        .select_related("province", "city")
+        .select_related(
+            "province",
+            "city",
+        )
+        .filter(pk=address_id)
         .first()
     )
 

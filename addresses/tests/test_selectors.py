@@ -1,9 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from rest_framework.exceptions import ValidationError
 
 from addresses import selectors
 
 from addresses.tests.factories import address_factory
+from orders.services.validators import validate_address_owner
 
 User = get_user_model()
 
@@ -62,7 +64,6 @@ class AddressSelectorTests(TestCase):
         address = address_factory(user)
 
         result = selectors.get_address_by_id(
-            user=user,
             address_id=address.id,
         )
 
@@ -84,9 +85,8 @@ class AddressSelectorTests(TestCase):
 
         address = address_factory(user2)
 
-        result = selectors.get_address_by_id(
-            user=user1,
-            address_id=address.id,
-        )
-
-        self.assertIsNone(result)
+        with self.assertRaises(ValidationError):
+            validate_address_owner(
+                address,
+                user1,
+            )

@@ -1,20 +1,25 @@
+from django.utils.translation import gettext_lazy as _
+
 from addresses.models import Province, City, Address
 
 
 def province_factory(name="تهران"):
-    return Province.objects.create(
+    province, _ = Province.objects.get_or_create(
         name=name,
     )
+    return province
 
 
 def city_factory(province=None, name="تهران"):
     if province is None:
         province = province_factory()
 
-    return City.objects.create(
+    city, _ = City.objects.get_or_create(
         province=province,
         name=name,
     )
+
+    return city
 
 
 def address_factory(user, **kwargs):
@@ -30,7 +35,8 @@ def address_factory(user, **kwargs):
 
     defaults = {
         "title": "خانه",
-        "receiver_name": "علی رضایی",
+        "receiver_name": f"{user.first_name} {user.last_name}"
+        if user.is_authenticated else "کاربر ناشناس",
         "receiver_phone": "+989121111111",
         "province": province,
         "city": city,

@@ -10,7 +10,7 @@ from users.models import User
 
 from carts.models import Cart, CartItem
 
-from discounts.models import Coupon
+from discounts.models import Coupon, Discount
 
 from products.models import (
     Brand,
@@ -60,13 +60,20 @@ class CartViewsTestCase(APITestCase):
             sku="S25-256",
         )
 
+        self.discount = Discount.objects.create(
+            name="Test Discount",
+            discount_type="percent",
+            value=10,
+            is_active=True,
+            start_date=now(),
+            end_date=now() + timedelta(days=7),
+        )
+
         self.cart = Cart.objects.create(
             user=self.user,
         )
 
-
     def test_get_cart(self):
-
         url = reverse("cart-list")
 
         response = self.client.get(url)
@@ -76,9 +83,35 @@ class CartViewsTestCase(APITestCase):
             status.HTTP_200_OK,
         )
 
-        self.assertIn("cart", response.data)
+        self.assertIn(
+            "items",
+            response.data,
+        )
 
-        self.assertIn("totals", response.data)
+        self.assertIn(
+            "items_count",
+            response.data,
+        )
+
+        self.assertIn(
+            "subtotal",
+            response.data,
+        )
+
+        self.assertIn(
+            "discount",
+            response.data,
+        )
+
+        self.assertIn(
+            "coupon_discount",
+            response.data,
+        )
+
+        self.assertIn(
+            "total",
+            response.data,
+        )
 
 
     def test_add_item_to_cart(self):
@@ -223,6 +256,9 @@ class CartViewsTestCase(APITestCase):
 
         coupon = Coupon.objects.create(
             code="TEST10",
+            discount=self.discount,
+            start_date = now(),
+            end_date = now() + timedelta(days=7),
         )
 
         url = reverse(
@@ -272,6 +308,7 @@ class CartViewsTestCase(APITestCase):
 
         coupon = Coupon.objects.create(
             code="TEST10",
+            discount=self.discount,
             start_date=now(),
             end_date=now() + timedelta(days=7),
         )
@@ -316,6 +353,9 @@ class CartViewsTestCase(APITestCase):
     def test_clear_cart(self):
         coupon = Coupon.objects.create(
             code="TEST10",
+            discount=self.discount,
+            start_date=now(),
+            end_date=now() + timedelta(days=7),
         )
 
         self.cart.coupon = coupon

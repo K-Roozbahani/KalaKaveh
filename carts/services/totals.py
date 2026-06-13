@@ -58,8 +58,17 @@ def calculate_cart_totals(cart):
     return {
         "items_count": items_count,
         "subtotal": subtotal,
-        "discount": product_discount,
+
+        # مجموع کل تخفیف
+        "discount": (
+                product_discount +
+                coupon_discount
+        ),
+
+        # جزئیات تخفیف
+        "product_discount": product_discount,
         "coupon_discount": coupon_discount,
+
         "total": total,
     }
 

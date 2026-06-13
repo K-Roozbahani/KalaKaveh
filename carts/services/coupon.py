@@ -71,7 +71,7 @@ def apply_coupon(
     اعمال کد تخفیف
     """
 
-    coupon = validate_coupon(code=code)
+    coupon = validate_coupon(code=code, cart=cart)
 
     cart.coupon = coupon
 

@@ -5,9 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from utils.permissions import IsOwnerOrAdmin
 
-from addresses.models import Address
-from addresses import selectors, services
-
+from addresses import selectors
+from addresses.services import address as service_address
 from addresses.api.serializers import (
     AddressListSerializer,
     AddressDetailSerializer,
@@ -44,7 +43,7 @@ class AddressViewSet(viewsets.ModelViewSet):
 
 
     def perform_create(self, serializer):
-        services.create_address(
+        service_address.create_address(
             user=self.request.user,
             **serializer.validated_data,
         )
@@ -53,21 +52,21 @@ class AddressViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         address = self.get_object()
 
-        services.update_address(
+        address.update_address(
             address=address,
             **serializer.validated_data,
         )
 
 
     def perform_destroy(self, instance):
-        services.delete_address(address=instance)
+        service_address.delete_address(address=instance)
 
 
     @action(detail=True, methods=["post"])
     def set_default(self, request, pk=None):
         address = self.get_object()
 
-        updated = services.set_default_address(address=address)
+        updated = service_address.set_default_address(address=address)
 
         return Response(
             {
