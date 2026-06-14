@@ -75,6 +75,11 @@ class Order(models.Model):
         auto_now=True,
     )
 
+    paid_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
     objects = OrderManager()
 
     class Meta:
