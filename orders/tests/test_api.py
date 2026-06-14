@@ -32,11 +32,11 @@ class OrderAPITest(APITestCase):
             status.HTTP_200_OK,
         )
 
-    @patch("orders.views.create_order_from_cart")
+    @patch("orders.api.views.create_order_from_cart")
     def test_create_order(self, mock_create):
 
         mock_create.return_value = self.order
-        print("mock tset= ", mock_create.called)
+
         data = {
             "address_id": 1,
             "note": "test",

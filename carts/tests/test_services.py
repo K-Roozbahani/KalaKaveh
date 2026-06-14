@@ -222,8 +222,6 @@ class CartServicesTestCase(TestCase):
         totals = calculate_cart_totals(
             self.cart,
         )
-        print("total= ", totals)
-        print("variant_final_price= ", self.variant.final_price)
 
         self.assertEqual(
             totals["items_count"],
