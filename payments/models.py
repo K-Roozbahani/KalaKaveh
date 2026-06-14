@@ -9,6 +9,7 @@ from .constants import (
     GatewayType,
     PaymentStatus,
 )
+from .managers import PaymentManager
 
 
 class Payment(models.Model):
@@ -74,6 +75,8 @@ class Payment(models.Model):
         _("تاریخ بروزرسانی"),
         auto_now=True,
     )
+
+    objects = PaymentManager()
 
     class Meta:
         verbose_name = _("پرداخت")
