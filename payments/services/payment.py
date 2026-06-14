@@ -10,6 +10,7 @@ from payments.selectors import (
     get_payment_by_authority,
     get_payment_by_id,
 )
+from .gateways import get_gateway
 
 from .validators import (
     validate_payment_exists,
@@ -18,22 +19,46 @@ from .validators import (
 )
 
 
-def create_payment(*, order, gateway: str) -> Payment:
+def create_payment(
+    *,
+    order,
+    gateway_type,
+    callback_url,
+):
     """
-    ایجاد پرداخت برای سفارش
+    ایجاد پرداخت جدید.
     """
 
-    # بررسی اینکه سفارش قبلاً پرداخت نشده باشد
     validate_order_not_paid(order)
 
     payment = Payment.objects.create(
         order=order,
-        gateway=gateway,
+        gateway=gateway_type,
         amount=order.total_amount,
-        status=PaymentStatus.PENDING,
     )
 
-    return payment
+    gateway = get_gateway(
+        gateway_type,
+    )
+
+    response = gateway.request_payment(
+        amount=payment.amount,
+        description=f"Order {order.order_number}",
+        callback_url=callback_url,
+    )
+
+    payment.authority = response["authority"]
+
+    payment.save(
+        update_fields=[
+            "authority",
+        ]
+    )
+
+    return {
+        "payment": payment,
+        "payment_url": response["payment_url"],
+    }
 
 
 def mark_payment_failed(payment: Payment, reason: str = "") -> Payment:
@@ -73,20 +98,42 @@ def mark_payment_success(payment: Payment, ref_id: str) -> Payment:
     return payment
 
 
-def verify_payment(*, authority: str, ref_id: str) -> Payment:
+def verify_payment(
+    *,
+    authority,
+):
     """
-    بررسی و تایید پرداخت از طریق authority
+    تایید پرداخت.
     """
 
-    payment = get_payment_by_authority(authority)
+    payment = get_payment_by_authority(
+        authority,
+    )
 
     validate_payment_exists(payment)
-    validate_payment_is_pending(payment)
 
-    # اینجا در آینده gateway verify می‌شود
+    validate_payment_is_pending(
+        payment,
+    )
+
+    gateway = get_gateway(
+        payment.gateway,
+    )
+
+    result = gateway.verify_payment(
+        authority=authority,
+        amount=payment.amount,
+    )
+
+    if not result["success"]:
+        return mark_payment_failed(
+            payment,
+            "Gateway verification failed.",
+        )
+
     return mark_payment_success(
         payment=payment,
-        ref_id=ref_id,
+        ref_id=result["ref_id"],
     )
 
 
