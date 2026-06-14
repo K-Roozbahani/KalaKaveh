@@ -25,16 +25,16 @@ def validate_order_not_paid(order):
             _("این سفارش قبلاً پرداخت شده است.")
         )
 
-
-def validate_payment_is_pending(payment):
-    """
-    فقط پرداخت‌های در انتظار قابل Verify هستند.
-    """
-
-    if payment.status != PaymentStatus.PENDING:
-        raise ValidationError(
-            _("این پرداخت در وضعیت در انتظار نیست.")
-        )
+# این متد به دلیل تداخل با سرویس پاک شد
+# def validate_payment_is_pending(payment):
+#     """
+#     فقط پرداخت‌های در انتظار قابل Verify هستند.
+#     """
+#
+#     if payment.status != PaymentStatus.PENDING:
+#         raise ValidationError(
+#             _("این پرداخت در وضعیت در انتظار نیست.")
+#         )
 
 
 def validate_payment_amount(

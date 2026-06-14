@@ -215,25 +215,105 @@ class PaymentServicesTestCase(TestCase):
                 authority="INVALID",
             )
 
+    # بعد اضافه کردن state service دیگر نیاز نیست
+    # def test_verify_payment_not_pending(self):
+    #     """
+    #     فقط پرداخت Pending
+    #     قابل Verify است.
+    #     """
+    #
+    #     payment = create_payment_factory(
+    #         order=self.order,
+    #         authority="AUTH-123",
+    #         status=PaymentStatus.SUCCESS,
+    #     )
+    #
+    #     with self.assertRaises(
+    #         ValidationError,
+    #     ):
+    #         verify_payment(
+    #             authority=payment.authority,
+    #         )
 
-    def test_verify_payment_not_pending(self):
+
+    @patch("payments.services.payment.get_gateway")
+    def test_verify_payment_sets_order_paid_at(
+            self,
+            mock_get_gateway,
+    ):
         """
-        فقط پرداخت Pending
-        قابل Verify است.
+        بعد از پرداخت موفق باید paid_at سفارش ثبت شود.
         """
 
         payment = create_payment_factory(
             order=self.order,
-            authority="AUTH-123",
-            status=PaymentStatus.SUCCESS,
+            gateway_type="ZARINPAL",
+            callback_url="http://test/callback/",
         )
 
-        with self.assertRaises(
-            ValidationError,
-        ):
-            verify_payment(
-                authority=payment.authority,
-            )
+        mock_gateway = mock_get_gateway.return_value
+        mock_gateway.verify_payment.return_value = {
+            "success": True,
+            "ref_id": "REF-123",
+        }
+
+        verify_payment(
+            authority=payment.authority,
+        )
+
+        payment.order.refresh_from_db()
+
+        self.assertIsNotNone(
+            payment.order.paid_at,
+        )
 
 
+    @patch("payments.services.payment.get_gateway")
+    def test_verify_payment_is_idempotent(
+            self,
+            mock_get_gateway,
+    ):
+        """
+        Callback نباید دوبار اثر مخرب داشته باشد.
+        """
+
+        payment = create_payment_factory(
+            order=self.order,
+            gateway_type="ZARINPAL",
+            callback_url="http://test/callback/",
+        )
+
+        mock_gateway = mock_get_gateway.return_value
+        mock_gateway.verify_payment.return_value = {
+            "success": True,
+            "ref_id": "REF-123",
+        }
+
+        verify_payment(
+            authority=payment.authority,
+        )
+
+        payment.refresh_from_db()
+        first_paid_at = payment.order.paid_at
+
+        verify_payment(
+            authority=payment.authority,
+        )
+
+        payment.refresh_from_db()
+
+        self.assertEqual(
+            payment.status,
+            PaymentStatus.SUCCESS,
+        )
+
+        self.assertEqual(
+            payment.ref_id,
+            "REF-123",
+        )
+
+        self.assertEqual(
+            payment.order.paid_at,
+            first_paid_at,
+        )
 

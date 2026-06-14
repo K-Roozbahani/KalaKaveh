@@ -11,11 +11,11 @@ from payments.selectors import (
     get_payment_by_id,
 )
 from .gateways import get_gateway
+from .state import transition_status
 
 from .validators import (
     validate_payment_exists,
     validate_order_not_paid,
-    validate_payment_is_pending,
 )
 
 
@@ -98,27 +98,17 @@ def mark_payment_success(payment: Payment, ref_id: str) -> Payment:
     return payment
 
 
-def verify_payment(
-    *,
-    authority,
-):
-    """
-    تایید پرداخت.
-    """
 
-    payment = get_payment_by_authority(
-        authority,
-    )
+def verify_payment(*, authority):
+    payment = get_payment_by_authority(authority)
 
     validate_payment_exists(payment)
 
-    validate_payment_is_pending(
-        payment,
-    )
+    # ✅ idempotency built-in
+    if payment.status == PaymentStatus.SUCCESS:
+        return payment
 
-    gateway = get_gateway(
-        payment.gateway,
-    )
+    gateway = get_gateway(payment.gateway)
 
     result = gateway.verify_payment(
         authority=authority,
@@ -126,16 +116,36 @@ def verify_payment(
     )
 
     if not result["success"]:
-        return mark_payment_failed(
+        transition_status(
             payment,
-            "Gateway verification failed.",
+            PaymentStatus.FAILED,
         )
+        return payment
 
-    return mark_payment_success(
-        payment=payment,
-        ref_id=result["ref_id"],
+    transition_status(
+        payment,
+        PaymentStatus.SUCCESS,
     )
 
+    payment.ref_id = result["ref_id"]
+    payment.paid_at = (
+        payment.paid_at or timezone.now()
+    )
+
+    payment.save(
+        update_fields=[
+            "ref_id",
+            "paid_at",
+        ]
+    )
+
+    order = payment.order
+
+    if order.paid_at is None:
+        order.paid_at = timezone.now()
+        order.save(update_fields=["paid_at"])
+
+    return payment
 
 def get_payment_detail(payment_id: int) -> Payment:
     """

@@ -7,7 +7,6 @@ from payments.constants import PaymentStatus
 from payments.services.validators import (
     validate_payment_exists,
     validate_order_not_paid,
-    validate_payment_is_pending,
     validate_payment_amount,
 )
 
@@ -60,30 +59,30 @@ class PaymentValidatorsTestCase(TestCase):
         with self.assertRaises(ValidationError):
             validate_order_not_paid(self.order)
 
-    def test_validate_payment_is_pending_success(self):
-        """
-        اگر پرداخت در وضعیت Pending باشد معتبر است.
-        """
-
-        payment = create_payment(
-            order=self.order,
-            status=PaymentStatus.PENDING,
-        )
-
-        validate_payment_is_pending(payment)
-
-    def test_validate_payment_is_pending_failed(self):
-        """
-        اگر پرداخت Pending نباشد باید خطا بدهد.
-        """
-
-        payment = create_payment(
-            order=self.order,
-            status=PaymentStatus.SUCCESS,
-        )
-
-        with self.assertRaises(ValidationError):
-            validate_payment_is_pending(payment)
+    # def test_validate_payment_is_pending_success(self):
+    #     """
+    #     اگر پرداخت در وضعیت Pending باشد معتبر است.
+    #     """
+    #
+    #     payment = create_payment(
+    #         order=self.order,
+    #         status=PaymentStatus.PENDING,
+    #     )
+    #
+    #     validate_payment_is_pending(payment)
+    #
+    # def test_validate_payment_is_pending_failed(self):
+    #     """
+    #     اگر پرداخت Pending نباشد باید خطا بدهد.
+    #     """
+    #
+    #     payment = create_payment(
+    #         order=self.order,
+    #         status=PaymentStatus.SUCCESS,
+    #     )
+    #
+    #     with self.assertRaises(ValidationError):
+    #         validate_payment_is_pending(payment)
 
     def test_validate_payment_amount_success(self):
         """
