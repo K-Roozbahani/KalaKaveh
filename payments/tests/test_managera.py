@@ -1,45 +1,27 @@
 from django.test import TestCase
 
-from apps.orders.models import Order
-from apps.payments.constants import (
-    GatewayType,
-    PaymentStatus,
-)
-from apps.payments.models import Payment
+from orders.tests.factories import create_order,create_user
 
-from tests.factories import (
-    user_factory,
-    order_factory,
-)
+from payments.constants import PaymentStatus
+from payments.models import Payment
+
+from .factories import create_payment
 
 
 class PaymentManagerTestCase(TestCase):
 
     def setUp(self):
-        self.user = user_factory()
-
-        self.order = order_factory(
-            user=self.user,
-        )
-
-    def create_payment(
-        self,
-        status,
-    ):
-        return Payment.objects.create(
-            order=self.order,
-            gateway=GatewayType.ZARINPAL,
-            amount=100000,
-            status=status,
-        )
+        self.user = create_user()
 
     def test_pending_manager(self):
-        pending_payment = self.create_payment(
-            PaymentStatus.PENDING,
+        pending_payment = create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.PENDING,
         )
 
-        self.create_payment(
-            PaymentStatus.FAILED,
+        create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.FAILED,
         )
 
         queryset = Payment.objects.pending()
@@ -55,12 +37,14 @@ class PaymentManagerTestCase(TestCase):
         )
 
     def test_successful_manager(self):
-        success_payment = self.create_payment(
-            PaymentStatus.SUCCESS,
+        success_payment = create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.SUCCESS,
         )
 
-        self.create_payment(
-            PaymentStatus.FAILED,
+        create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.FAILED,
         )
 
         queryset = Payment.objects.successful()
@@ -76,12 +60,14 @@ class PaymentManagerTestCase(TestCase):
         )
 
     def test_failed_manager(self):
-        failed_payment = self.create_payment(
-            PaymentStatus.FAILED,
+        failed_payment = create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.FAILED,
         )
 
-        self.create_payment(
-            PaymentStatus.PENDING,
+        create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.PENDING,
         )
 
         queryset = Payment.objects.failed()
@@ -97,12 +83,14 @@ class PaymentManagerTestCase(TestCase):
         )
 
     def test_canceled_manager(self):
-        canceled_payment = self.create_payment(
-            PaymentStatus.CANCELED,
+        canceled_payment = create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.CANCELED,
         )
 
-        self.create_payment(
-            PaymentStatus.PENDING,
+        create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.PENDING,
         )
 
         queryset = Payment.objects.canceled()
@@ -118,12 +106,14 @@ class PaymentManagerTestCase(TestCase):
         )
 
     def test_refunded_manager(self):
-        refunded_payment = self.create_payment(
-            PaymentStatus.REFUNDED,
+        refunded_payment = create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.REFUNDED,
         )
 
-        self.create_payment(
-            PaymentStatus.PENDING,
+        create_payment(
+            order=create_order(self.user),
+            status=PaymentStatus.PENDING,
         )
 
         queryset = Payment.objects.refunded()
