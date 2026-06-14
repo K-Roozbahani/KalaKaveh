@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
-from apps.orders.models import Order
+from orders.models import Order
 
 from .constants import (
     GatewayType,
