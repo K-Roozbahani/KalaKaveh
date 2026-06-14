@@ -15,7 +15,7 @@ class OrderAPITest(APITestCase):
         self.order = create_order(self.user)
 
     def test_list_orders(self):
-        response = self.client.get("/api-orders/")
+        response = self.client.get("/api/orders/")
 
         self.assertEqual(
             response.status_code,
@@ -23,7 +23,7 @@ class OrderAPITest(APITestCase):
         )
 
     def test_retrieve_order(self):
-        url = f"/api-orders/{self.order.order_number}/"
+        url = f"/api/orders/{self.order.order_number}/"
 
         response = self.client.get(url)
 
@@ -43,7 +43,7 @@ class OrderAPITest(APITestCase):
         }
 
         response = self.client.post(
-            "/api-orders/",
+            "/api/orders/",
             data,
         )
 
@@ -54,7 +54,7 @@ class OrderAPITest(APITestCase):
 
     def test_order_items(self):
 
-        url = f"/api-orders/{self.order.order_number}/items/"
+        url = f"/api/orders/{self.order.order_number}/items/"
 
         response = self.client.get(url)
 
@@ -66,7 +66,7 @@ class OrderAPITest(APITestCase):
     def test_latest_order(self):
 
         response = self.client.get(
-            "/api-orders/latest/"
+            "/api/orders/latest/"
         )
 
         self.assertIn(
