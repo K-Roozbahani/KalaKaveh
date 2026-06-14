@@ -49,3 +49,10 @@ def validate_payment_amount(
         raise ValidationError(
             _("مبلغ پرداخت معتبر نیست.")
         )
+
+
+def validate_order_exists(order):
+    if order is None:
+        raise ValidationError(
+            "سفارش یافت نشد."
+        )
