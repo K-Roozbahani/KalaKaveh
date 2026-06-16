@@ -35,6 +35,7 @@ class ProductAttributeViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     lookup_field = 'slug'
+    permission_classes = [IsOwnerOrReadOnly, ]
 
     def get_serializer_class(self):
         if self.action == "list":
