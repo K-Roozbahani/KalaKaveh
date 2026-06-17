@@ -128,5 +128,5 @@ class ShipmentModelTest(TestCase):
 
         self.assertEqual(
             str(shipment),
-            f"Shipment - #{shipment.order.order_number}"
+            f"Shipment - {shipment.order.order_number}"
         )
