@@ -15,7 +15,10 @@ def create_user(**kwargs):
     )
 
 
-def create_order(user, **kwargs):
+def create_order(user=None, **kwargs):
+    if user is None:
+        user = create_user()
+
     return Order.objects.create(
         user=user,
         order_number=kwargs.get("order_number", generate_order_number()),
