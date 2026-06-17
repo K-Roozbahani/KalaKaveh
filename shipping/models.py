@@ -2,12 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from shipping.constants import ShipmentStatus
-
-
-class ShippingMethodQuerySet(models.QuerySet):
-    def active(self):
-        return self.filter(is_active=True)
-
+from shipping.managers import ShippingMethodQuerySet, ShipmentQuerySet
 
 class ShippingMethod(models.Model):
     name = models.CharField(
@@ -54,25 +49,6 @@ class ShippingMethod(models.Model):
     def __str__(self):
         return self.name
 
-
-class ShipmentQuerySet(models.QuerySet):
-    def pending(self):
-        return self.filter(status=ShipmentStatus.PENDING)
-
-    def packaged(self):
-        return self.filter(status=ShipmentStatus.PACKAGED)
-
-    def shipped(self):
-        return self.filter(status=ShipmentStatus.SHIPPED)
-
-    def delivered(self):
-        return self.filter(status=ShipmentStatus.DELIVERED)
-
-    def returned(self):
-        return self.filter(status=ShipmentStatus.RETURNED)
-
-    def canceled(self):
-        return self.filter(status=ShipmentStatus.CANCELED)
 
 
 class Shipment(models.Model):
