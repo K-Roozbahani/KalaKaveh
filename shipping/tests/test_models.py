@@ -56,12 +56,7 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_default_status_is_pending(self):
-        user = create_user()
-        order = create_order(user)
-
-        shipment = create_shipment(
-            order=order,
-        )
+        shipment = create_shipment()
 
         self.assertEqual(
             shipment.status,
@@ -69,12 +64,7 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_tracking_code_default_is_empty(self):
-        user = create_user()
-        order = create_order(user)
-
-        shipment = create_shipment(
-            order=order,
-        )
+        shipment = create_shipment()
 
         self.assertEqual(
             shipment.tracking_code,
@@ -82,36 +72,21 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_shipped_at_default_is_none(self):
-        user = create_user()
-        order = create_order(user)
-
-        shipment = create_shipment(
-            order=order,
-        )
+        shipment = create_shipment()
 
         self.assertIsNone(
             shipment.shipped_at,
         )
 
     def test_delivered_at_default_is_none(self):
-        user = create_user()
-        order = create_order(user)
-
-        shipment = create_shipment(
-            order=order,
-        )
+        shipment = create_shipment()
 
         self.assertIsNone(
             shipment.delivered_at,
         )
 
     def test_description_default_is_empty(self):
-        user = create_user()
-        order = create_order(user)
-
-        shipment = create_shipment(
-            order=order,
-        )
+        shipment = create_shipment()
 
         self.assertEqual(
             shipment.description,
@@ -119,12 +94,7 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_shipment_str(self):
-        user = create_user()
-        order = create_order(user)
-
-        shipment = create_shipment(
-            order=order,
-        )
+        shipment = create_shipment()
 
         self.assertEqual(
             str(shipment),

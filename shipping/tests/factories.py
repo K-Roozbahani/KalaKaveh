@@ -1,3 +1,4 @@
+from orders.tests.factories import create_order
 from shipping.constants import ShipmentStatus
 from shipping.models import (
     Shipment,
@@ -30,7 +31,9 @@ def create_shipping_method(**kwargs):
     )
 
 
-def create_shipment(order, **kwargs):
+def create_shipment(order=None, **kwargs):
+    if order is None:
+        order = create_order()
     shipping_method = kwargs.get(
         "shipping_method",
     )
