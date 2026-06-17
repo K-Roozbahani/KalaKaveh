@@ -32,3 +32,18 @@ def build_product_snapshot(
 
         "sku": variant.sku,
     }
+
+
+def build_shipping_snapshot(
+    shipping_method,
+):
+    return {
+        "id": shipping_method.id,
+        "name": shipping_method.name,
+        "price": str(
+            shipping_method.price
+        ),
+        "estimated_days": (
+            shipping_method.estimated_days
+        ),
+    }
