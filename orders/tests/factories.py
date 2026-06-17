@@ -34,9 +34,14 @@ def create_shipping_snapshot():
 
 
 
-def create_order(user=None, **kwargs):
+def create_order(user=None, shipping_method=None, **kwargs):
     if user is None:
         user = create_user()
+
+    if shipping_method is None:
+        raise ValueError(
+            "shipping_method is required"
+        )
 
     return Order.objects.create(
         user=user,
@@ -52,6 +57,7 @@ def create_order(user=None, **kwargs):
             "address_snapshot",
             {},
         ),
+        shipping_method=shipping_method,
         shipping_method_snapshot=kwargs.get(
             "shipping_method_snapshot",
             create_shipping_snapshot(),
