@@ -49,6 +49,10 @@ class Order(models.Model):
         verbose_name=_("مبلغ تخفیف"),
     )
 
+    shipping_method_snapshot = models.JSONField(
+        verbose_name=_("اطلاعات روش ارسال"),
+    )
+
     shipping_cost = models.DecimalField(
         max_digits=14,
         decimal_places=0,
