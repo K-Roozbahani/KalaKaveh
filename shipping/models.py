@@ -138,5 +138,5 @@ class Shipment(models.Model):
         ordering = ("-created_at",)
 
     def __str__(self):
-        return f"Shipment #{self.pk}"
+        return f"Shipment - {self.order.order_number}"
 

@@ -8,7 +8,7 @@ from shipping.tests.factories import (
 )
 
 from orders.tests.factories import (
-    create_order,
+    create_order, create_user
 )
 
 
@@ -38,7 +38,8 @@ class ShippingMethodModelTest(TestCase):
 
 class ShipmentModelTest(TestCase):
     def test_create_shipment(self):
-        order = create_order()
+        user = create_user()
+        order = create_order(user)
 
         shipment = create_shipment(
             order=order,
@@ -55,7 +56,8 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_default_status_is_pending(self):
-        order = create_order()
+        user = create_user()
+        order = create_order(user)
 
         shipment = create_shipment(
             order=order,
@@ -67,7 +69,8 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_tracking_code_default_is_empty(self):
-        order = create_order()
+        user = create_user()
+        order = create_order(user)
 
         shipment = create_shipment(
             order=order,
@@ -79,7 +82,8 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_shipped_at_default_is_none(self):
-        order = create_order()
+        user = create_user()
+        order = create_order(user)
 
         shipment = create_shipment(
             order=order,
@@ -90,7 +94,8 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_delivered_at_default_is_none(self):
-        order = create_order()
+        user = create_user()
+        order = create_order(user)
 
         shipment = create_shipment(
             order=order,
@@ -101,7 +106,8 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_description_default_is_empty(self):
-        order = create_order()
+        user = create_user()
+        order = create_order(user)
 
         shipment = create_shipment(
             order=order,
@@ -113,7 +119,8 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_shipment_str(self):
-        order = create_order()
+        user = create_user()
+        order = create_order(user)
 
         shipment = create_shipment(
             order=order,
@@ -121,5 +128,5 @@ class ShipmentModelTest(TestCase):
 
         self.assertEqual(
             str(shipment),
-            f"Shipment - {self.order.order_number}"
+            f"Shipment - #{shipment.order.order_number}"
         )
