@@ -9,6 +9,7 @@ from payments.services.validators import (
     validate_order_not_paid,
     validate_payment_amount,
 )
+from shipping.tests.factories import create_shipping_method
 
 from .factories import create_payment
 
@@ -16,9 +17,10 @@ from .factories import create_payment
 class PaymentValidatorsTestCase(TestCase):
     def setUp(self):
         self.user = create_user()
-
+        self.shipping_method = create_shipping_method()
         self.order = create_order(
             self.user,
+            shipping_method=self.shipping_method,
         )
 
     def test_validate_payment_exists_success(self):

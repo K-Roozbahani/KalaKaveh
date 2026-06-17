@@ -5,13 +5,18 @@ from orders.selectors import (
     get_user_orders,
     get_user_order_by_number,
 )
+from shipping.tests.factories import create_shipping_method
 
 
 class OrderSelectorTest(TestCase):
 
     def setUp(self):
         self.user = create_user()
-        self.order = create_order(self.user)
+        self.shipping_method = create_shipping_method()
+        self.order = create_order(
+            user=self.user,
+            shipping_method=self.shipping_method,
+        )
 
     def test_get_user_orders(self):
         qs = get_user_orders(self.user)

@@ -16,6 +16,7 @@ from payments.services.payment import (
     mark_payment_success,
     verify_payment,
 )
+from shipping.tests.factories import create_shipping_method
 
 from .factories import create_payment as create_payment_factory
 
@@ -25,9 +26,11 @@ from .factories import create_payment as create_payment_factory
 class PaymentServicesTestCase(TestCase):
     def setUp(self):
         self.user = create_user()
+        self.shipping_method = create_shipping_method()
 
         self.order = create_order(
-            self.user,
+            shipping_method=self.shipping_method,
+            user=self.user,
         )
 
     @patch(

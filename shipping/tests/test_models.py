@@ -37,17 +37,22 @@ class ShippingMethodModelTest(TestCase):
 
 
 class ShipmentModelTest(TestCase):
-    def test_create_shipment(self):
-        user = create_user()
-        order = create_order(user)
+    def setUp(self):
+        self.user = create_user()
+        self.shipping_method = create_shipping_method()
+        self.order = create_order(
+            user=self.user,
+            shipping_method=self.shipping_method,
+        )
 
+    def test_create_shipment(self):
         shipment = create_shipment(
-            order=order,
+            order=self.order,
         )
 
         self.assertEqual(
             shipment.order,
-            order,
+            self.order,
         )
 
         self.assertEqual(
@@ -56,7 +61,9 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_default_status_is_pending(self):
-        shipment = create_shipment()
+        shipment = create_shipment(
+            order=self.order,
+        )
 
         self.assertEqual(
             shipment.status,
@@ -64,7 +71,9 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_tracking_code_default_is_empty(self):
-        shipment = create_shipment()
+        shipment = create_shipment(
+            order=self.order,
+        )
 
         self.assertEqual(
             shipment.tracking_code,
@@ -72,21 +81,27 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_shipped_at_default_is_none(self):
-        shipment = create_shipment()
+        shipment = create_shipment(
+            order=self.order,
+        )
 
         self.assertIsNone(
             shipment.shipped_at,
         )
 
     def test_delivered_at_default_is_none(self):
-        shipment = create_shipment()
+        shipment = create_shipment(
+            order=self.order,
+        )
 
         self.assertIsNone(
             shipment.delivered_at,
         )
 
     def test_description_default_is_empty(self):
-        shipment = create_shipment()
+        shipment = create_shipment(
+            order=self.order,
+        )
 
         self.assertEqual(
             shipment.description,
@@ -94,7 +109,9 @@ class ShipmentModelTest(TestCase):
         )
 
     def test_shipment_str(self):
-        shipment = create_shipment()
+        shipment = create_shipment(
+            order=self.order,
+        )
 
         self.assertEqual(
             str(shipment),

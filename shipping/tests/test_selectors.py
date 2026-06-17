@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from orders.tests.factories import (
-    create_order,
+    create_order, create_user,
 )
 
 from shipping.selectors import (
@@ -89,8 +89,18 @@ class ShippingMethodSelectorTest(TestCase):
 
 
 class ShipmentSelectorTest(TestCase):
+    def setUp(self):
+        self.user = create_user()
+        self.shipping_method = create_shipping_method()
+        self.order = create_order(
+            user=self.user,
+            shipping_method=self.shipping_method,
+        )
+
     def test_get_shipment_queryset(self):
-        shipment = create_shipment()
+        shipment = create_shipment(
+            order=self.order,
+        )
 
         queryset = (
             get_shipment_queryset()
@@ -107,7 +117,9 @@ class ShipmentSelectorTest(TestCase):
         )
 
     def test_get_shipment_by_id(self):
-        shipment = create_shipment()
+        shipment = create_shipment(
+            order=self.order,
+        )
 
         result = get_shipment_by_id(
             shipment.id,
@@ -128,14 +140,13 @@ class ShipmentSelectorTest(TestCase):
         )
 
     def test_get_order_shipment(self):
-        order = create_order()
 
         shipment = create_shipment(
-            order=order,
+            order=self.order,
         )
 
         result = get_order_shipment(
-            order,
+            order=self.order,
         )
 
         self.assertEqual(
@@ -144,10 +155,9 @@ class ShipmentSelectorTest(TestCase):
         )
 
     def test_get_order_shipment_not_found(self):
-        order = create_order()
 
         result = get_order_shipment(
-            order,
+            self.order,
         )
 
         self.assertIsNone(

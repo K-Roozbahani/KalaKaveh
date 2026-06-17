@@ -11,6 +11,7 @@ from payments.serializers import (
     PaymentDetailSerializer,
     PaymentListSerializer,
 )
+from shipping.tests.factories import create_shipping_method
 
 from .factories import create_payment
 
@@ -97,9 +98,11 @@ class PaymentCreateSerializerTestCase(TestCase):
 class PaymentListSerializerTestCase(TestCase):
     def setUp(self):
         self.user = create_user()
+        self.shipping_method = create_shipping_method()
 
         self.order = create_order(
-            self.user,
+            shipping_method=self.shipping_method,
+            user=self.user,
         )
 
         self.payment = create_payment(
@@ -158,9 +161,10 @@ class PaymentListSerializerTestCase(TestCase):
 class PaymentDetailSerializerTestCase(TestCase):
     def setUp(self):
         self.user = create_user()
-
+        self.shipping_method = create_shipping_method()
         self.order = create_order(
             self.user,
+            shipping_method=self.shipping_method,
         )
 
         self.payment = create_payment(

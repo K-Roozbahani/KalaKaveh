@@ -19,13 +19,18 @@ from shipping.tests.factories import (
 )
 
 from orders.tests.factories import (
-    create_order,
+    create_order, create_user,
 )
 
 
 class CreateShipmentForOrderTest(TestCase):
     def test_create_shipment_for_order(self):
-        order = create_order()
+        user=create_user()
+        shipping_method = create_shipping_method()
+        order = create_order(
+            user=user,
+            shipping_method=shipping_method,
+        )
 
         shipping_method = (
             create_shipping_method()
@@ -54,7 +59,10 @@ class CreateShipmentForOrderTest(TestCase):
     def test_create_shipment_for_order_returns_existing_shipment(
         self,
     ):
-        order = create_order()
+        shipping_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipping_method,
+        )
 
         shipping_method = (
             create_shipping_method()
@@ -78,7 +86,10 @@ class CreateShipmentForOrderTest(TestCase):
     def test_create_shipment_for_order_with_inactive_shipping_method(
         self,
     ):
-        order = create_order()
+        shipping_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipping_method,
+        )
 
         shipping_method = (
             create_shipping_method(
@@ -96,8 +107,17 @@ class CreateShipmentForOrderTest(TestCase):
 
 
 class ChangeShipmentStatusTest(TestCase):
+    def setUp(self):
+        self.user = create_user()
+        self.shipping_method = create_shipping_method()
+        self.order = create_order(
+            shipping_method=self.shipping_method,
+            user=self.user,
+        )
+
     def test_change_shipment_status(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.PENDING,
         )
 
@@ -114,7 +134,9 @@ class ChangeShipmentStatusTest(TestCase):
     def test_change_shipment_status_invalid_transition(
         self,
     ):
+
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.PENDING,
         )
 
@@ -129,7 +151,15 @@ class ChangeShipmentStatusTest(TestCase):
 
 class AssignTrackingCodeTest(TestCase):
     def test_assign_tracking_code(self):
-        shipment = create_shipment()
+        user = create_user()
+        shipping_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipping_method,
+            user=user,
+        )
+        shipment = create_shipment(
+            order=order,
+        )
 
         shipment = assign_tracking_code(
             shipment=shipment,
@@ -143,8 +173,18 @@ class AssignTrackingCodeTest(TestCase):
 
 
 class MarkAsShippedTest(TestCase):
+
+    def setUp(self):
+        self.user = create_user()
+        self.shipping_method = create_shipping_method()
+        self.order = create_order(
+            user=self.user,
+            shipping_method=self.shipping_method,
+        )
+
     def test_mark_as_shipped(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.PACKAGED,
         )
 
@@ -165,6 +205,7 @@ class MarkAsShippedTest(TestCase):
         self,
     ):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.PACKAGED,
         )
 
@@ -189,8 +230,18 @@ class MarkAsShippedTest(TestCase):
 
 
 class MarkAsDeliveredTest(TestCase):
+
+    def setUp(self):
+        self.user = create_user()
+        self.shipping_method = create_shipping_method()
+        self.order = create_order(
+            user=self.user,
+            shipping_method=self.shipping_method,
+        )
+
     def test_mark_as_delivered(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.SHIPPED,
         )
 
@@ -211,6 +262,7 @@ class MarkAsDeliveredTest(TestCase):
         self,
     ):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.PENDING,
         )
 

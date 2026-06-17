@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from orders.tests.factories import create_user, create_order
 from shipping.constants import ShipmentStatus
 
 from shipping.models import (
@@ -37,12 +38,25 @@ class ShippingMethodQuerySetTest(TestCase):
 
 
 class ShipmentQuerySetTest(TestCase):
+    def setUp(self):
+        self.user = create_user()
+        self.shipping_method = create_shipping_method()
+        self.order = create_order(
+            shipping_method=self.shipping_method,
+            user=self.user,
+        )
+
     def test_pending(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.PENDING,
         )
 
         create_shipment(
+            order=create_order(
+                user=self.user,
+                shipping_method=self.shipping_method,
+            ),
             status=ShipmentStatus.SHIPPED,
         )
 
@@ -60,10 +74,15 @@ class ShipmentQuerySetTest(TestCase):
 
     def test_packaged(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.PACKAGED,
         )
 
         create_shipment(
+            order=create_order(
+                user=self.user,
+                shipping_method=self.shipping_method,
+            ),
             status=ShipmentStatus.PENDING,
         )
 
@@ -81,10 +100,15 @@ class ShipmentQuerySetTest(TestCase):
 
     def test_shipped(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.SHIPPED,
         )
 
         create_shipment(
+            order=create_order(
+                user=self.user,
+                shipping_method=self.shipping_method,
+            ),
             status=ShipmentStatus.PENDING,
         )
 
@@ -102,10 +126,15 @@ class ShipmentQuerySetTest(TestCase):
 
     def test_delivered(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.DELIVERED,
         )
 
         create_shipment(
+            order=create_order(
+                user=self.user,
+                shipping_method=self.shipping_method,
+            ),
             status=ShipmentStatus.PENDING,
         )
 
@@ -123,10 +152,15 @@ class ShipmentQuerySetTest(TestCase):
 
     def test_returned(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.RETURNED,
         )
 
         create_shipment(
+            order=create_order(
+                user=self.user,
+                shipping_method=self.shipping_method,
+            ),
             status=ShipmentStatus.PENDING,
         )
 
@@ -144,10 +178,15 @@ class ShipmentQuerySetTest(TestCase):
 
     def test_canceled(self):
         shipment = create_shipment(
+            order=self.order,
             status=ShipmentStatus.CANCELED,
         )
 
         create_shipment(
+            order=create_order(
+                user=self.user,
+                shipping_method=self.shipping_method,
+            ),
             status=ShipmentStatus.PENDING,
         )
 

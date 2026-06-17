@@ -11,6 +11,7 @@ from payments.constants import (
     GatewayType,
     PaymentStatus,
 )
+from shipping.tests.factories import create_shipping_method
 
 from .factories import create_payment
 
@@ -31,8 +32,11 @@ class PaymentAPITestCase(APITestCase):
             self.user,
         )
 
+        self.shipping_method = create_shipping_method()
+
         self.order = create_order(
-            self.user,
+            shipping_method=self.shipping_method,
+            user=self.user,
         )
 
     def test_get_payment_list(self):
@@ -45,7 +49,8 @@ class PaymentAPITestCase(APITestCase):
         )
 
         other_order = create_order(
-            self.other_user,
+            user = self.other_user,
+            shipping_method=self.shipping_method
         )
 
         create_payment(
@@ -107,7 +112,9 @@ class PaymentAPITestCase(APITestCase):
         """
 
         other_order = create_order(
-            self.other_user,
+            shipping_method=self.shipping_method,
+            user=self.other_user,
+
         )
 
         payment = create_payment(

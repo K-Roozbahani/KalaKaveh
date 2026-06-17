@@ -9,6 +9,7 @@ from payments.selectors import (
     get_payment_queryset,
     get_user_payments,
 )
+from shipping.tests.factories import create_shipping_method
 
 from .factories import create_payment
 
@@ -18,7 +19,7 @@ class PaymentSelectorsTestCase(TestCase):
         self.user = create_user(
             phone_number="+989121111111",
         )
-
+        self.shipping_method = create_shipping_method()
         self.other_user = create_user(
             phone_number="+989121111112",
         )
@@ -30,7 +31,8 @@ class PaymentSelectorsTestCase(TestCase):
 
         payment = create_payment(
             order=create_order(
-                self.user,
+                user=self.user,
+                shipping_method=self.shipping_method,
                 order_number="ORD-000001",
             ),
         )
@@ -49,7 +51,8 @@ class PaymentSelectorsTestCase(TestCase):
 
         payment = create_payment(
             order=create_order(
-                self.user,
+                user=self.user,
+                shipping_method=self.shipping_method,
                 order_number="ORD-000001",
             ),
         )
@@ -83,7 +86,8 @@ class PaymentSelectorsTestCase(TestCase):
 
         payment = create_payment(
             order=create_order(
-                self.user,
+                user=self.user,
+                shipping_method=self.shipping_method,
                 order_number="ORD-000001",
             ),
             authority="AUTH-123456",
@@ -117,7 +121,8 @@ class PaymentSelectorsTestCase(TestCase):
         """
 
         order = create_order(
-            self.user,
+            user=self.user,
+            shipping_method=self.shipping_method,
             order_number="ORD-000001",
         )
 
@@ -133,7 +138,8 @@ class PaymentSelectorsTestCase(TestCase):
 
         other_order_payment = create_payment(
             order=create_order(
-                self.user,
+                user=self.user,
+                shipping_method=self.shipping_method,
                 order_number="ORD-000002",
             ),
             authority="AUTH-3",
@@ -170,7 +176,8 @@ class PaymentSelectorsTestCase(TestCase):
 
         user_payment_1 = create_payment(
             order=create_order(
-                self.user,
+                user=self.user,
+                shipping_method=self.shipping_method,
                 order_number="ORD-000001",
             ),
             authority="AUTH-1",
@@ -178,7 +185,8 @@ class PaymentSelectorsTestCase(TestCase):
 
         user_payment_2 = create_payment(
             order=create_order(
-                self.user,
+                user=self.user,
+                shipping_method=self.shipping_method,
                 order_number="ORD-000002",
             ),
             authority="AUTH-2",
@@ -186,7 +194,8 @@ class PaymentSelectorsTestCase(TestCase):
 
         other_user_payment = create_payment(
             order=create_order(
-                self.other_user,
+                user=self.other_user,
+                shipping_method=self.shipping_method,
                 order_number="ORD-000003",
             ),
             authority="AUTH-3",

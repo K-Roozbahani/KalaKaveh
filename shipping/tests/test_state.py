@@ -1,7 +1,9 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from orders.tests.factories import create_order, create_user
 from shipping.constants import ShipmentStatus
+from shipping.services import create_shipment_for_order
 from shipping.state import (
     can_transition,
     transition_status,
@@ -9,6 +11,7 @@ from shipping.state import (
 
 from shipping.tests.factories import (
     create_shipment,
+    create_shipping_method
 )
 
 
@@ -30,7 +33,14 @@ class ShipmentStateTest(TestCase):
         self.assertFalse(result)
 
     def test_transition_pending_to_packaged(self):
+        user = create_user()
+        shipment_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipment_method,
+            user=user,
+        )
         shipment = create_shipment(
+            order=order,
             status=ShipmentStatus.PENDING,
         )
 
@@ -45,7 +55,14 @@ class ShipmentStateTest(TestCase):
         )
 
     def test_transition_invalid_raises_error(self):
+        user = create_user()
+        shipment_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipment_method,
+            user=user,
+        )
         shipment = create_shipment(
+            order=order,
             status=ShipmentStatus.PENDING,
         )
 
@@ -58,7 +75,14 @@ class ShipmentStateTest(TestCase):
             )
 
     def test_transition_packaged_to_shipped(self):
+        user = create_user()
+        shipment_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipment_method,
+            user=user,
+        )
         shipment = create_shipment(
+            order=order,
             status=ShipmentStatus.PACKAGED,
         )
 
@@ -73,7 +97,14 @@ class ShipmentStateTest(TestCase):
         )
 
     def test_transition_packaged_to_canceled(self):
+        user = create_user()
+        shipment_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipment_method,
+            user=user,
+        )
         shipment = create_shipment(
+            order=order,
             status=ShipmentStatus.PACKAGED,
         )
 
@@ -88,7 +119,14 @@ class ShipmentStateTest(TestCase):
         )
 
     def test_terminal_state_delivered(self):
+        user = create_user()
+        shipment_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipment_method,
+            user=user,
+        )
         shipment = create_shipment(
+            order=order,
             status=ShipmentStatus.SHIPPED,
         )
 
@@ -103,7 +141,14 @@ class ShipmentStateTest(TestCase):
         )
 
     def test_terminal_state_returned(self):
+        user = create_user()
+        shipment_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipment_method,
+            user=user,
+        )
         shipment = create_shipment(
+            order=order,
             status=ShipmentStatus.SHIPPED,
         )
 
@@ -118,7 +163,14 @@ class ShipmentStateTest(TestCase):
         )
 
     def test_no_transition_from_terminal_state(self):
+        user = create_user()
+        shipment_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipment_method,
+            user=user,
+        )
         shipment = create_shipment(
+            order=order,
             status=ShipmentStatus.DELIVERED,
         )
 

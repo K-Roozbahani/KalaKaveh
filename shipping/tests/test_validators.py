@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+from orders.tests.factories import create_order, create_user
 from shipping.tests.factories import (
     create_shipment,
     create_shipping_method,
@@ -31,6 +32,15 @@ class ValidateShippingMethodExistsTest(TestCase):
 
 
 class ValidateShippingMethodActiveTest(TestCase):
+    def setUp(self):
+        self.user = create_user()
+        self.shipping_method = create_shipping_method()
+
+        self.order = create_order(
+            shipping_method=self.shipping_method,
+            user=self.user,
+        )
+
     def test_validate_shipping_method_active_success(self):
         shipping_method = create_shipping_method(
             is_active=True,
@@ -55,7 +65,13 @@ class ValidateShippingMethodActiveTest(TestCase):
 
 class ValidateShipmentExistsTest(TestCase):
     def test_validate_shipment_exists_success(self):
-        shipment = create_shipment()
+        user = create_user()
+        shipping_method = create_shipping_method()
+        order = create_order(
+            shipping_method=shipping_method,
+            user=user,
+        )
+        shipment = create_shipment(order=order)
 
         validate_shipment_exists(
             shipment,

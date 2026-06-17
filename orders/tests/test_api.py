@@ -4,6 +4,8 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from orders.tests.factories import create_user, create_order
+from shipping.models import ShippingMethod
+from shipping.tests.factories import create_shipping_method
 
 
 class OrderAPITest(APITestCase):
@@ -11,8 +13,11 @@ class OrderAPITest(APITestCase):
     def setUp(self):
         self.user = create_user()
         self.client.force_authenticate(self.user)
-
-        self.order = create_order(self.user)
+        self.shipping_method = create_shipping_method()
+        self.order = create_order(
+            shipping_method=self.shipping_method,
+            user=self.user
+        )
 
     def test_list_orders(self):
         response = self.client.get("/api/orders/")
