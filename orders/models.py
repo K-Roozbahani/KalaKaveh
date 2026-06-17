@@ -49,6 +49,15 @@ class Order(models.Model):
         verbose_name=_("مبلغ تخفیف"),
     )
 
+    shipping_method = models.ForeignKey(
+        "shipping.ShippingMethod",
+        on_delete=models.PROTECT,
+        related_name="orders",
+        verbose_name=_("روش ارسال"),
+        null=True,
+        blank = True
+    )
+
     shipping_method_snapshot = models.JSONField(
         verbose_name=_("اطلاعات روش ارسال"),
     )
