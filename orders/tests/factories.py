@@ -9,8 +9,17 @@ User = get_user_model()
 
 
 def create_user(**kwargs):
+    phone_number = kwargs.get(
+        "phone_number"
+    )
+
+    if phone_number is None:
+        phone_number = (
+            f"091200000{User.objects.count() + 1:02d}"
+        )
+
     return User.objects.create_user(
-        phone_number=kwargs.get("phone_number", "09120000000"),
+        phone_number=phone_number,
         password="testpass123",
     )
 
