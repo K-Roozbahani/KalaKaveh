@@ -87,6 +87,7 @@ def create_order_from_cart(
         shipping_method,
     )
 
+
     totals = calculate_cart_totals(cart)
 
     order = Order.objects.create(
@@ -100,6 +101,7 @@ def create_order_from_cart(
 
         subtotal=totals["subtotal"],
         discount_amount=totals["discount"],
+        shipping_method=shipping_method,
         shipping_method_snapshot=
         build_shipping_snapshot(
             shipping_method
