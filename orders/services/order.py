@@ -29,10 +29,20 @@ from .validators import (
 from .snapshot import (
     build_address_snapshot,
     build_product_snapshot,
+    build_shipping_snapshot
 )
 
 from .order_number import (
     generate_order_number,
+)
+
+from shipping.selectors import (
+    get_shipping_method_by_id,
+)
+
+from shipping.validators import (
+    validate_shipping_method_exists,
+    validate_shipping_method_active,
 )
 
 
@@ -41,8 +51,8 @@ def create_order_from_cart(
     *,
     user,
     address_id,
+    shipping_method_id,
     note="",
-
 ):
     cart = get_user_active_cart(user)
     note = note
@@ -63,6 +73,20 @@ def create_order_from_cart(
         user,
     )
 
+    shipping_method = (
+        get_shipping_method_by_id(
+            shipping_method_id,
+        )
+    )
+
+    validate_shipping_method_exists(
+        shipping_method,
+    )
+
+    validate_shipping_method_active(
+        shipping_method,
+    )
+
     totals = calculate_cart_totals(cart)
 
     order = Order.objects.create(
@@ -76,11 +100,15 @@ def create_order_from_cart(
 
         subtotal=totals["subtotal"],
         discount_amount=totals["discount"],
-        shipping_cost=totals.get(
-            "shipping_cost",
-            0,
+        shipping_method_snapshot=
+        build_shipping_snapshot(
+            shipping_method
         ),
-        total_amount=totals["total"],
+        shipping_cost=shipping_method.price,
+        total_amount=(
+                totals["total"]
+                + shipping_method.price
+        ),
     )
 
     order_items = []
