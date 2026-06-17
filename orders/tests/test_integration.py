@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+from shipping.models import ShippingMethod
 from users.models import User
 
 from addresses.models import (
@@ -111,6 +112,15 @@ class CartToOrderIntegrationTest(TestCase):
             quantity=2,
         )
 
+        # روش ارسال
+        self.shipping_method = ShippingMethod.objects.create(
+            name="پست پیشتاز",
+            price=50000,
+            estimated_days=3,
+            is_active=True,
+        )
+
+
     def test_create_order_successfully(self):
         """
         ثبت موفق سفارش از روی سبد خرید
@@ -119,6 +129,7 @@ class CartToOrderIntegrationTest(TestCase):
         order = create_order_from_cart(
             user=self.user,
             address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
             note="تحویل عصر",
         )
 
@@ -142,6 +153,7 @@ class CartToOrderIntegrationTest(TestCase):
         order = create_order_from_cart(
             user=self.user,
             address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
         )
 
         item = order.items.first()
@@ -164,6 +176,7 @@ class CartToOrderIntegrationTest(TestCase):
         order = create_order_from_cart(
             user=self.user,
             address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
         )
 
         self.assertEqual(
@@ -184,6 +197,7 @@ class CartToOrderIntegrationTest(TestCase):
         order = create_order_from_cart(
             user=self.user,
             address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
         )
 
         item = order.items.first()
@@ -206,6 +220,7 @@ class CartToOrderIntegrationTest(TestCase):
         create_order_from_cart(
             user=self.user,
             address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
         )
 
         self.variant.refresh_from_db()
@@ -223,6 +238,7 @@ class CartToOrderIntegrationTest(TestCase):
         create_order_from_cart(
             user=self.user,
             address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
         )
 
         self.cart.refresh_from_db()
@@ -244,6 +260,7 @@ class CartToOrderIntegrationTest(TestCase):
             create_order_from_cart(
                 user=self.user,
                 address_id=self.address.id,
+                shipping_method_id=self.shipping_method.id,
             )
 
     def test_foreign_address_validation(self):
@@ -275,6 +292,7 @@ class CartToOrderIntegrationTest(TestCase):
             create_order_from_cart(
                 user=self.user,
                 address_id=foreign_address.id,
+                shipping_method_id=self.shipping_method.id,
             )
 
     def test_empty_cart_validation(self):
@@ -288,6 +306,7 @@ class CartToOrderIntegrationTest(TestCase):
             create_order_from_cart(
                 user=self.user,
                 address_id=self.address.id,
+                shipping_method_id=self.shipping_method.id,
             )
 
     def test_product_snapshot_should_not_change_after_product_update(self):
@@ -298,6 +317,7 @@ class CartToOrderIntegrationTest(TestCase):
         order = create_order_from_cart(
             user=self.user,
             address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
         )
 
         self.product.name = "نام جدید محصول"
@@ -318,6 +338,7 @@ class CartToOrderIntegrationTest(TestCase):
         order = create_order_from_cart(
             user=self.user,
             address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
         )
 
         self.address.receiver_name = "نام جدید"
@@ -327,3 +348,69 @@ class CartToOrderIntegrationTest(TestCase):
             order.address_snapshot["receiver_name"],
             "علی رضایی",
         )
+
+    def test_create_order_stores_shipping_cost(self):
+        order = create_order_from_cart(
+            user=self.user,
+            address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
+        )
+
+        self.assertEqual(
+            order.shipping_cost,
+            self.shipping_method.price,
+        )
+
+    def test_create_order_stores_shipping_snapshot(self):
+        order = create_order_from_cart(
+            user=self.user,
+            address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
+        )
+
+        self.assertEqual(
+            order.shipping_method_snapshot["id"],
+            self.shipping_method.id,
+        )
+
+        self.assertEqual(
+            order.shipping_method_snapshot["name"],
+            self.shipping_method.name,
+        )
+
+    def test_create_order_total_amount_includes_shipping_cost(self):
+        order = create_order_from_cart(
+            user=self.user,
+            address_id=self.address.id,
+            shipping_method_id=self.shipping_method.id,
+        )
+
+        self.assertEqual(
+            order.total_amount,
+            order.subtotal
+            - order.discount_amount
+            + order.shipping_cost,
+        )
+
+    def test_create_order_with_inactive_shipping_method(self):
+        self.shipping_method.is_active = False
+        self.shipping_method.save()
+
+        with self.assertRaises(
+                ValidationError,
+        ):
+            create_order_from_cart(
+                user=self.user,
+                address_id=self.address.id,
+                shipping_method_id=self.shipping_method.id,
+            )
+
+    def test_create_order_with_invalid_shipping_method(self):
+        with self.assertRaises(
+                ValidationError,
+        ):
+            create_order_from_cart(
+                user=self.user,
+                address_id=self.address.id,
+                shipping_method_id=999999,
+            )
