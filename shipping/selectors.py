@@ -56,3 +56,35 @@ def get_shipment_by_order(
         )
         .first()
     )
+
+def get_user_shipments(*, user):
+    return (
+        Shipment.objects
+        .select_related(
+            "order",
+            "shipping_method",
+        )
+        .filter(
+            order__user=user,
+        )
+        .order_by("-created_at")
+    )
+
+def get_user_shipment_by_id(
+    *,
+    shipment_id,
+    user,
+):
+    return (
+        Shipment.objects
+        .select_related(
+            "order",
+            "shipping_method",
+        )
+        .filter(
+            pk=shipment_id,
+            order__user=user,
+        )
+        .first()
+    )
+
