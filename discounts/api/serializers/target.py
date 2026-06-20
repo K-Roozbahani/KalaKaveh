@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
-from discounts.models import DiscountTarget
+from discounts.models import DiscountScope
 
 
 class DiscountTargetSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = DiscountTarget
+        model = DiscountScope
         fields = (
             "id",
             "product",

@@ -4,7 +4,7 @@ from django.utils import timezone
 from products.models import ProductVariant
 from discounts.models import (
     Discount,
-    DiscountTarget
+    DiscountScope
 )
 
 
@@ -14,7 +14,7 @@ def calculate_discount_for_variant(variant):
     now = timezone.now()
 
     target = (
-        DiscountTarget.objects
+        DiscountScope.objects
         .filter(
             Q(variant=variant) |
             Q(product=variant.product) |

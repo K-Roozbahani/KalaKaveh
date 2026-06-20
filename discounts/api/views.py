@@ -5,7 +5,7 @@ from discounts.api.serializers.usage import CouponUsageSerializer
 
 from discounts.models import (
     Discount,
-    DiscountTarget,
+    DiscountScope,
     Coupon,
     CouponUsage,
 )

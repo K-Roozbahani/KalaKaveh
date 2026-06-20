@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from discounts.models import (
     Discount,
-    DiscountTarget
+    DiscountScope
 )
 
 from .target import (
@@ -83,8 +83,8 @@ class DiscountCreateUpdateSerializer(
             **validated_data
         )
 
-        DiscountTarget.objects.bulk_create([
-            DiscountTarget(
+        DiscountScope.objects.bulk_create([
+            DiscountScope(
                 discount=discount,
                 **target
             )
@@ -104,8 +104,8 @@ class DiscountCreateUpdateSerializer(
             **validated_data
         )
 
-        DiscountTarget.objects.bulk_create([
-            DiscountTarget(
+        DiscountScope.objects.bulk_create([
+            DiscountScope(
                 discount=discount,
                 **target
             )

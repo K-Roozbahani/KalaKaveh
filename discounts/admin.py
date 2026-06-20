@@ -2,14 +2,14 @@ from django.contrib import admin
 
 from .models import (
     Discount,
-    DiscountTarget,
+    DiscountScope,
     Coupon,
     CouponUsage,
 )
 
 #برای اهداف تخغیف
 class DiscountTargetInline(admin.TabularInline):
-    model = DiscountTarget
+    model = DiscountScope
     extra = 1
 
 
@@ -58,7 +58,7 @@ class DiscountAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(DiscountTarget)
+@admin.register(DiscountScope)
 class DiscountTargetAdmin(admin.ModelAdmin):
 
     list_display = (
