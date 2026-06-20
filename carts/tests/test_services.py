@@ -23,7 +23,7 @@ from carts.services.coupon import remove_coupon, validate_coupon
 
 from carts.services.totals import calculate_cart_totals
 
-from discounts.models import Coupon, Discount, DiscountTarget
+from discounts.models import Coupon, Discount, DiscountScope
 
 from products.models import (
     Brand,
@@ -207,7 +207,7 @@ class CartServicesTestCase(TestCase):
 
 
     def test_calculate_cart_totals(self):
-        DiscountTarget.objects.create(
+        DiscountScope.objects.create(
             discount=self.discount,
             target_type=4,
             variant=self.variant,
