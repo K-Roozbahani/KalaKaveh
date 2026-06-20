@@ -62,7 +62,7 @@ class Discount(models.Model):
         return self.name
 
 
-class DiscountTarget(models.Model):
+class DiscountScope(models.Model):
 
     discount = models.ForeignKey(
         Discount,
