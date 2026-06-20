@@ -10,6 +10,8 @@ from payments.selectors import (
     get_payment_by_authority,
     get_payment_by_id,
 )
+from shipping.selectors import get_shipment_by_order
+from shipping.tests.factories import create_shipment
 from .gateways import get_gateway
 from .state import transition_status
 
@@ -144,6 +146,16 @@ def verify_payment(*, authority):
     if order.paid_at is None:
         order.paid_at = timezone.now()
         order.save(update_fields=["paid_at"])
+
+    shipment = get_shipment_by_order(
+        order=order,
+    )
+
+    if shipment is None:
+        create_shipment(
+            order=order,
+            shipping_method=order.shipping_method,
+        )
 
     return payment
 
