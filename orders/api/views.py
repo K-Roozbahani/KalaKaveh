@@ -107,6 +107,7 @@ class OrderViewSet(
         order = create_order_from_cart(
             user=request.user,
             address_id=serializer.validated_data["address_id"],
+            shipping_method_id=serializer.validated_data["shipping_method_id"],
             note=serializer.validated_data.get(
                 "note",
                 "",
