@@ -44,6 +44,7 @@ class OrderAPITest(APITestCase):
 
         data = {
             "address_id": 1,
+            "shipping_method_id": 1,
             "note": "test",
         }
 
