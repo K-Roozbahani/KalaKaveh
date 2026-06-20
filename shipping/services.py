@@ -3,7 +3,7 @@ from django.db import transaction
 from shipping.constants import ShipmentStatus
 
 from shipping.selectors import (
-    get_order_shipment,
+    get_shipment_by_order,
     get_shipment_by_id,
 )
 
@@ -38,7 +38,7 @@ def create_shipment_for_order(
         shipping_method,
     )
 
-    existing_shipment = get_order_shipment(
+    existing_shipment = get_shipment_by_order(
         order,
     )
 
@@ -70,7 +70,7 @@ def create_shipment_for_order(
         shipping_method,
     )
 
-    existing_shipment = get_order_shipment(
+    existing_shipment = get_shipment_by_order(
         order,
     )
 

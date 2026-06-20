@@ -46,7 +46,7 @@ def get_shipment_by_id(
     )
 
 
-def get_order_shipment(
+def get_shipment_by_order(
     order,
 ):
     return (

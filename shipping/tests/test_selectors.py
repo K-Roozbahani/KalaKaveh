@@ -6,7 +6,7 @@ from orders.tests.factories import (
 
 from shipping.selectors import (
     get_active_shipping_methods,
-    get_order_shipment,
+    get_shipment_by_order,
     get_shipment_by_id,
     get_shipment_queryset,
     get_shipping_method_by_id,
@@ -145,7 +145,7 @@ class ShipmentSelectorTest(TestCase):
             order=self.order,
         )
 
-        result = get_order_shipment(
+        result = get_shipment_by_order(
             order=self.order,
         )
 
@@ -156,7 +156,7 @@ class ShipmentSelectorTest(TestCase):
 
     def test_get_order_shipment_not_found(self):
 
-        result = get_order_shipment(
+        result = get_shipment_by_order(
             self.order,
         )
 
