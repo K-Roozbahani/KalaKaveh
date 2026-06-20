@@ -36,6 +36,7 @@ class OrderAdmin(admin.ModelAdmin):
         "status",
         "subtotal",
         "discount_amount",
+        "shipping_method",
         "shipping_cost",
         "total_amount",
         "created_at",
@@ -111,6 +112,18 @@ class OrderAdmin(admin.ModelAdmin):
                 )
             },
         ),
+        (
+            "روش ارسال",
+            {
+                "fields": (
+                    "shipping_method_snapshot",
+                )
+            }
+        )
+    )
+
+    autocomplete_fields = (
+        "shipping_method",
     )
 
     inlines = [OrderItemInline]
