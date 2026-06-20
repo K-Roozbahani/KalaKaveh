@@ -78,6 +78,8 @@ class OrderDetailSerializer(OrderBaseSerializer):
         read_only=True,
     )
 
+    shipping_method_name = serializers.SerializerMethodField()
+
     class Meta(OrderBaseSerializer.Meta):
         fields = (
             *OrderBaseSerializer.Meta.fields,
@@ -86,6 +88,8 @@ class OrderDetailSerializer(OrderBaseSerializer):
 
             "subtotal",
             "discount_amount",
+            "shipping_method_snapshot",
+            "shipping_method_name",
             "shipping_cost",
             "total_amount",
 
@@ -99,6 +103,16 @@ class OrderDetailSerializer(OrderBaseSerializer):
 
         read_only_fields = fields
 
+    def get_shipping_method_name(
+            self,
+            obj,
+    ):
+        return (
+            obj.shipping_method_snapshot.get(
+                "name"
+            )
+        )
+
 
 class CreateOrderSerializer(serializers.Serializer):
     """
@@ -106,6 +120,9 @@ class CreateOrderSerializer(serializers.Serializer):
     """
 
     address_id = serializers.IntegerField(
+        min_value=1,
+    )
+    shipping_method_id = serializers.IntegerField(
         min_value=1,
     )
 
