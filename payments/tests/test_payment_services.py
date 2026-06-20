@@ -16,7 +16,8 @@ from payments.services.payment import (
     mark_payment_success,
     verify_payment,
 )
-from shipping.tests.factories import create_shipping_method
+from shipping.models import Shipment
+from shipping.tests.factories import create_shipping_method, create_shipment
 
 from .factories import create_payment as create_payment_factory
 
@@ -318,5 +319,82 @@ class PaymentServicesTestCase(TestCase):
         self.assertEqual(
             payment.order.paid_at,
             first_paid_at,
+        )
+
+    def test_verify_payment_with_existing_shipment(
+            self,
+    ):
+        """
+        اگر Shipment قبلاً وجود داشته باشد
+        Shipment جدیدی ساخته نشود.
+        """
+
+        payment = create_payment_factory(
+            order=self.order,
+        )
+
+        create_shipment(
+            order=self.order,
+            shipping_method=self.order.shipping_method,
+        )
+
+        verify_payment(
+            authority=payment.authority,
+        )
+
+        self.assertEqual(
+            Shipment.objects.count(),
+            1,
+        )
+
+    def test_verify_payment_failed_does_not_create_shipment(
+            self,
+    ):
+        """
+        در صورت ناموفق بودن پرداخت نباید Shipment ساخته شود.
+        """
+
+        payment = create_payment_factory(
+            order=self.order,
+        )
+
+        with patch(
+                "payments.services.payment.get_gateway"
+        ) as mock_gateway:
+            mock_gateway.return_value.verify_payment.return_value = {
+                "success": False,
+            }
+
+            verify_payment(
+                authority=payment.authority,
+            )
+
+        self.assertEqual(
+            Shipment.objects.count(),
+            0,
+        )
+
+    def test_verify_payment_does_not_create_duplicate_shipment(
+            self,
+    ):
+        """
+        verify_payment نباید Shipment تکراری بسازد.
+        """
+
+        payment = create_payment_factory(
+            order=self.order,
+        )
+
+        verify_payment(
+            authority=payment.authority,
+        )
+
+        verify_payment(
+            authority=payment.authority,
+        )
+
+        self.assertEqual(
+            Shipment.objects.count(),
+            1,
         )
 
