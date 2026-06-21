@@ -64,8 +64,12 @@ class Product(models.Model):
     name = models.CharField(_("نام محصول"), max_length=255)
     slug = models.SlugField(_("اسلاگ"), unique=True, allow_unicode=True, blank=True)  # برای URL های خوانا
     description = models.TextField(_("توضیحات"), blank=True)
+    # price = models.DecimalField(_("قیمت"), max_digits=10, decimal_places=2)
+    # discount_price = models.DecimalField(_("قیمت با تخفیف"), max_digits=10, decimal_places=2, null=True, blank=True)
+    # stock = models.PositiveIntegerField(_("موجودی"), default=0)
     category = models.ForeignKey(Category, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
     brand = models.ForeignKey(Brand, related_name='products', on_delete=models.SET_NULL, null=True, blank=True)
+    # main_image = models.ImageField(_("عکس اصلی"), upload_to='products/images/')
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
     updated_at = models.DateTimeField(_("تاریخ بروزرسانی"), auto_now=True)
     attributes = models.ManyToManyField(ProductAttribute, through='ProductAttributeValue', related_name='products')
@@ -129,6 +133,16 @@ class ProductVariant(models.Model):
         _("قیمت"),
     )
 
+    discount_amount = models.PositiveIntegerField(
+        _("مبلغ تخفیف"),
+        default=0
+    )
+
+    final_price = models.PositiveIntegerField(
+        _("قیمت نهایی"),
+        default=0
+    )
+
     stock = models.PositiveIntegerField(
         _("موجودی"),
         default=0
@@ -150,6 +164,12 @@ class ProductVariant(models.Model):
         _("تاریخ ایجاد"),
         auto_now_add=True
     )
+
+    def save(self, *args, **kwargs):
+        if not self.final_price:
+            self.final_price = self.price
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("تنوع محصول")
