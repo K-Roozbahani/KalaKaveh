@@ -35,6 +35,15 @@ def validate_variant_is_active(
             _("تنوع محصول غیرفعال است.")
         )
 
+def validate_quantity(
+    *,
+    quantity: int,
+):
+    if quantity <= 0:
+        raise ValidationError(
+            _("تعداد باید بیشتر از صفر باشد.")
+        )
+
 
 def validate_variant_has_stock(
     *,
@@ -45,10 +54,7 @@ def validate_variant_has_stock(
     بررسی موجودی تنوع محصول
     """
 
-    if quantity <= 0:
-        raise ValidationError(
-            _("تعداد باید بیشتر از صفر باشد.")
-        )
+    validate_quantity(quantity=quantity)
 
     if variant.stock < quantity:
         raise ValidationError(
