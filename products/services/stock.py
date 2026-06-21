@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from products.models import ProductVariant
 from products.validators import (
-    validate_variant_can_be_purchased,
+    validate_variant_can_be_purchased, validate_quantity,
 )
 
 
@@ -57,10 +57,7 @@ def increase_stock(
     - بازگشت وجه
     """
 
-    if quantity <= 0:
-        raise ValidationError(
-            _("تعداد باید بیشتر از صفر باشد.")
-        )
+    validate_quantity(quantity=quantity)
 
     variant = (
         ProductVariant.objects
