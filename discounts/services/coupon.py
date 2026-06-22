@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.db.models import F
 from django.db import transaction
 
 from discounts.models import (
@@ -82,6 +83,7 @@ def calculate_coupon_discount(
 
 
 @transaction.atomic
+@transaction.atomic
 def register_coupon_usage(
     *,
     coupon: Coupon,
@@ -89,7 +91,7 @@ def register_coupon_usage(
     order,
 ):
     """
-    ثبت استفاده از کوپن
+    ثبت استفاده از کوپن (Safe for concurrent requests)
     """
 
     CouponUsage.objects.create(
@@ -98,12 +100,10 @@ def register_coupon_usage(
         order=order,
     )
 
-    coupon.used_count += 1
-
-    coupon.save(
-        update_fields=[
-            "used_count",
-        ]
+    Coupon.objects.filter(
+        pk=coupon.pk
+    ).update(
+        used_count=F("used_count") + 1
     )
 
-    return coupon
+    return True
