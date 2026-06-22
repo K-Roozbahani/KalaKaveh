@@ -1,66 +1,6 @@
 from decimal import Decimal
 
 
-def calculate_cart_totals(cart):
-    """
-    محاسبه خلاصه مالی سبد خرید
-    """
-
-    items_count = 0
-
-    subtotal = Decimal("0")
-
-    product_discount = Decimal("0")
-
-    for item in cart.items.select_related(
-        "variant",
-    ):
-
-        quantity = item.quantity
-        variant = item.variant
-
-        items_count += quantity
-
-        subtotal += (
-            Decimal(str(variant.price))
-            * quantity
-        )
-
-        product_discount += (
-            Decimal(str(
-                variant.discount_amount
-            ))
-            * quantity
-        )
-
-    coupon_discount = calculate_coupon_discount(
-        cart=cart,
-        subtotal=subtotal,
-        product_discount=product_discount,
-    )
-
-    total = (
-        subtotal
-        - product_discount
-        - coupon_discount
-    )
-
-    if total < 0:
-        total = Decimal("0")
-
-    return {
-        "items_count": items_count,
-        "subtotal": subtotal,
-        "discount": (
-            product_discount +
-            coupon_discount
-        ),
-        "product_discount": product_discount,
-        "coupon_discount": coupon_discount,
-        "total": total,
-    }
-
-
 def calculate_coupon_discount(
     *,
     cart,
