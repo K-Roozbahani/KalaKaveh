@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from shipping.constants import ShipmentStatus
 from shipping.models import (
     Shipment,
@@ -13,7 +15,7 @@ def create_shipping_method(**kwargs):
         ),
         code=kwargs.get(
             "code",
-            f"POST-{ShippingMethod.objects.count() + 1}",
+            f"POST-{int(timezone.now().timestamp())}"
         ),
         price=kwargs.get(
             "price",
