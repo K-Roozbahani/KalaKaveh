@@ -1,3 +1,5 @@
+import uuid
+
 from products.models import (
     Category,
     Brand,
@@ -90,7 +92,7 @@ def create_variant(**kwargs):
         product=product,
         sku=kwargs.get(
             "sku",
-            f"SKU-{ProductVariant.objects.count() + 1}",
+            f"SKU-{uuid.uuid4().hex[:8]}",
         ),
         price=kwargs.get(
             "price",
