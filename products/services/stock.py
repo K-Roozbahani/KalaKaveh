@@ -4,9 +4,29 @@ from django.utils.translation import gettext_lazy as _
 
 from products.models import ProductVariant
 from products.validators import (
-    validate_variant_can_be_purchased, validate_quantity,
+    validate_quantity,
+    validate_product_is_active, validate_variant_is_active, validate_variant_has_stock,
 )
 
+def ensure_variant_can_be_purchased(*, variant, quantity):
+    """
+    بررسی کامل امکان خرید
+    """
+
+    validate_product_is_active(
+        product=variant.product,
+    )
+
+    validate_variant_is_active(
+        variant=variant,
+    )
+
+    validate_variant_has_stock(
+        variant=variant,
+        quantity=quantity,
+    )
+
+    return True
 
 @transaction.atomic
 def decrease_stock(
@@ -29,7 +49,7 @@ def decrease_stock(
         .get(pk=variant.pk)
     )
 
-    validate_variant_can_be_purchased(
+    ensure_variant_can_be_purchased(
         variant=variant,
         quantity=quantity,
     )
