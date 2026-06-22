@@ -67,7 +67,7 @@ class DiscountScope(models.Model):
     discount = models.ForeignKey(
         Discount,
         on_delete=models.CASCADE,
-        related_name="targets"
+        related_name="scopes"
     )
 
     target_type = models.PositiveSmallIntegerField(
@@ -134,7 +134,13 @@ class DiscountScope(models.Model):
     class Meta:
         verbose_name = _("هدف تخفیف")
         verbose_name_plural = _("اهداف تخفیف")
-        indexes = [models.Index(fields=["discount"]),]
+        indexes = [
+            models.Index(fields=["discount"]),
+            models.Index(fields=["product"]),
+            models.Index(fields=["variant"]),
+            models.Index(fields=["category"]),
+            models.Index(fields=["brand"]),
+        ]
 
 
 class Coupon(models.Model):
