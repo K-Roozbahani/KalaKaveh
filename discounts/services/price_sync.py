@@ -17,7 +17,7 @@ def get_variant_active_discount(
 
     discounts = Discount.objects.filter(
         is_active=True,
-        targets__variant=variant,
+        scopes__variant=variant,
     ).order_by(
         "-priority",
     )
