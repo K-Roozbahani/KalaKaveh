@@ -1,4 +1,7 @@
-from django.db.models import QuerySet, Prefetch
+from django.db.models import (
+    Prefetch,
+    QuerySet,
+)
 
 from .models import (
     Product,
@@ -11,6 +14,10 @@ from .models import (
 )
 
 
+# =====================================================
+# Category
+# =====================================================
+
 def get_categories() -> QuerySet[Category]:
     """
     دریافت تمام دسته‌بندی‌ها
@@ -19,7 +26,10 @@ def get_categories() -> QuerySet[Category]:
     return Category.objects.all()
 
 
-def get_category_by_slug(*, slug: str) -> Category:
+def get_category_by_slug(
+    *,
+    slug: str,
+) -> Category:
     """
     دریافت دسته‌بندی بر اساس اسلاگ
     """
@@ -27,6 +37,11 @@ def get_category_by_slug(*, slug: str) -> Category:
     return Category.objects.get(
         slug=slug,
     )
+
+
+# =====================================================
+# Brand
+# =====================================================
 
 def get_brands() -> QuerySet[Brand]:
     """
@@ -36,7 +51,10 @@ def get_brands() -> QuerySet[Brand]:
     return Brand.objects.all()
 
 
-def get_brand_by_slug(*, slug: str) -> Brand:
+def get_brand_by_slug(
+    *,
+    slug: str,
+) -> Brand:
     """
     دریافت برند بر اساس اسلاگ
     """
@@ -44,6 +62,11 @@ def get_brand_by_slug(*, slug: str) -> Brand:
     return Brand.objects.get(
         slug=slug,
     )
+
+
+# =====================================================
+# Product
+# =====================================================
 
 def get_active_products() -> QuerySet[Product]:
     """
@@ -54,7 +77,90 @@ def get_active_products() -> QuerySet[Product]:
         is_active=True,
     )
 
-def get_product_by_slug(*, slug: str) -> Product:
+
+def get_products_for_listing() -> QuerySet[Product]:
+    """
+    دریافت محصولات برای صفحه لیست فروشگاه
+    """
+
+    variants = (
+        ProductVariant.objects
+        .filter(
+            is_active=True,
+        )
+        .order_by(
+            "final_price",
+            "-stock",
+            "id",
+        )
+        .prefetch_related(
+            "images",
+        )
+    )
+
+    return (
+        Product.objects
+        .filter(
+            is_active=True,
+        )
+        .select_related(
+            "category",
+            "brand",
+        )
+        .prefetch_related(
+            "images",
+            Prefetch(
+                "variants",
+                queryset=variants,
+            ),
+        )
+    )
+
+
+def get_product_detail_by_slug(
+    *,
+    slug: str,
+) -> Product:
+    """
+    دریافت اطلاعات کامل محصول برای صفحه جزئیات
+    """
+
+    variants = (
+        ProductVariant.objects
+        .filter(
+            is_active=True,
+        )
+        .prefetch_related(
+            "images",
+        )
+    )
+
+    return (
+        Product.objects
+        .select_related(
+            "category",
+            "brand",
+        )
+        .prefetch_related(
+            "images",
+            Prefetch(
+                "variants",
+                queryset=variants,
+            ),
+            "attribute_values__attribute",
+            "reviews__user",
+        )
+        .get(
+            slug=slug,
+            is_active=True,
+        )
+    )
+
+
+def get_product_by_slug(
+    *,
+    slug: str,
+) -> Product:
     """
     دریافت محصول بر اساس اسلاگ
     """
@@ -76,7 +182,11 @@ def get_product_by_slug(*, slug: str) -> Product:
         )
     )
 
-def get_product_by_id(*, product_id: int) -> Product:
+
+def get_product_by_id(
+    *,
+    product_id: int,
+) -> Product:
     """
     دریافت محصول بر اساس شناسه
     """
@@ -85,6 +195,10 @@ def get_product_by_id(*, product_id: int) -> Product:
         pk=product_id,
     )
 
+
+# =====================================================
+# Variant
+# =====================================================
 
 def get_variant_by_id(
     *,
@@ -99,6 +213,9 @@ def get_variant_by_id(
         .select_related(
             "product",
         )
+        .prefetch_related(
+            "images",
+        )
         .get(
             pk=variant_id,
         )
@@ -110,13 +227,16 @@ def get_variant_by_sku(
     sku: str,
 ) -> ProductVariant:
     """
-    دریافت تنوع بر اساس SKU
+    دریافت تنوع محصول بر اساس SKU
     """
 
     return (
         ProductVariant.objects
         .select_related(
             "product",
+        )
+        .prefetch_related(
+            "images",
         )
         .get(
             sku=sku,
@@ -129,7 +249,7 @@ def get_product_variants(
     product_id: int,
 ) -> QuerySet[ProductVariant]:
     """
-    دریافت تنوع‌های محصول
+    دریافت تنوع‌های فعال محصول
     """
 
     return (
@@ -138,8 +258,41 @@ def get_product_variants(
             product_id=product_id,
             is_active=True,
         )
+        .prefetch_related(
+            "images",
+        )
+        .order_by(
+            "-stock",
+            "final_price",
+            "id",
+        )
     )
 
+
+def get_default_variant(
+    *,
+    product: Product,
+) -> ProductVariant | None:
+    """
+    دریافت Variant پیش‌فرض محصول
+
+    این تابع هیچ Query جدیدی ایجاد نمی‌کند
+    در صورتی که variants قبلاً Prefetch شده باشند.
+    """
+
+    variants = list(
+        product.variants.all()
+    )
+
+    if not variants:
+        return None
+
+    return variants[0]
+
+
+# =====================================================
+# Review
+# =====================================================
 
 def get_product_reviews(
     *,
@@ -160,16 +313,23 @@ def get_product_reviews(
     )
 
 
+# =====================================================
+# Images
+# =====================================================
+
 def get_product_images(
     *,
     product_id: int,
 ) -> QuerySet[ProductImage]:
     """
-    تصاویر محصول
+    دریافت تصاویر محصول
     """
 
-    return ProductImage.objects.filter(
-        product_id=product_id,
+    return (
+        ProductImage.objects
+        .filter(
+            product_id=product_id,
+        )
     )
 
 
@@ -178,11 +338,12 @@ def get_variant_images(
     variant_id: int,
 ) -> QuerySet[VariantImage]:
     """
-    تصاویر تنوع محصول
+    دریافت تصاویر تنوع محصول
     """
 
-    return VariantImage.objects.filter(
-        variant_id=variant_id,
+    return (
+        VariantImage.objects
+        .filter(
+            variant_id=variant_id,
+        )
     )
-
-

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from products.models import Product
+from products.selectors import get_default_variant
 
 from .brand import BrandSerializer
 from .category import CategorySerializer
@@ -8,19 +9,15 @@ from .category import CategorySerializer
 
 class ProductListSerializer(serializers.ModelSerializer):
     """
-    نمایش لیست محصولات
+    نمایش لیست محصولات (بهینه شده برای production)
     """
 
-    brand = BrandSerializer(
-        read_only=True,
-    )
+    brand = BrandSerializer(read_only=True)
+    category = CategorySerializer(read_only=True)
 
-    category = CategorySerializer(
-        read_only=True,
-    )
-
-    primary_image = serializers.SerializerMethodField()
-
+    price = serializers.SerializerMethodField()
+    discount_amount = serializers.SerializerMethodField()
+    final_price = serializers.SerializerMethodField()
     has_stock = serializers.SerializerMethodField()
 
     class Meta:
@@ -32,28 +29,72 @@ class ProductListSerializer(serializers.ModelSerializer):
             "slug",
             "brand",
             "category",
-            "primary_image",
+            "price",
+            "discount_amount",
+            "final_price",
             "has_stock",
         )
 
         read_only_fields = fields
 
-    def get_primary_image(
-        self,
-        obj,
-    ):
-        image = obj.images.first()
+    # =====================================================
+    # Default Variant Cache
+    # =====================================================
 
-        if image:
-            return image.image.url
+    def _get_default_variant(self, obj):
+        """
+        گرفتن Variant پیش‌فرض با cache در سطح serializer
+        """
 
-        return None
+        cache = getattr(self, "_default_variant_cache", None)
 
-    def get_has_stock(
-        self,
-        obj,
-    ):
-        return obj.variants.filter(
-            is_active=True,
-            stock__gt=0,
-        ).exists()
+        if cache is None:
+            cache = {}
+            self._default_variant_cache = cache
+
+        if obj.id in cache:
+            return cache[obj.id]
+
+        variant = get_default_variant(product=obj)
+
+        cache[obj.id] = variant
+
+        return variant
+
+    # =====================================================
+    # Fields
+    # =====================================================
+
+    def get_price(self, obj):
+        variant = self._get_default_variant(obj)
+
+        if not variant:
+            return None
+
+        return variant.price
+
+    def get_discount_amount(self, obj):
+        variant = self._get_default_variant(obj)
+
+        if not variant:
+            return None
+
+        return variant.discount_amount
+
+    def get_final_price(self, obj):
+        variant = self._get_default_variant(obj)
+
+        if not variant:
+            return None
+
+        return variant.final_price
+
+    def get_has_stock(self, obj):
+        variant = self._get_default_variant(obj)
+
+        if not variant:
+            return False
+
+        return (
+            variant.is_active and variant.stock > 0
+        )
