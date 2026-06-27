@@ -1,4 +1,4 @@
-from django.db.models import Q, QuerySet
+from django.db.models import Q
 from django.utils import timezone
 
 from discounts.models import (
@@ -33,9 +33,9 @@ def get_discount_by_id(
     )
 
 
-def get_active_discounts() -> QuerySet[Discount]:
+def get_active_discounts():
     """
-    دریافت تمام تخفیف‌های فعال
+    دریافت تخفیف‌های فعال
     """
 
     now = timezone.now()
@@ -282,47 +282,6 @@ def get_highest_priority_discount(
 
     return (
         get_applicable_discount_scopes(
-            variant=variant,
-        )
-        .first()
-    )
-
-def get_variant_available_discounts(
-    *,
-    variant: ProductVariant,
-) -> QuerySet[Discount]:
-    """
-    دریافت تمام تخفیف‌های قابل اعمال روی تنوع محصول.
-
-    ترتیب اولویت در این مرحله اعمال نمی‌شود
-    و فقط تمام Discount های معتبر برگردانده می‌شوند.
-    """
-
-    return (
-        get_active_discounts()
-        .filter(
-            scopes__variant=variant,
-        )
-        .distinct()
-        .order_by(
-            "-priority",
-            "-id",
-        )
-    )
-
-
-def get_variant_active_discount(
-    *,
-    variant: ProductVariant,
-):
-    """
-    دریافت بهترین تخفیف فعال.
-
-    جهت سازگاری با کدهای قبلی نگه داشته شده است.
-    """
-
-    return (
-        get_variant_available_discounts(
             variant=variant,
         )
         .first()
