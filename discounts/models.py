@@ -83,28 +83,32 @@ class DiscountScope(models.Model):
         Product,
         on_delete=models.CASCADE,
         null=True,
-        blank=True
+        blank=True,
+        related_name="scopes"
     )
 
     variant = models.ForeignKey(
         ProductVariant,
         on_delete=models.CASCADE,
         null=True,
-        blank=True
+        blank=True,
+        related_name="scopes"
     )
 
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
         null=True,
-        blank=True
+        blank=True,
+        related_name="scopes"
     )
 
     brand = models.ForeignKey(
         Brand,
         on_delete=models.CASCADE,
         null=True,
-        blank=True
+        blank=True,
+        related_name="scopes"
     )
 
     def clean(self):
