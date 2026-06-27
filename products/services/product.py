@@ -46,7 +46,9 @@ def update_product(
             value,
         )
 
-    product.save()
+    product.save(
+        update_fields=data.keys(),
+    )
 
     return product
 
@@ -100,7 +102,9 @@ def update_product_variant(
             value,
         )
 
-    variant.save()
+    variant.save(
+        update_fields=data.keys(),
+    )
 
     return variant
 
