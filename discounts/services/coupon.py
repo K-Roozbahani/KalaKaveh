@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-from django.db.models import F
 from django.db import transaction
+from django.db.models import F
 
 from discounts.models import (
     Coupon,
@@ -25,7 +25,7 @@ def validate_coupon(
     user,
 ) -> Coupon:
     """
-    اعتبارسنجی کوپن
+    اعتبارسنجی امکان استفاده از کوپن
     """
 
     validate_coupon_is_active(
@@ -40,7 +40,7 @@ def validate_coupon(
         has_used=has_user_used_coupon(
             coupon=coupon,
             user=user,
-        )
+        ),
     )
 
     return coupon
@@ -50,12 +50,12 @@ def calculate_coupon_discount(
     *,
     coupon: Coupon,
     amount,
-):
+) -> Decimal:
     """
     محاسبه مبلغ تخفیف کوپن
 
     amount:
-        مبلغ قابل پرداخت
+        مبلغ سفارش
     """
 
     amount = Decimal(str(amount))
@@ -65,15 +65,13 @@ def calculate_coupon_discount(
 
     discount = coupon.discount
 
-    if discount.discount_type == discount.PERCENT:
-
+    if discount.discount_type == Coupon.discount.field.related_model.PERCENT:
         return (
             amount *
             discount.value
         ) / Decimal("100")
 
-    if discount.discount_type == discount.FIXED:
-
+    if discount.discount_type == Coupon.discount.field.related_model.FIXED:
         return min(
             Decimal(str(discount.value)),
             amount,
@@ -83,15 +81,16 @@ def calculate_coupon_discount(
 
 
 @transaction.atomic
-@transaction.atomic
 def register_coupon_usage(
     *,
     coupon: Coupon,
     user,
     order,
-):
+) -> bool:
     """
-    ثبت استفاده از کوپن (Safe for concurrent requests)
+    ثبت استفاده از کوپن
+
+    این متد باید پس از ثبت موفق سفارش فراخوانی شود.
     """
 
     CouponUsage.objects.create(
@@ -101,9 +100,9 @@ def register_coupon_usage(
     )
 
     Coupon.objects.filter(
-        pk=coupon.pk
+        pk=coupon.pk,
     ).update(
-        used_count=F("used_count") + 1
+        used_count=F("used_count") + 1,
     )
 
     return True
