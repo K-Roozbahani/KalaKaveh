@@ -144,7 +144,7 @@ class PriceSyncServiceTest(TestCase):
 
         print("VARIANT ID:", self.variant.id)
 
-        print(زی
+        print(
             "SCOPE EXISTS:",
             DiscountScope.objects.filter(variant_id=self.variant.id).exists()
         )
