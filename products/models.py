@@ -166,7 +166,7 @@ class ProductVariant(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if not self.final_price:
+        if self.final_price is None:
             self.final_price = self.price
 
         super().save(*args, **kwargs)
