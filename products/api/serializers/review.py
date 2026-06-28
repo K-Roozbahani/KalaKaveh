@@ -22,3 +22,29 @@ class ReviewSerializer(serializers.ModelSerializer):
         )
 
         read_only_fields = fields
+
+
+class ReviewWriteSerializer(serializers.ModelSerializer):
+    """
+    ثبت و ویرایش نظر
+    """
+
+    class Meta:
+        model = Review
+
+        fields = (
+            "rating",
+            "comment",
+        )
+
+    def validate_rating(self, value):
+        """
+        اعتبارسنجی امتیاز
+        """
+
+        if not 1 <= value <= 5:
+            raise serializers.ValidationError(
+                "امتیاز باید بین ۱ تا ۵ باشد."
+            )
+
+        return value
