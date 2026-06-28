@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from .models import Product, ProductVariant, ProductAttributeValue
+from .models import Product, ProductVariant, ProductAttributeValue, Review
 
 
 def validate_product_is_active(*, product: Product) -> None:
@@ -42,3 +42,49 @@ def validate_attribute_value_belongs_to_product(
 ) -> None:
     if attribute_value.product_id != variant.product_id:
         raise ValidationError(_("مقدار ویژگی متعلق به این محصول نیست."))
+
+def validate_review_rating(
+    *,
+    rating: int,
+) -> None:
+    """
+    اعتبارسنجی امتیاز نظر
+    """
+
+    if rating < 1 or rating > 5:
+        raise ValidationError(
+            _("امتیاز باید بین ۱ تا ۵ باشد.")
+        )
+
+
+def validate_review_comment(
+    *,
+    comment: str,
+) -> None:
+    """
+    اعتبارسنجی متن نظر
+    """
+
+    if comment is None:
+        return
+
+    comment = comment.strip()
+
+    if len(comment) > 5000:
+        raise ValidationError(
+            _("متن نظر نمی‌تواند بیشتر از ۵۰۰۰ کاراکتر باشد.")
+        )
+
+
+def validate_review_can_be_updated(
+    *,
+    review: Review,
+) -> None:
+    """
+    بررسی امکان ویرایش نظر
+    """
+
+    if review is None:
+        raise ValidationError(
+            _("نظر موردنظر یافت نشد.")
+        )
