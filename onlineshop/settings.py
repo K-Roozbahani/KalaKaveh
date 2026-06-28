@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'utils',
     'rest_framework',
     'rest_framework_simplejwt',
+    "drf_spectacular",
     'users',
     'products',
     'discounts',
@@ -149,6 +150,11 @@ REST_FRAMEWORK = {
     # تنظیمات صفحه‌بندی (Pagination)
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+
+
+    #Swagger
+    "DEFAULT_SCHEMA_CLASS":
+        "drf_spectacular.openapi.AutoSchema",
 }
 
 # _____________________________Cache redis____________________________________________
@@ -177,5 +183,20 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 CELERY_TIMEZONE = "Asia/Tehran"
+
+# _____________________drf-spectacular_________________
+
+SPECTACULAR_SETTINGS = {
+
+    "TITLE": "Online Shop API",
+
+    "DESCRIPTION": "REST API Documentation",
+
+    "VERSION": "1.0.0",
+
+    "SERVE_INCLUDE_SCHEMA": False,
+
+    "COMPONENT_SPLIT_REQUEST": True,
+}
 
 
