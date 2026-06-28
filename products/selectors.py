@@ -297,18 +297,58 @@ def get_default_variant(
 def get_product_reviews(
     *,
     product_id: int,
-) -> QuerySet[Review]:
+):
     """
-    دریافت نظرات محصول
+    دریافت نظرات تایید شده محصول
+    """
+
+    return (
+        Review.objects
+        .select_related("user")
+        .filter(
+            product_id=product_id,
+            is_valid=True,
+        )
+        .order_by("-created_at")
+    )
+
+def get_review_by_id(
+    *,
+    review_id: int,
+) -> Review:
+    """
+    دریافت نظر بر اساس شناسه
     """
 
     return (
         Review.objects
         .select_related(
+            "product",
             "user",
         )
-        .filter(
-            product_id=product_id,
+        .get(
+            pk=review_id,
+        )
+    )
+
+def get_user_review(
+    *,
+    product: Product,
+    user,
+) -> Review:
+    """
+    دریافت نظر کاربر برای یک محصول
+    """
+
+    return (
+        Review.objects
+        .select_related(
+            "product",
+            "user",
+        )
+        .get(
+            product=product,
+            user=user,
         )
     )
 
