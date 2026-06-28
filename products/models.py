@@ -249,6 +249,7 @@ class Review(models.Model):
     """
     برای ثبت نظرات و امتیازات کاربران درباره محصولات.
     """
+    is_valid = models.BooleanField(default=False, verbose_name=_("معتبر"))
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews', verbose_name=_('کاربر')) # تغییر از user_name به ForeignKey
     comment = models.TextField(_("نظر"), blank=True)
