@@ -144,6 +144,7 @@ REST_FRAMEWORK = {
 
     # تعیین سیستم احراز هویت پیش‌فرض
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
@@ -197,6 +198,21 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 
     "COMPONENT_SPLIT_REQUEST": True,
+
+    "SECURITY": [
+            {
+                "Bearer": [],
+            },
+        ],
+
+    "SECURITY_SCHEMES": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        },
+
 }
 
 
