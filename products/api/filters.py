@@ -1,65 +1,58 @@
-import django_filters
-from ..models import Product, ProductVariant
+from django_filters import rest_framework as filters
+
+from products.models import Product
 
 
-class ProductFilter(django_filters.FilterSet):
+class ProductFilter(filters.FilterSet):
     """
-    فیلتر محصولات
+    فیلتر محصولات فروشگاه
     """
 
-    name = django_filters.CharFilter(lookup_expr="icontains")
-    category = django_filters.CharFilter(
-        field_name="category__slug",
-    )
+    min_price = filters.NumberFilter(method="filter_min_price")
+    max_price = filters.NumberFilter(method="filter_max_price")
 
-    brand = django_filters.CharFilter(
-        field_name="brand__slug",
-    )
+    brand = filters.NumberFilter(field_name="brand_id")
+    category = filters.NumberFilter(field_name="category_id")
 
-    slug = django_filters.CharFilter(
-        lookup_expr="icontains",
-    )
-
-    created_after = django_filters.DateTimeFilter(
-        field_name="created_at",
-        lookup_expr="gte",
-    )
-
-    created_before = django_filters.DateTimeFilter(
-        field_name="created_at",
-        lookup_expr="lte",
-    )
-
-    is_active = django_filters.BooleanFilter()
+    has_stock = filters.BooleanFilter(method="filter_has_stock")
 
     class Meta:
         model = Product
-        fields = ["name", "category", "brand", "is_active", "slug", "created_after", "created_before"]
 
+        fields = [
+            "brand",
+            "category",
+        ]
 
-class VariantFilter(django_filters.FilterSet):
-    """
-    فیلتر واریانت‌ها
-    """
+    def filter_min_price(self, queryset, name, value):
+        """
+        حداقل قیمت (بر اساس variant پیش‌فرض)
+        """
 
-    price_min = django_filters.NumberFilter(
-        field_name="final_price",
-        lookup_expr="gte",
-    )
+        return queryset.filter(
+            variants__final_price__gte=value,
+            variants__is_active=True,
+        ).distinct()
 
-    price_max = django_filters.NumberFilter(
-        field_name="final_price",
-        lookup_expr="lte",
-    )
+    def filter_max_price(self, queryset, name, value):
+        """
+        حداکثر قیمت (بر اساس variant پیش‌فرض)
+        """
 
-    is_active = django_filters.BooleanFilter()
-    in_stock = django_filters.BooleanFilter(method="filter_in_stock")
+        return queryset.filter(
+            variants__final_price__lte=value,
+            variants__is_active=True,
+        ).distinct()
 
-    class Meta:
-        model = ProductVariant
-        fields = ["price_min", "price_max", "is_active", "in_stock"]
+    def filter_has_stock(self, queryset, name, value):
+        """
+        فیلتر موجودی
+        """
 
-    def filter_in_stock(self, queryset, name, value):
         if value:
-            return queryset.filter(stock__gt=0)
+            return queryset.filter(
+                variants__stock__gt=0,
+                variants__is_active=True,
+            ).distinct()
+
         return queryset
