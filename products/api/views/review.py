@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAu
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from core.permissions import IsOwnerOrAdmin
+from utils.permissions import IsOwnerOrAdmin
 
 from products.api.serializers.review import (
     ReviewSerializer,
