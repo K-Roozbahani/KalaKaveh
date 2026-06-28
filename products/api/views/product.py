@@ -4,6 +4,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+
+from products.api.pagination import ProductPagination
 from products.models import Product
 from products.selectors import (
     get_products_for_listing,
@@ -46,6 +48,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     )
 
     ordering = ("-created_at",)
+
+    pagination_class = (ProductPagination, )
 
     def get_queryset(self):
         """
