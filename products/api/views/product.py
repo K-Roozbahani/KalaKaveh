@@ -18,7 +18,28 @@ from products.api.serializers import (
     ProductDetailSerializer,
 )
 
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view,
+)
 
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="لیست محصولات",
+        description="دریافت لیست محصولات فعال فروشگاه",
+        responses=ProductListSerializer
+    ),
+    retrieve=extend_schema(
+        summary="جزئیات محصول",
+        description="دریافت اطلاعات کامل یک محصول بر اساس اسلاگ",
+        responses=ProductDetailSerializer
+    ),
+)
+@extend_schema(
+    tags=["Products"],
+)
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API محصولات فروشگاه

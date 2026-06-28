@@ -3,7 +3,7 @@ from rest_framework.mixins import (
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
-    UpdateModelMixin,
+    UpdateModelMixin, DestroyModelMixin,
 )
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -26,12 +26,43 @@ from products.services.review import (
     deactivate_review,
 )
 
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view,
+)
 
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="لیست نظرات",
+        description="دریافت لیست نظرات معتبر",
+        responses=ReviewSerializer,
+
+    ),
+    create=extend_schema(
+        summary="ثبت نظر",
+        description="ثبت نظر جدید کاربر یا بروزرسانی نظر ثبت شده کاربر",
+        responses=ReviewWriteSerializer,
+    ),
+    update=extend_schema(
+        summary="بروز رسانی نظر",
+        description="بروزرسانی نظر ثبت شده کاربر",
+        responses=ReviewWriteSerializer,
+    ),
+    destroy=extend_schema(
+        summary="حذف نظر کاربر",
+        description="حذف نظر کاربر نظر ثبت شده",
+    ),
+
+)
+@extend_schema(
+    tags=["review"],
+)
 class ReviewViewSet(
     ListModelMixin,
     CreateModelMixin,
-    RetrieveModelMixin,
     UpdateModelMixin,
+    DestroyModelMixin,
     GenericViewSet,
 ):
     """
