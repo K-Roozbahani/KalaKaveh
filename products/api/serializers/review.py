@@ -8,7 +8,10 @@ class ReviewSerializer(serializers.ModelSerializer):
     نمایش نظرات کاربران
     """
 
-    user = serializers.StringRelatedField()
+    user = serializers.CharField(
+        source="user.get_full_name",
+        read_only=True,
+    )
 
     class Meta:
         model = Review
