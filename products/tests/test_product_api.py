@@ -53,7 +53,7 @@ class ProductAPITests(APITestCase):
 
         self.assertEqual(len(response.data["results"]), 1)
 
-        product = response.data[0]
+        product = response.data["results"][0]
 
         self.assertEqual(product["name"], "iPhone 15")
 
