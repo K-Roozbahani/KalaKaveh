@@ -49,7 +49,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
     ordering = ("-created_at",)
 
-    pagination_class = (ProductPagination, )
+    pagination_class = ProductPagination
 
     def get_queryset(self):
         """
