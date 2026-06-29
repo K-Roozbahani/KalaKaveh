@@ -18,6 +18,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
             "id",
             "image",
             "alt_text",
+            "is_primary",
         )
 
         read_only_fields = fields
