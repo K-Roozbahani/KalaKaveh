@@ -35,6 +35,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "discount_amount",
             "final_price",
             "has_stock",
+            "image",
         )
 
         read_only_fields = fields
