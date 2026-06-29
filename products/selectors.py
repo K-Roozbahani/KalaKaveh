@@ -398,13 +398,27 @@ def get_primary_product_image(
 ) -> ProductImage | None:
     """
     دریافت تصویر اصلی محصول
+
+    در صورت نبود تصویر اصلی، اولین تصویر محصول
+    برگردانده می‌شود.
     """
+
+    image = (
+        ProductImage.objects
+        .filter(
+            product=product,
+            is_primary=True,
+        )
+        .first()
+    )
+
+    if image:
+        return image
 
     return (
         ProductImage.objects
         .filter(
             product=product,
-            is_primary=True,
         )
         .first()
     )
@@ -416,13 +430,27 @@ def get_primary_variant_image(
 ) -> VariantImage | None:
     """
     دریافت تصویر اصلی تنوع محصول
+
+    در صورت نبود تصویر اصلی، اولین تصویر تنوع
+    برگردانده می‌شود.
     """
+
+    image = (
+        VariantImage.objects
+        .filter(
+            variant=variant,
+            is_primary=True,
+        )
+        .first()
+    )
+
+    if image:
+        return image
 
     return (
         VariantImage.objects
         .filter(
             variant=variant,
-            is_primary=True,
         )
         .first()
     )
