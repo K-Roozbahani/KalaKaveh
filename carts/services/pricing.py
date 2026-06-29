@@ -1,59 +1,78 @@
 from decimal import Decimal
 
-from discounts.services.discount import (
-    calculate_variant_price,
-)
-
-from discounts.services.coupon import (
-    calculate_coupon_discount,
-)
+from discounts.models import Coupon
+from discounts.services.coupons import calculate_coupon_discount
+from discounts.services.price_engine import calculate_variant_price
 
 
-def calculate_cart_totals(*, cart):
+def calculate_cart_totals(
+    *,
+    cart,
+    coupon: Coupon | None = None,
+) -> dict:
     """
-    محاسبه کامل قیمت سبد خرید (Single Source of Truth)
+    محاسبه خلاصه مالی سبد خرید.
+
+    این سرویس هیچ تغییری در دیتابیس ایجاد نمی‌کند و
+    فقط وضعیت فعلی سبد خرید را محاسبه می‌کند.
+
+    اگر Coupon ارسال شود، صرفاً مبلغ قابل پرداخت را
+    شبیه‌سازی می‌کند و هیچ استفاده‌ای از کوپن ثبت
+    نخواهد شد.
     """
 
     items_count = 0
+
     subtotal = Decimal("0")
     product_discount = Decimal("0")
 
-    for item in cart.items.select_related("variant").all():
+    for item in cart.items.select_related("variant"):
 
-        variant = item.variant
         quantity = item.quantity
+
+        pricing = calculate_variant_price(
+            variant=item.variant,
+        )
 
         items_count += quantity
 
-        pricing = calculate_variant_price(
-            variant=variant,
+        subtotal += (
+            Decimal(pricing.base_price)
+            * quantity
         )
-
-        subtotal += Decimal(str(pricing["price"])) * quantity
 
         product_discount += (
-            Decimal(str(pricing["discount_amount"])) * quantity
+            Decimal(pricing.discount_amount)
+            * quantity
         )
+
+    payable_amount = (
+        subtotal -
+        product_discount
+    )
 
     coupon_discount = Decimal("0")
 
-    if getattr(cart, "coupon", None):
+    if coupon is not None:
 
         coupon_discount = calculate_coupon_discount(
-            coupon=cart.coupon,
-            amount=(subtotal - product_discount),
+            coupon=coupon,
+            amount=payable_amount,
         )
 
-    total = subtotal - product_discount - coupon_discount
-
-    if total < 0:
-        total = Decimal("0")
+    total = max(
+        payable_amount - coupon_discount,
+        Decimal("0"),
+    )
 
     return {
         "items_count": items_count,
         "subtotal": subtotal,
         "product_discount": product_discount,
         "coupon_discount": coupon_discount,
-        "discount": product_discount + coupon_discount,
+        "discount": (
+            product_discount +
+            coupon_discount
+        ),
         "total": total,
     }
