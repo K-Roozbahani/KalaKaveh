@@ -144,7 +144,6 @@ REST_FRAMEWORK = {
 
     # تعیین سیستم احراز هویت پیش‌فرض
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 
