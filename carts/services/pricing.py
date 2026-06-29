@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from discounts.models import Coupon
-from discounts.services.coupons import calculate_coupon_discount
+from discounts.services.coupon import calculate_coupon_discount
 from discounts.services.price_engine import calculate_variant_price
 
 
