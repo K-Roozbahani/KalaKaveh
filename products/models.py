@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
@@ -105,6 +106,19 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(_("عکس"), upload_to='products/images/')
     alt_text = models.CharField(_("متن جایگزین"), max_length=255, blank=True)
+    is_primary = models.BooleanField(
+        default=False,
+        verbose_name=_("تصویر اصلی"),
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product"],
+                condition=Q(is_primary=True),
+                name="unique_primary_product_image",
+            ),
+        ]
 
     def __str__(self):
         return f"Image for {self.product.name}"
@@ -239,6 +253,14 @@ class VariantImage(models.Model):
     class Meta:
         verbose_name = _("تصویر تنوع محصول")
         verbose_name_plural = _("تصاویر تنوع محصول")
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["variant"],
+                condition=Q(is_primary=True),
+                name="unique_primary_variant_image",
+            ),
+        ]
 
     def __str__(self):
         return f"{_('تصویر')} {self.variant.sku}"
