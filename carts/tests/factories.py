@@ -3,12 +3,14 @@ from carts.models import (
     CartItem,
 )
 
+from carts.constants import CartStatus
+
 
 def create_cart(
     *,
     user=None,
     session_key=None,
-    status=Cart.Status.ACTIVE,
+    status=CartStatus.ACTIVE,
 ):
     """
     ایجاد سبد خرید
