@@ -1,10 +1,14 @@
 from django.db import transaction
 
 from carts.constants import CartStatus
-from carts.models import Cart, CartItem
+from carts.models import (
+    Cart,
+    CartItem,
+)
 
-from carts.services.validators import validate_variant_availability
-
+from products.services.stock import (
+    ensure_variant_can_be_purchased,
+)
 
 
 def get_or_create_cart(
@@ -13,10 +17,10 @@ def get_or_create_cart(
     session_key=None,
 ):
     """
-    دریافت یا ساخت سبد فعال
+    دریافت یا ایجاد سبد خرید فعال
     """
 
-    if user:
+    if user is not None:
         cart, _ = Cart.objects.get_or_create(
             user=user,
             status=CartStatus.ACTIVE,
@@ -39,7 +43,7 @@ def add_to_cart(
     quantity,
 ):
     """
-    افزودن محصول به سبد
+    افزودن کالا به سبد خرید
     """
 
     item, created = CartItem.objects.get_or_create(
@@ -51,7 +55,8 @@ def add_to_cart(
     )
 
     if created:
-        validate_variant_availability(
+
+        ensure_variant_can_be_purchased(
             variant=variant,
             quantity=quantity,
         )
@@ -60,33 +65,12 @@ def add_to_cart(
 
     new_quantity = item.quantity + quantity
 
-    validate_variant_availability(
+    ensure_variant_can_be_purchased(
         variant=variant,
         quantity=new_quantity,
     )
 
     item.quantity = new_quantity
-
-    item.save(update_fields=["quantity"])
-
-    return item
-
-
-@transaction.atomic
-def update_cart_item(
-    *,
-    item,
-    quantity,
-):
-    """
-    تغییر تعداد
-    """
-    validate_variant_availability(
-        variant=item.variant,
-        quantity=quantity,
-    )
-
-    item.quantity = quantity
 
     item.save(
         update_fields=[
@@ -99,23 +83,53 @@ def update_cart_item(
 
 
 @transaction.atomic
-def remove_cart_item(item):
+def update_cart_item(
+    *,
+    item,
+    quantity,
+):
     """
-    حذف آیتم
+    بروزرسانی تعداد یک آیتم سبد خرید
+    """
+
+    ensure_variant_can_be_purchased(
+        variant=item.variant,
+        quantity=quantity,
+    )
+
+    item.quantity = quantity
+
+    item.save(
+        update_fields=[
+            "quantity",
+            "updated_at",
+        ],
+    )
+
+    return item
+
+
+@transaction.atomic
+def remove_cart_item(
+    *,
+    item,
+):
+    """
+    حذف یک آیتم از سبد خرید
     """
 
     item.delete()
 
 
-def clear_cart(*, cart: Cart):
+@transaction.atomic
+def clear_cart(
+    *,
+    cart,
+):
     """
-    حذف تمام آیتم‌های سبد خرید.
+    حذف تمام آیتم‌های سبد خرید
     """
 
     cart.items.all().delete()
-
-    cart.coupon = None
-
-    cart.save(update_fields=["coupon"])
 
     return cart
