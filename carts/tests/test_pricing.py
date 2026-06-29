@@ -14,7 +14,7 @@ from products.tests.factories import (
     create_variant,
 )
 
-from accounts.tests.factories import (
+from orders.tests.factories import (
     create_user,
 )
 
