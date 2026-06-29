@@ -9,7 +9,7 @@ from carts.selectors import (
     get_user_active_cart,
 )
 
-from carts.services.totals import (
+from carts.services.pricing import (
     calculate_cart_totals,
 )
 
@@ -88,7 +88,7 @@ def create_order_from_cart(
     )
 
 
-    totals = calculate_cart_totals(cart)
+    totals = calculate_cart_totals(cart=cart)
 
     order = Order.objects.create(
         user=user,
