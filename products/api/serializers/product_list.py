@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from products.models import Product
-from products.selectors import get_default_variant
+from products.selectors import get_default_variant, get_primary_product_image, get_primary_variant_image
 
 from .brand import BrandSerializer
 from .category import CategorySerializer
@@ -19,6 +19,8 @@ class ProductListSerializer(serializers.ModelSerializer):
     discount_amount = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
     has_stock = serializers.SerializerMethodField()
+
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -98,3 +100,14 @@ class ProductListSerializer(serializers.ModelSerializer):
         return (
             variant.is_active and variant.stock > 0
         )
+
+    def get_image(self, obj):
+
+        image = get_primary_product_image(
+            product=obj,
+        )
+
+        if image:
+            return image.image.url
+
+        return None
