@@ -49,7 +49,7 @@ def get_guest_active_cart(session_key):
         get_cart_queryset()
         .filter(
             session_key=session_key,
-            status=Cart.Status.ACTIVE,
+            status=CartStatus.ACTIVE,
         )
         .first()
     )
