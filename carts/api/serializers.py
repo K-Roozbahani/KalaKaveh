@@ -1,30 +1,38 @@
 from rest_framework import serializers
 
-from carts.models import Cart, CartItem
+from carts.models import (
+    Cart,
+    CartItem,
+)
+
+from discounts.services.price_engine import (
+    calculate_variant_price,
+)
+
 from products.models import ProductVariant
 
 
 # ==========================================================
-# Serializer نمایش آیتم سبد خرید
+# Cart Item Serializer
 # ==========================================================
+
 class CartItemSerializer(serializers.ModelSerializer):
     """
     نمایش اطلاعات هر آیتم سبد خرید.
-
-    نکته:
-        قیمت‌ها از ProductVariant خوانده می‌شوند
-        و داخل CartItem ذخیره نمی‌شوند.
     """
 
-    # شناسه Variant
     variant_id = serializers.IntegerField(
         source="variant.id",
         read_only=True,
     )
 
-    # اطلاعات محصول
     product_id = serializers.IntegerField(
         source="variant.product.id",
+        read_only=True,
+    )
+
+    product_name = serializers.CharField(
+        source="variant.product.name",
         read_only=True,
     )
 
@@ -38,37 +46,16 @@ class CartItemSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    product_name = serializers.CharField(
-        source="variant.product.name",
-        read_only=True,
-    )
-
     sku = serializers.CharField(
         source="variant.sku",
         read_only=True,
     )
 
-    # قیمت‌های جاری Variant
-    unit_price = serializers.DecimalField(
-        source="variant.price",
-        max_digits=12,
-        decimal_places=0,
-        read_only=True,
-    )
+    unit_price = serializers.SerializerMethodField()
 
-    discount_amount = serializers.DecimalField(
-        source="variant.discount_amount",
-        max_digits=12,
-        decimal_places=0,
-        read_only=True,
-    )
+    discount_amount = serializers.SerializerMethodField()
 
-    final_price = serializers.DecimalField(
-        source="variant.final_price",
-        max_digits=12,
-        decimal_places=0,
-        read_only=True,
-    )
+    final_price = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
@@ -79,9 +66,9 @@ class CartItemSerializer(serializers.ModelSerializer):
             "variant_id",
 
             "product_id",
+            "product_name",
             "product_category",
             "product_brand",
-            "product_name",
 
             "sku",
 
@@ -92,15 +79,61 @@ class CartItemSerializer(serializers.ModelSerializer):
             "final_price",
         )
 
+    # =====================================================
+    # Price Snapshot Cache
+    # =====================================================
+
+    def _get_price_snapshot(self, obj):
+        """
+        دریافت PriceSnapshot با Cache در سطح Serializer
+        """
+
+        cache = getattr(
+            self,
+            "_price_snapshot_cache",
+            None,
+        )
+
+        if cache is None:
+
+            cache = {}
+
+            self._price_snapshot_cache = cache
+
+        if obj.variant_id not in cache:
+
+            cache[obj.variant_id] = calculate_variant_price(
+                variant=obj.variant,
+            )
+
+        return cache[obj.variant_id]
+
+    def get_unit_price(self, obj):
+
+        return self._get_price_snapshot(
+            obj,
+        ).base_price
+
+    def get_discount_amount(self, obj):
+
+        return self._get_price_snapshot(
+            obj,
+        ).discount_amount
+
+    def get_final_price(self, obj):
+
+        return self._get_price_snapshot(
+            obj,
+        ).final_price
+
 
 # ==========================================================
-# Serializer نمایش سبد خرید
+# Cart Serializer
 # ==========================================================
+
 class CartSerializer(serializers.ModelSerializer):
     """
     نمایش اطلاعات سبد خرید.
-
-    تمام محاسبات مالی توسط Service انجام می‌شود.
     """
 
     items = CartItemSerializer(
@@ -108,44 +141,17 @@ class CartSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    coupon_code = serializers.CharField(
-        source="coupon.code",
-        read_only=True,
-    )
+    items_count = serializers.SerializerMethodField()
 
-    items_count = serializers.IntegerField(
-        read_only=True,
-    )
+    subtotal = serializers.SerializerMethodField()
 
-    subtotal = serializers.DecimalField(
-        max_digits=14,
-        decimal_places=0,
-        read_only=True,
-    )
+    product_discount = serializers.SerializerMethodField()
 
-    product_discount = serializers.DecimalField(
-        max_digits=14,
-        decimal_places=0,
-        read_only=True,
-    )
+    coupon_discount = serializers.SerializerMethodField()
 
-    coupon_discount = serializers.DecimalField(
-        max_digits=14,
-        decimal_places=0,
-        read_only=True,
-    )
+    discount = serializers.SerializerMethodField()
 
-    discount_amount = serializers.DecimalField(
-        max_digits=14,
-        decimal_places=0,
-        read_only=True,
-    )
-
-    total = serializers.DecimalField(
-        max_digits=14,
-        decimal_places=0,
-        read_only=True,
-    )
+    total = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
@@ -153,14 +159,12 @@ class CartSerializer(serializers.ModelSerializer):
         fields = (
             "id",
 
-            "coupon_code",
-
             "items_count",
 
             "subtotal",
             "product_discount",
             "coupon_discount",
-            "discount_amount",
+            "discount",
             "total",
 
             "items",
@@ -169,10 +173,58 @@ class CartSerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
+    # =====================================================
+    # Pricing Cache
+    # =====================================================
+
+    def _get_pricing(self):
+        """
+        دریافت خلاصه مالی سبد خرید
+        """
+
+        pricing = getattr(
+            self,
+            "_pricing",
+            None,
+        )
+
+        if pricing is None:
+
+            pricing = self.context["pricing"]
+
+            self._pricing = pricing
+
+        return pricing
+
+    def get_items_count(self, obj):
+
+        return self._get_pricing()["items_count"]
+
+    def get_subtotal(self, obj):
+
+        return self._get_pricing()["subtotal"]
+
+    def get_product_discount(self, obj):
+
+        return self._get_pricing()["product_discount"]
+
+    def get_coupon_discount(self, obj):
+
+        return self._get_pricing()["coupon_discount"]
+
+    def get_discount(self, obj):
+
+        return self._get_pricing()["discount"]
+
+    def get_total(self, obj):
+
+        return self._get_pricing()["total"]
+
 
 # ==========================================================
-# افزودن کالا به سبد خرید
+# Add Cart Item
 # ==========================================================
+
 class AddCartItemSerializer(serializers.Serializer):
     """
     Serializer افزودن کالا به سبد خرید.
@@ -188,27 +240,11 @@ class AddCartItemSerializer(serializers.Serializer):
         min_value=1,
     )
 
-    def validate(self, attrs):
-
-        variant = attrs["variant"]
-
-        quantity = attrs["quantity"]
-
-        if quantity > variant.stock:
-            raise serializers.ValidationError(
-                {
-                    "quantity": (
-                        "تعداد درخواستی بیشتر از موجودی کالا است."
-                    )
-                }
-            )
-
-        return attrs
-
 
 # ==========================================================
-# تغییر تعداد کالا
+# Update Cart Item
 # ==========================================================
+
 class UpdateCartItemSerializer(serializers.Serializer):
     """
     Serializer تغییر تعداد کالا.
@@ -217,38 +253,3 @@ class UpdateCartItemSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(
         min_value=1,
     )
-
-    def validate_quantity(self, value):
-
-        cart_item = self.context["cart_item"]
-
-        if value > cart_item.variant.stock:
-            raise serializers.ValidationError(
-                "تعداد درخواستی بیشتر از موجودی کالا است."
-            )
-
-        return value
-
-
-# ==========================================================
-# اعمال کد تخفیف
-# ==========================================================
-class ApplyCouponSerializer(serializers.Serializer):
-    """
-    Serializer اعمال کد تخفیف.
-    """
-
-    code = serializers.CharField(
-        max_length=100,
-    )
-
-    def validate_code(self, value):
-
-        value = value.strip().upper()
-
-        if not value:
-            raise serializers.ValidationError(
-                "کد تخفیف معتبر نیست."
-            )
-
-        return value
