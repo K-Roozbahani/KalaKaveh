@@ -387,3 +387,42 @@ def get_variant_images(
             variant_id=variant_id,
         )
     )
+
+# =====================================================
+# Primary Images
+# =====================================================
+
+def get_primary_product_image(
+    *,
+    product,
+) -> ProductImage | None:
+    """
+    دریافت تصویر اصلی محصول
+    """
+
+    return (
+        ProductImage.objects
+        .filter(
+            product=product,
+            is_primary=True,
+        )
+        .first()
+    )
+
+
+def get_primary_variant_image(
+    *,
+    variant,
+) -> VariantImage | None:
+    """
+    دریافت تصویر اصلی تنوع محصول
+    """
+
+    return (
+        VariantImage.objects
+        .filter(
+            variant=variant,
+            is_primary=True,
+        )
+        .first()
+    )
