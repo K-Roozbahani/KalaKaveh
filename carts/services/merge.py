@@ -4,12 +4,19 @@ from carts.models import CartItem
 
 
 @transaction.atomic
-def merge_guest_cart(*, guest_cart, user_cart):
+def merge_guest_cart(
+    *,
+    guest_cart,
+    user_cart,
+):
     """
-    ادغام سبد مهمان با سبد کاربر.
+    ادغام سبد خرید مهمان با سبد خرید کاربر.
 
-    در صورت وجود کالا در هر دو سبد، تعدادها با هم
-    جمع می‌شوند اما از موجودی کالا بیشتر نخواهند شد.
+    اگر یک کالا در هر دو سبد وجود داشته باشد،
+    تعداد آن‌ها با هم جمع می‌شود اما از موجودی
+    فعلی کالا بیشتر نخواهد شد.
+
+    کالاهای بدون موجودی از سبد مهمان حذف می‌شوند.
     """
 
     guest_items = guest_cart.items.select_related(
@@ -18,25 +25,24 @@ def merge_guest_cart(*, guest_cart, user_cart):
 
     for guest_item in guest_items:
 
-        user_item = CartItem.objects.filter(
-            cart=user_cart,
-            variant=guest_item.variant,
-        ).first()
+        variant = guest_item.variant
 
-        if guest_item.variant.stock <= 0:
+        if variant.stock <= 0:
             guest_item.delete()
-
             continue
 
-        if not user_item:
+        user_item = CartItem.objects.filter(
+            cart=user_cart,
+            variant=variant,
+        ).first()
 
-            quantity = min(
-                guest_item.quantity,
-                guest_item.variant.stock,
-            )
+        if user_item is None:
 
             guest_item.cart = user_cart
-            guest_item.quantity = quantity
+            guest_item.quantity = min(
+                guest_item.quantity,
+                variant.stock,
+            )
 
             guest_item.save(
                 update_fields=[
@@ -47,20 +53,17 @@ def merge_guest_cart(*, guest_cart, user_cart):
 
             continue
 
-        merged_quantity = (
-            user_item.quantity
-            + guest_item.quantity
+        user_item.quantity = min(
+            user_item.quantity +
+            guest_item.quantity,
+            variant.stock,
         )
-
-        merged_quantity = min(
-            merged_quantity,
-            guest_item.variant.stock,
-        )
-
-        user_item.quantity = merged_quantity
 
         user_item.save(
-            update_fields=["quantity"],
+            update_fields=[
+                "quantity",
+                "updated_at",
+            ],
         )
 
         guest_item.delete()
