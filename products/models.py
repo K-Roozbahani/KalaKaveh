@@ -120,6 +120,17 @@ class ProductImage(models.Model):
             ),
         ]
 
+    def save(self, *args, **kwargs):
+        if self.is_primary:
+            (
+                ProductImage.objects
+                .filter(product=self.product)
+                .exclude(pk=self.pk)
+                .update(is_primary=False)
+            )
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Image for {self.product.name}"
 
@@ -261,6 +272,19 @@ class VariantImage(models.Model):
                 name="unique_primary_variant_image",
             ),
         ]
+
+    def save(self, *args, **kwargs):
+        if self.is_primary:
+            (
+                VariantImage.objects
+                .filter(product=self.variant)
+                .exclude(pk=self.pk)
+                .update(is_primary=False)
+            )
+
+        super().save(*args, **kwargs)
+
+
 
     def __str__(self):
         return f"{_('تصویر')} {self.variant.sku}"
