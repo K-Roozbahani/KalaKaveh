@@ -1,23 +1,28 @@
-from tabnanny import verbose
-
 from rest_framework import serializers
 
 from carts.models import Cart, CartItem
 from products.models import ProductVariant
 
 
-# ==========================================
+# ==========================================================
 # Serializer نمایش آیتم سبد خرید
-# ==========================================
+# ==========================================================
 class CartItemSerializer(serializers.ModelSerializer):
     """
-    نمایش اطلاعات هر آیتم سبد خرید
+    نمایش اطلاعات هر آیتم سبد خرید.
 
     نکته:
-    قیمت‌ها از ProductVariant خوانده می‌شوند
-    و داخل CartItem ذخیره نمی‌شوند.
+        قیمت‌ها از ProductVariant خوانده می‌شوند
+        و داخل CartItem ذخیره نمی‌شوند.
     """
 
+    # شناسه Variant
+    variant_id = serializers.IntegerField(
+        source="variant.id",
+        read_only=True,
+    )
+
+    # اطلاعات محصول
     product_id = serializers.IntegerField(
         source="variant.product.id",
         read_only=True,
@@ -33,7 +38,6 @@ class CartItemSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-
     product_name = serializers.CharField(
         source="variant.product.name",
         read_only=True,
@@ -44,6 +48,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    # قیمت‌های جاری Variant
     unit_price = serializers.DecimalField(
         source="variant.price",
         max_digits=12,
@@ -71,42 +76,31 @@ class CartItemSerializer(serializers.ModelSerializer):
         fields = (
             "id",
 
-            # تنوع محصول انتخاب شده
-            "variant",
+            "variant_id",
 
-            # اطلاعات نمایشی محصول
             "product_id",
             "product_category",
             "product_brand",
             "product_name",
+
             "sku",
 
-            # تعداد انتخاب شده
             "quantity",
 
-            # قیمت‌های جاری
             "unit_price",
             "discount_amount",
             "final_price",
         )
 
 
-# ==========================================
-# Serializer نمایش کل سبد خرید
-# ==========================================
+# ==========================================================
+# Serializer نمایش سبد خرید
+# ==========================================================
 class CartSerializer(serializers.ModelSerializer):
     """
-    نمایش سبد خرید
+    نمایش اطلاعات سبد خرید.
 
-    مقادیر زیر از Service یا Selector
-    توسط annotate یا context تامین می‌شوند:
-
-        items_count
-        subtotal
-        discount
-        total
-
-    بنابراین هیچ محاسبه‌ای داخل Serializer انجام نمی‌شود.
+    تمام محاسبات مالی توسط Service انجام می‌شود.
     """
 
     items = CartItemSerializer(
@@ -129,7 +123,19 @@ class CartSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    discount = serializers.DecimalField(
+    product_discount = serializers.DecimalField(
+        max_digits=14,
+        decimal_places=0,
+        read_only=True,
+    )
+
+    coupon_discount = serializers.DecimalField(
+        max_digits=14,
+        decimal_places=0,
+        read_only=True,
+    )
+
+    discount_amount = serializers.DecimalField(
         max_digits=14,
         decimal_places=0,
         read_only=True,
@@ -149,13 +155,14 @@ class CartSerializer(serializers.ModelSerializer):
 
             "coupon_code",
 
-            # خلاصه سبد
             "items_count",
+
             "subtotal",
-            "discount",
+            "product_discount",
+            "coupon_discount",
+            "discount_amount",
             "total",
 
-            # آیتم‌ها
             "items",
 
             "created_at",
@@ -163,23 +170,18 @@ class CartSerializer(serializers.ModelSerializer):
         )
 
 
-# ==========================================
-# افزودن کالا به سبد
-# ==========================================
+# ==========================================================
+# افزودن کالا به سبد خرید
+# ==========================================================
 class AddCartItemSerializer(serializers.Serializer):
     """
-    ورودی API:
-
-    POST /cart/items/
-
-    {
-        "variant_id": 1,
-        "quantity": 2
-    }
+    Serializer افزودن کالا به سبد خرید.
     """
 
     variant = serializers.PrimaryKeyRelatedField(
-        queryset=ProductVariant.objects.all(),
+        queryset=ProductVariant.objects.filter(
+            is_active=True,
+        ),
     )
 
     quantity = serializers.IntegerField(
@@ -187,33 +189,29 @@ class AddCartItemSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        """
-        بررسی موجودی محصول قبل از افزودن به سبد.
-        """
 
         variant = attrs["variant"]
+
         quantity = attrs["quantity"]
 
         if quantity > variant.stock:
             raise serializers.ValidationError(
                 {
-                    "quantity": "تعداد درخواستی بیشتر از موجودی کالا است."
+                    "quantity": (
+                        "تعداد درخواستی بیشتر از موجودی کالا است."
+                    )
                 }
             )
 
         return attrs
 
 
-# ==========================================
+# ==========================================================
 # تغییر تعداد کالا
-# ==========================================
+# ==========================================================
 class UpdateCartItemSerializer(serializers.Serializer):
     """
-    PATCH /cart/items/{id}/
-
-    {
-        "quantity": 5
-    }
+    Serializer تغییر تعداد کالا.
     """
 
     quantity = serializers.IntegerField(
@@ -221,9 +219,6 @@ class UpdateCartItemSerializer(serializers.Serializer):
     )
 
     def validate_quantity(self, value):
-        """
-        بررسی موجودی هنگام تغییر تعداد.
-        """
 
         cart_item = self.context["cart_item"]
 
@@ -235,16 +230,12 @@ class UpdateCartItemSerializer(serializers.Serializer):
         return value
 
 
-# ==========================================
+# ==========================================================
 # اعمال کد تخفیف
-# ==========================================
+# ==========================================================
 class ApplyCouponSerializer(serializers.Serializer):
     """
-    POST /cart/apply-coupon/
-
-    {
-        "code": "WELCOME20"
-    }
+    Serializer اعمال کد تخفیف.
     """
 
     code = serializers.CharField(
@@ -252,18 +243,6 @@ class ApplyCouponSerializer(serializers.Serializer):
     )
 
     def validate_code(self, value):
-        """
-        اعتبارسنجی اولیه کد تخفیف
-
-        اعتبارسنجی کامل شامل:
-            - فعال بودن
-            - تاریخ شروع
-            - تاریخ پایان
-            - سقف استفاده
-            - تعداد استفاده کاربر
-
-        بهتر است در Service انجام شود.
-        """
 
         value = value.strip().upper()
 

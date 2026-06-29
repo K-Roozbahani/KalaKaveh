@@ -15,7 +15,7 @@ from carts.tests.factories import (
     create_cart_item,
 )
 
-from accounts.tests.factories import create_user
+from orders.tests.factories import create_user
 from products.tests.factories import create_variant
 
 
