@@ -75,6 +75,15 @@ class Order(models.Model):
         verbose_name=_("مبلغ نهایی"),
     )
 
+    coupon = models.ForeignKey(
+        "Coupon",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders",
+        verbose_name=_("کوپن"),
+    )
+
     note = models.TextField(
         blank=True,
         verbose_name=_("یادداشت مشتری"),
