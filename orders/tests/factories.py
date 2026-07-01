@@ -66,6 +66,7 @@ def create_order(user=None, shipping_method=None, **kwargs):
             "subtotal",
             100000,
         ),
+        coupon=kwargs.get("coupon"),
         discount_amount=kwargs.get(
             "discount_amount",
             0,
