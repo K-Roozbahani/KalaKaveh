@@ -181,3 +181,24 @@ def mark_as_delivered(
     return shipment
 
 
+def get_or_create_shipment(*, order) -> Shipment:
+    """
+    اطمینان از وجود Shipment برای سفارش.
+
+    اگر Shipment قبلاً ایجاد شده باشد، همان برگردانده می‌شود.
+    در غیر این صورت Shipment جدید ایجاد خواهد شد.
+    """
+
+    shipment = get_shipment_by_order(
+        order=order,
+    )
+
+    if shipment is not None:
+        return shipment
+
+    return create_shipment_for_order(
+        order=order,
+        shipping_method=order.shipping_method,
+    )
+
+
