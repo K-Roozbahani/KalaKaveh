@@ -20,8 +20,7 @@ from shipping.models import Shipment
 from shipping.tests.factories import create_shipping_method, create_shipment
 
 from .factories import create_payment as create_payment_factory
-
-
+from ..services.callback import process_gateway_callback
 
 
 class PaymentServicesTestCase(TestCase):
@@ -189,7 +188,7 @@ class PaymentServicesTestCase(TestCase):
             "ref_id": "987654",
         }
 
-        result = verify_payment(
+        result = process_gateway_callback(
             authority="AUTH-123",
         )
 
@@ -215,7 +214,7 @@ class PaymentServicesTestCase(TestCase):
         with self.assertRaises(
             ValidationError,
         ):
-            verify_payment(
+            process_gateway_callback(
                 authority="INVALID",
             )
 
@@ -261,7 +260,7 @@ class PaymentServicesTestCase(TestCase):
             "ref_id": "REF-123",
         }
 
-        verify_payment(
+        process_gateway_callback(
             authority=payment.authority,
         )
 
@@ -293,7 +292,7 @@ class PaymentServicesTestCase(TestCase):
             "ref_id": "REF-123",
         }
 
-        verify_payment(
+        process_gateway_callback(
             authority=payment.authority,
         )
 
