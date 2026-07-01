@@ -73,6 +73,11 @@ class OrderDetailSerializer(OrderBaseSerializer):
     Order detail serializer.
     """
 
+    coupon = serializers.CharField(
+        source="coupon.code",
+        read_only=True,
+    )
+
     items = OrderItemSerializer(
         many=True,
         read_only=True,
@@ -87,6 +92,7 @@ class OrderDetailSerializer(OrderBaseSerializer):
             "address_snapshot",
 
             "subtotal",
+            "coupon",
             "discount_amount",
             "shipping_method_snapshot",
             "shipping_method_name",
@@ -123,6 +129,12 @@ class CreateOrderSerializer(serializers.Serializer):
         min_value=1,
     )
     shipping_method_id = serializers.IntegerField(
+        min_value=1,
+    )
+
+    coupon_id = serializers.IntegerField(
+        required=False,
+        allow_null=True,
         min_value=1,
     )
 
