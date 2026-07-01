@@ -11,7 +11,10 @@ def get_order_queryset():
 
     return (
         Order.objects
-        .select_related("user")
+        .select_related(
+            "user",
+            "coupon",
+        )
         .prefetch_related(
             Prefetch(
                 "items",
