@@ -12,6 +12,7 @@ from carts.selectors import (
 from carts.services.pricing import (
     calculate_cart_totals,
 )
+from discounts.models import Coupon
 
 from orders.models import (
     Order,
@@ -52,6 +53,7 @@ def create_order_from_cart(
     user,
     address_id,
     shipping_method_id,
+    coupon : Coupon = None,
     note="",
 ):
     cart = get_user_active_cart(user)
