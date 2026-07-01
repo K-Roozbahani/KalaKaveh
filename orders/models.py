@@ -76,7 +76,7 @@ class Order(models.Model):
     )
 
     coupon = models.ForeignKey(
-        "Coupon",
+        "discounts.Coupon",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
