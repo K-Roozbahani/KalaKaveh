@@ -36,6 +36,7 @@ class OrderAdmin(admin.ModelAdmin):
         "status",
         "subtotal",
         "discount_amount",
+        "coupon",
         "shipping_method",
         "shipping_cost",
         "total_amount",
@@ -58,6 +59,7 @@ class OrderAdmin(admin.ModelAdmin):
         "order_number",
         "address_snapshot",
         "subtotal",
+        "coupon",
         "discount_amount",
         "shipping_cost",
         "total_amount",
@@ -81,6 +83,7 @@ class OrderAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "subtotal",
+                    "coupon",
                     "discount_amount",
                     "shipping_cost",
                     "total_amount",
