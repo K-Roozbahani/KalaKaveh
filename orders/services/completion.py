@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils import timezone
 
 from discounts.services.coupon import register_coupon_usage
 
@@ -6,6 +7,7 @@ from orders.models import Order
 from orders.services.status import mark_order_confirmed
 
 from payments.models import Payment
+from shipping.services import get_or_create_shipment
 
 
 # =====================================================
@@ -39,6 +41,8 @@ def complete_paid_order(
             user=order.user,
             order=order,
         )
+
+    get_or_create_shipment(order=order)
 
     # -------------------------------------------------
     # Future Hooks
