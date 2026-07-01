@@ -50,11 +50,11 @@ def change_order_status(order: Order, new_status: str) -> Order:
     order.status = new_status
 
     # ثبت زمان تکمیل سفارش
-    if new_status == OrderStatus.COMPLETED:
-        order.completed_at = timezone.now()
-        update_fields.append("completed_at")
-
-    order.save(update_fields=update_fields)
+    # if new_status == OrderStatus.COMPLETED:
+    #     order.paid_at = timezone.now()
+    #     update_fields.append("paid_at")
+    #
+    # order.save(update_fields=update_fields)
 
     return order
 
@@ -67,11 +67,20 @@ def mark_order_confirmed(order: Order) -> Order:
     """
     تایید سفارش
     """
-
-    return change_order_status(
+    change_order_status(
         order,
         OrderStatus.CONFIRMED,
     )
+
+    if order.paid_at is None:
+        order.paid_at = timezone.now()
+        order.save(
+            update_fields=[
+                "paid_at",
+            ]
+        )
+
+    return order
 
 
 def mark_order_processing(order: Order) -> Order:
