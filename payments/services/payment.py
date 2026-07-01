@@ -92,11 +92,6 @@ def mark_payment_success(payment: Payment, ref_id: str) -> Payment:
         "paid_at",
     ])
 
-    # آپدیت Order
-    order = payment.order
-    order.paid_at = payment.paid_at
-    order.save(update_fields=["paid_at"])
-
     return payment
 
 
@@ -141,21 +136,21 @@ def verify_payment(*, authority):
         ]
     )
 
-    order = payment.order
-
-    if order.paid_at is None:
-        order.paid_at = timezone.now()
-        order.save(update_fields=["paid_at"])
-
-    shipment = get_shipment_by_order(
-        order=order,
-    )
-
-    if shipment is None:
-        create_shipment(
-            order=order,
-            shipping_method=order.shipping_method,
-        )
+    # order = payment.order
+    #
+    # if order.paid_at is None:
+    #     order.paid_at = timezone.now()
+    #     order.save(update_fields=["paid_at"])
+    #
+    # shipment = get_shipment_by_order(
+    #     order=order,
+    # )
+    #
+    # if shipment is None:
+    #     create_shipment(
+    #         order=order,
+    #         shipping_method=order.shipping_method,
+    #     )
 
     return payment
 
