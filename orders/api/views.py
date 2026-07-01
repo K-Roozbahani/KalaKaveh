@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from utils.permissions import IsOwnerOrAdmin
 
-from orders.serializers import (
+from orders.api.serializers import (
     CreateOrderSerializer,
     OrderDetailSerializer,
     OrderItemSerializer,
