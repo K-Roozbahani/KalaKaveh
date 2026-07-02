@@ -34,19 +34,13 @@ class OrderCompletionServiceTest(TestCase):
         payment = create_payment(
             order=order,
         )
-        print("stage: test_complete_order_without_coupon"
-            f"\norder: {order.status}\n")
+
         complete_paid_order(
             order=order,
             payment=payment,
         )
-        print("stage: test_complete_order_without_coupon before"
-              f"\norder: {order.status}\n")
 
         order.refresh_from_db()
-        print("stage: test_complete_order_without_coupon after"
-              f"\norder: {order.status}\n"
-              "status:", OrderStatus.CONFIRMED)
 
         self.assertEqual(
             order.status,

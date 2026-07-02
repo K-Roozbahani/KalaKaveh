@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.utils import timezone
 
 from shipping.constants import ShipmentStatus
@@ -15,7 +17,7 @@ def create_shipping_method(**kwargs):
         ),
         code=kwargs.get(
             "code",
-            f"POST-{int(timezone.now().timestamp())}"
+            f"POST-{uuid4()}",
         ),
         price=kwargs.get(
             "price",

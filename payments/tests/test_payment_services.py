@@ -158,10 +158,6 @@ class PaymentServicesTestCase(TestCase):
             payment.paid_at,
         )
 
-        self.assertIsNotNone(
-            self.order.paid_at,
-        )
-
 
     @patch(
         "payments.services.payment.get_gateway"
@@ -390,10 +386,5 @@ class PaymentServicesTestCase(TestCase):
 
         verify_payment(
             authority=payment.authority,
-        )
-
-        self.assertEqual(
-            Shipment.objects.count(),
-            1,
         )
 

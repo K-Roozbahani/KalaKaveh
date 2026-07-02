@@ -245,8 +245,6 @@ class CartItemAPIViewTests(CartAPITestCase):
                 "quantity": 5,
             },
         )
-        print("\nresponse.status_code:", response.status_code)
-        print("\nresponse.data:", response.data, "\n")
 
         self.assertEqual(
             response.status_code,

@@ -20,10 +20,11 @@ from shipping.tests.factories import (
 
 
 class ShippingMethodSelectorTest(TestCase):
+    def setUp(self):
+        self.shipping_method = create_shipping_method()
+
     def test_get_shipping_method_queryset(self):
-        shipping_method = (
-            create_shipping_method()
-        )
+        shipping_method=self.shipping_method
 
         queryset = (
             get_shipping_method_queryset()
@@ -63,11 +64,7 @@ class ShippingMethodSelectorTest(TestCase):
         )
 
     def test_get_active_shipping_methods(self):
-        active_method = (
-            create_shipping_method(
-                is_active=True,
-            )
-        )
+        active_method = self.shipping_method
 
         create_shipping_method(
             is_active=False,

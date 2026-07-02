@@ -76,7 +76,7 @@ class PaymentViewSet(
 
         callback_url = request.build_absolute_uri(
             reverse(
-                "payments:callback",
+                "payment-callback",
             )
         )
 
