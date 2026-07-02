@@ -53,8 +53,8 @@ def change_order_status(order: Order, new_status: str) -> Order:
     # if new_status == OrderStatus.COMPLETED:
     #     order.paid_at = timezone.now()
     #     update_fields.append("paid_at")
-    #
-    # order.save(update_fields=update_fields)
+
+    order.save(update_fields=update_fields)
 
     return order
 
