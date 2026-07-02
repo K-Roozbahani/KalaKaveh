@@ -13,7 +13,7 @@ from orders.selectors import get_user_order_by_number
 
 from payments.selectors import get_user_payments
 
-from payments.serializers import (
+from payments.api.serializers import (
     PaymentCreateSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,

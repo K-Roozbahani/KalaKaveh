@@ -6,7 +6,7 @@ from payments.constants import (
     GatewayType,
     PaymentStatus,
 )
-from payments.serializers import (
+from payments.api.serializers import (
     PaymentCreateSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
