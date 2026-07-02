@@ -1,6 +1,7 @@
 from django.test import TestCase
 from unittest.mock import patch
 
+from payments.services.callback import process_gateway_callback
 from users.models import User
 
 from addresses.models import (
@@ -146,7 +147,7 @@ class CheckoutFlowTest(TestCase):
 
         payment = result["payment"]
 
-        verify_payment(
+        process_gateway_callback(
             authority=payment.authority,
         )
 
