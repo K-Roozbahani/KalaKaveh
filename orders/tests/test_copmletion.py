@@ -34,13 +34,19 @@ class OrderCompletionServiceTest(TestCase):
         payment = create_payment(
             order=order,
         )
-
+        print("stage: test_complete_order_without_coupon"
+            f"\norder: {order.status}\n")
         complete_paid_order(
             order=order,
             payment=payment,
         )
+        print("stage: test_complete_order_without_coupon before"
+              f"\norder: {order.status}\n")
 
         order.refresh_from_db()
+        print("stage: test_complete_order_without_coupon after"
+              f"\norder: {order.status}\n"
+              "status:", OrderStatus.CONFIRMED)
 
         self.assertEqual(
             order.status,
@@ -139,4 +145,53 @@ class OrderCompletionServiceTest(TestCase):
         self.assertEqual(
             order.status,
             OrderStatus.PENDING,
+        )
+
+    @patch("orders.services.completion.register_coupon_usage")
+    def test_not_register_coupon_usage_when_order_has_no_coupon(
+        self,
+        mock_register_coupon_usage,
+    ):
+        order = create_order(
+            shipping_method=self.shipping_method,
+            coupon=None,
+        )
+
+        payment = create_payment(
+            order=order,
+        )
+
+        complete_paid_order(
+            order=order,
+            payment=payment,
+        )
+
+        mock_register_coupon_usage.assert_not_called()
+
+
+    @patch("orders.services.completion.register_coupon_usage")
+    def test_register_coupon_usage_when_order_has_coupon(
+            self,
+            mock_register_coupon_usage,
+    ):
+        coupon = create_coupon()
+
+        order = create_order(
+            shipping_method=self.shipping_method,
+            coupon=coupon,
+        )
+
+        payment = create_payment(
+            order=order,
+        )
+
+        complete_paid_order(
+            order=order,
+            payment=payment,
+        )
+
+        mock_register_coupon_usage.assert_called_once_with(
+            coupon=coupon,
+            user=order.user,
+            order=order,
         )
