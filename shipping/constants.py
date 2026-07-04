@@ -9,13 +9,3 @@ class ShipmentStatus(models.TextChoices):
     DELIVERED = "DELIVERED", _("تحویل شده")
     RETURNED = "RETURNED", _("مرجوع شده")
     CANCELED = "CANCELED", _("لغو شده")
-
-
-class ShippingRuleAttribute(models.TextChoices):
-    """
-    ویژگی قانون ارسال
-    """
-
-    DEFAULT = "default", _("پیش‌فرض")
-    HEAVY = "heavy", _("کالای سنگین")
-    FRAGILE = "fragile", _("کالای شکننده")
