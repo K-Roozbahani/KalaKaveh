@@ -97,7 +97,10 @@ def create_order_from_cart(
     )
 
 
-    totals = calculate_cart_totals(cart=cart)
+    totals = calculate_cart_totals(
+        cart=cart,
+        coupon=coupon,
+    )
 
     order = Order.objects.create(
         user=user,
