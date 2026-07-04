@@ -1,7 +1,7 @@
 from shipping.selectors import get_active_shipping_methods
 
 
-def get_available_shipping_methods_for_order(
+def get_available_shipping_methods(
 
     *,
 
@@ -20,4 +20,4 @@ def get_available_shipping_methods_for_order(
     اعمال خواهند شد.
     """
 
-    return get_active_shipping_methods()
+    return get_active_shipping_methods().order_by("price", "id")
