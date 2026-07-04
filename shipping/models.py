@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from shipping.constants import ShipmentStatus
+from shipping.constants import ShipmentStatus, ShippingRuleAttribute
 from shipping.managers import ShippingMethodQuerySet, ShipmentQuerySet
 
 class ShippingMethod(models.Model):
@@ -16,13 +16,13 @@ class ShippingMethod(models.Model):
         unique=True,
     )
 
-    price = models.PositiveIntegerField(
-        verbose_name=_("هزینه ارسال"),
-    )
-
-    estimated_days = models.PositiveSmallIntegerField(
-        verbose_name=_("زمان تقریبی تحویل (روز)"),
-    )
+    # price = models.PositiveIntegerField(
+    #     verbose_name=_("هزینه ارسال"),
+    # )
+    #
+    # estimated_days = models.PositiveSmallIntegerField(
+    #     verbose_name=_("زمان تقریبی تحویل (روز)"),
+    # )
 
     is_active = models.BooleanField(
         verbose_name=_("فعال"),
@@ -115,4 +115,78 @@ class Shipment(models.Model):
 
     def __str__(self):
         return f"Shipment - {self.order.order_number}"
+
+
+class ShippingRule(models.Model):
+    """
+    قانون ارسال
+
+    هر Rule مشخص می‌کند که برای یک روش ارسال،
+    در چه منطقه‌ای و با چه شرایطی، چه هزینه‌ای دریافت شود.
+    """
+
+    shipping_method = models.ForeignKey(
+        ShippingMethod,
+        verbose_name=_("روش ارسال"),
+        on_delete=models.CASCADE,
+        related_name="rules",
+    )
+
+    province = models.ForeignKey(
+        "addresses.Province",
+        verbose_name=_("استان"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="shipping_rules",
+    )
+
+    city = models.ForeignKey(
+        "addresses.City",
+        verbose_name=_("شهر"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="shipping_rules",
+    )
+
+    rule_type = models.CharField(
+        verbose_name=_("نوع قانون"),
+        max_length=20,
+        choices=ShippingRuleAttribute.choices,
+        default=ShippingRuleAttribute.DEFAULT,
+    )
+
+    price = models.PositiveIntegerField(
+        _("هزینه ارسال"),
+    )
+
+    estimated_days = models.PositiveSmallIntegerField(
+        _("مدت تقریبی ارسال (روز)"),
+        default=1,
+    )
+
+    priority = models.PositiveSmallIntegerField(
+        _("اولویت"),
+        default=100,
+        help_text=_("اعداد کمتر اولویت بالاتری دارند."),
+    )
+
+    is_active = models.BooleanField(
+        _("فعال"),
+        default=True,
+    )
+
+    class Meta:
+        verbose_name = _("قانون ارسال")
+        verbose_name_plural = _("قوانین ارسال")
+        ordering = (
+            "priority",
+            "id",
+        )
+
+    def __str__(self):
+        location = self.city or self.province or _("سراسری")
+
+        return f"{self.shipping_method} - {location}"
 
