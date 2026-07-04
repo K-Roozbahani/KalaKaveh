@@ -94,6 +94,10 @@ class OrderViewSet(
             serializer.data,
         )
 
+    @action(
+        detail=True,
+        methods=["get"],
+    )
     def items(self, request, *args, **kwargs):
         order = get_user_order_by_number(
             request.user,
