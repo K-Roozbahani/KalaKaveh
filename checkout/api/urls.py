@@ -10,7 +10,7 @@ router = DefaultRouter()
 router.register(
     "",
     CheckoutViewSet,
-    basename="",
+    basename="checkout",
 )
 
 urlpatterns = router.urls
