@@ -45,7 +45,7 @@ def get_address_by_id(*,
     """
     if addresses is not None:
         return (
-            addresses.filter(address_id=address_id).first()
+            addresses.filter(id=address_id).first()
         )
 
     return (
