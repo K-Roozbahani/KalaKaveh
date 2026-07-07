@@ -1,4 +1,5 @@
 from rest_framework.mixins import ListModelMixin
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
 from products.api.serializers import CategorySerializer
@@ -25,6 +26,7 @@ class CategoryViewSet(ListModelMixin, GenericViewSet):
     API دسته‌بندی‌ها
     """
 
+    authentication_classes = [AllowAny]
     serializer_class = CategorySerializer
     lookup_field = "slug"
 
