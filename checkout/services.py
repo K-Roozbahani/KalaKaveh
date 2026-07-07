@@ -83,7 +83,9 @@ def prepare_checkout(
     cart = get_user_active_cart(user)
 
     addresses = get_user_addresses(user=user)
-    if address_id is not None:
+    if addresses.first() is None:
+        address = None
+    elif address_id is not None:
         address = get_address_by_id(
             address_id=address_id,
             addresses=addresses,
