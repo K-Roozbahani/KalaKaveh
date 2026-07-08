@@ -5,7 +5,7 @@ from shipping.constants import (
     ShipmentStatus,
 )
 
-from shipping.services import (
+from shipping.services.shipment import (
     assign_tracking_code,
     change_shipment_status,
     create_shipment_for_order,

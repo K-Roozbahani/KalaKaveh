@@ -13,6 +13,7 @@ from carts.services.pricing import (
     calculate_cart_totals,
 )
 from discounts.models import Coupon
+from discounts.services.coupon import validate_coupon
 
 from orders.models import (
     Order,
@@ -64,6 +65,12 @@ def create_order_from_cart(
     validate_cart_not_empty(cart)
     validate_cart_stock(cart)
 
+    if not coupon is None:
+        validate_coupon(
+            user=user,
+            coupon=coupon,
+        )
+
     address = get_address_by_id(
         address_id=address_id,
     )
@@ -90,7 +97,10 @@ def create_order_from_cart(
     )
 
 
-    totals = calculate_cart_totals(cart=cart)
+    totals = calculate_cart_totals(
+        cart=cart,
+        coupon=coupon,
+    )
 
     order = Order.objects.create(
         user=user,
@@ -100,6 +110,7 @@ def create_order_from_cart(
         address_snapshot=build_address_snapshot(
             address
         ),
+        coupon= coupon,
 
         subtotal=totals["subtotal"],
         discount_amount=totals["discount"],

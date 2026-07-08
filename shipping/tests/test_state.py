@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from orders.tests.factories import create_order, create_user
 from shipping.constants import ShipmentStatus
-from shipping.services import create_shipment_for_order
+from shipping.services.shipment import create_shipment_for_order
 from shipping.state import (
     can_transition,
     transition_status,

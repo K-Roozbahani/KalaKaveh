@@ -1,3 +1,4 @@
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import  GenericViewSet
 from rest_framework.mixins import ListModelMixin
 
@@ -25,7 +26,7 @@ class BrandViewSet(ListModelMixin, GenericViewSet):
     """
     API برندها
     """
-
+    authentication_classes = [AllowAny]
     serializer_class = BrandSerializer
     lookup_field = "slug"
 

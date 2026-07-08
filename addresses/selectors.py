@@ -1,3 +1,5 @@
+from django.db.models import QuerySet
+
 from addresses.models import Address, Province, City
 
 def get_user_addresses(*, user):
@@ -13,10 +15,18 @@ def get_user_addresses(*, user):
     )
 
 
-def get_default_address(*, user):
+def get_default_address(*, user,
+                        addresses: QuerySet | None = None
+                        ):
     """
     دریافت آدرس پیش‌فرض کاربر
     """
+    if addresses is not None:
+        return (
+            addresses
+            .filter(is_default=True)
+            .first()
+        )
 
     return (
         Address.objects
@@ -26,10 +36,17 @@ def get_default_address(*, user):
     )
 
 
-def get_address_by_id(*, address_id: int):
+def get_address_by_id(*,
+                      address_id: int,
+                      addresses: QuerySet | None = None,
+                      ):
     """
     دریافت یک آدرس متعلق به کاربر (security safe)
     """
+    if addresses is not None:
+        return (
+            addresses.filter(id=address_id).first()
+        )
 
     return (
         Address.objects

@@ -27,7 +27,6 @@ from orders.services import (
 class OrderViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
     viewsets.GenericViewSet,
 ):
     permission_classes = (
@@ -95,34 +94,6 @@ class OrderViewSet(
             serializer.data,
         )
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(
-            data=request.data,
-        )
-
-        serializer.is_valid(
-            raise_exception=True,
-        )
-
-        order = create_order_from_cart(
-            user=request.user,
-            address_id=serializer.validated_data["address_id"],
-            shipping_method_id=serializer.validated_data["shipping_method_id"],
-            note=serializer.validated_data.get(
-                "note",
-                "",
-            ),
-        )
-
-        response_serializer = OrderDetailSerializer(
-            order,
-        )
-
-        return Response(
-            response_serializer.data,
-            status=status.HTTP_201_CREATED,
-        )
-
     @action(
         detail=True,
         methods=["get"],
@@ -146,27 +117,6 @@ class OrderViewSet(
         serializer = OrderItemSerializer(
             get_order_items(order),
             many=True,
-        )
-
-        return Response(
-            serializer.data,
-        )
-
-    @action(
-        detail=False,
-        methods=["get"],
-    )
-    def latest(self, request, *args, **kwargs):
-        order = self.get_queryset().first()
-
-        if not order:
-            return Response(
-                {},
-                status=status.HTTP_204_NO_CONTENT,
-            )
-
-        serializer = OrderDetailSerializer(
-            order,
         )
 
         return Response(

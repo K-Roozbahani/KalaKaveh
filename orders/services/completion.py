@@ -7,7 +7,7 @@ from orders.models import Order
 from orders.services.status import mark_order_confirmed
 
 from payments.models import Payment
-from shipping.services import get_or_create_shipment
+from shipping.services.shipment import get_or_create_shipment
 
 
 # =====================================================
