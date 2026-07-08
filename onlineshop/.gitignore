@@ -46,8 +46,6 @@ htmlcov/
 .cache
 nosetests out/
 coverage/
-media_root/
-static_root/
 
 # Translations
 *.mo
