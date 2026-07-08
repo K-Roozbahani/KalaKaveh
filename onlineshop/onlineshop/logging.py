@@ -4,17 +4,19 @@
 
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
 
     # ------------------------------------------------------------------
-    # Formatter
+    # Formatters
     # ------------------------------------------------------------------
     "formatters": {
         "standard": {
@@ -26,19 +28,19 @@ LOGGING = {
             ),
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-
         "error": {
             "()": "config.logging.formatters.ProductionFormatter",
             "format": (
                 "\n"
                 "================================================================================\n"
-                "TIME        : %(asctime)s\n"
-                "LEVEL       : %(levelname)s\n"
+                "TIME         : %(asctime)s\n"
+                "LEVEL        : %(levelname)s\n"
                 "LOGGER       : %(name)s\n"
                 "PATH         : %(request_path)s\n"
                 "METHOD       : %(request_method)s\n"
                 "USER         : %(user_id)s\n"
                 "VIEW         : %(view)s\n"
+                "IP           : %(ip)s\n"
                 "FILE         : %(pathname)s\n"
                 "FUNCTION     : %(funcName)s\n"
                 "LINE         : %(lineno)d\n"
@@ -50,16 +52,24 @@ LOGGING = {
     },
 
     # ------------------------------------------------------------------
+    # Filters
+    # ------------------------------------------------------------------
+    "filters": {
+        "request_context": {
+            "()": "config.logging.filters.RequestContextFilter",
+        },
+    },
+
+    # ------------------------------------------------------------------
     # Handlers
     # ------------------------------------------------------------------
     "handlers": {
-
         "console": {
             "class": "logging.StreamHandler",
             "level": "DEBUG",
             "formatter": "standard",
+            "filters": ["request_context"],
         },
-
         "activity_file": {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "level": "INFO",
@@ -69,8 +79,8 @@ LOGGING = {
             "encoding": "utf-8",
             "delay": True,
             "formatter": "standard",
+            "filters": ["request_context"],
         },
-
         "payment_file": {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "level": "INFO",
@@ -80,8 +90,8 @@ LOGGING = {
             "encoding": "utf-8",
             "delay": True,
             "formatter": "standard",
+            "filters": ["request_context"],
         },
-
         "error_file": {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "level": "ERROR",
@@ -91,6 +101,7 @@ LOGGING = {
             "encoding": "utf-8",
             "delay": True,
             "formatter": "error",
+            "filters": ["request_context"],
         },
     },
 
@@ -98,7 +109,6 @@ LOGGING = {
     # Loggers
     # ------------------------------------------------------------------
     "loggers": {
-
         "activity": {
             "handlers": [
                 "activity_file",
@@ -107,7 +117,6 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-
         "payments": {
             "handlers": [
                 "payment_file",
@@ -116,7 +125,6 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-
         "error": {
             "handlers": [
                 "error_file",
@@ -125,11 +133,10 @@ LOGGING = {
             "level": "ERROR",
             "propagate": False,
         },
-
     },
 
     # ------------------------------------------------------------------
-    # Root
+    # Root Logger
     # ------------------------------------------------------------------
     "root": {
         "handlers": [
