@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
         "drf_spectacular.openapi.AutoSchema",
 
     #logging
-    "EXCEPTION_HANDLER": "config.settings.exceptions.handlers.custom_exception_handler",
+    "EXCEPTION_HANDLER": "config.exceptions.handlers.custom_exception_handler",
 }
 
 # _____________________________Cache redis____________________________________________
