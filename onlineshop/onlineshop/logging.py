@@ -1,7 +1,5 @@
 """
 تنظیمات Logging پروژه
-
-این فایل مسئول تنظیم Loggerها، Handlerها و Formatterهای پروژه است.
 """
 
 from pathlib import Path
@@ -9,45 +7,51 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 LOG_DIR = BASE_DIR / "logs"
-LOG_DIR.mkdir(exist_ok=True)
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
 
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------
     # Formatter
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------
     "formatters": {
         "standard": {
+            "()": "config.logging.formatters.ProductionFormatter",
             "format": (
                 "[%(asctime)s] "
-                "%(levelname)s "
+                "%(levelname)-8s "
                 "%(message)s"
             ),
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
+
         "error": {
+            "()": "config.logging.formatters.ProductionFormatter",
             "format": (
                 "\n"
-                "======================================================================\n"
-                "TIME      : %(asctime)s\n"
-                "LEVEL     : %(levelname)s\n"
-                "LOGGER    : %(name)s\n"
-                "FILE      : %(pathname)s\n"
-                "FUNCTION  : %(funcName)s\n"
-                "LINE      : %(lineno)d\n\n"
-                "MESSAGE:\n"
-                "%(message)s\n"
-                "======================================================================"
+                "================================================================================\n"
+                "TIME        : %(asctime)s\n"
+                "LEVEL       : %(levelname)s\n"
+                "LOGGER       : %(name)s\n"
+                "PATH         : %(request_path)s\n"
+                "METHOD       : %(request_method)s\n"
+                "USER         : %(user_id)s\n"
+                "VIEW         : %(view)s\n"
+                "FILE         : %(pathname)s\n"
+                "FUNCTION     : %(funcName)s\n"
+                "LINE         : %(lineno)d\n"
+                "MESSAGE      : %(message)s\n"
+                "================================================================================"
             ),
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },
 
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------
     # Handlers
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------
     "handlers": {
 
         "console": {
@@ -90,46 +94,47 @@ LOGGING = {
         },
     },
 
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------
     # Loggers
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------
     "loggers": {
 
-        # ثبت رویدادهای کاربران
         "activity": {
-            "handlers": ["activity_file", "console"],
+            "handlers": [
+                "activity_file",
+                "console",
+            ],
             "level": "INFO",
             "propagate": False,
         },
 
-        # ثبت عملیات پرداخت
         "payments": {
-            "handlers": ["payment_file", "console"],
+            "handlers": [
+                "payment_file",
+                "console",
+            ],
             "level": "INFO",
             "propagate": False,
         },
 
-        # ثبت خطاها
         "error": {
-            "handlers": ["error_file", "console"],
-            "level": "ERROR",
-            "propagate": False,
-        },
-
-        # خطاهای خود Django
-        "django": {
-            "handlers": ["error_file"],
+            "handlers": [
+                "error_file",
+                "console",
+            ],
             "level": "ERROR",
             "propagate": False,
         },
 
     },
 
-    # ---------------------------------------------------------
-    # Root Logger
-    # ---------------------------------------------------------
+    # ------------------------------------------------------------------
+    # Root
+    # ------------------------------------------------------------------
     "root": {
-        "handlers": ["console"],
+        "handlers": [
+            "console",
+        ],
         "level": "INFO",
     },
 }
