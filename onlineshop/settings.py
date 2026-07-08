@@ -160,6 +160,9 @@ REST_FRAMEWORK = {
     #Swagger
     "DEFAULT_SCHEMA_CLASS":
         "drf_spectacular.openapi.AutoSchema",
+
+    #logging
+    "EXCEPTION_HANDLER": "config.settings.exceptions.handlers.custom_exception_handler",
 }
 
 # _____________________________Cache redis____________________________________________
