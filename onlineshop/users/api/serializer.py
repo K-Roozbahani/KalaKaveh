@@ -40,6 +40,20 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
+
+class RequestOTPSerializer(serializers.Serializer):
+    """
+    Serializer درخواست کد تأیید.
+    """
+
+    phone_number = PhoneNumberField(
+        region="IR",
+        required=True,
+    )
+
+
+
 class VerifyOTPSerializer(serializers.Serializer):
     """
     Serializer تأیید کد یکبار مصرف.
@@ -58,5 +72,4 @@ class VerifyOTPSerializer(serializers.Serializer):
 
     def validate_otp(self, value):
         validate_otp(value)
-
         return value
