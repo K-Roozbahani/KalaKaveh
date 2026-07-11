@@ -139,6 +139,14 @@ LOGGING = {
             "level": "ERROR",
             "propagate": False,
         },
+
+        "loggers": {
+                "authentication": {
+                    "handlers": ["console", "file"],
+                    "level": "INFO",
+                    "propagate": False,
+                },
+            },
     },
 
     "root": {
