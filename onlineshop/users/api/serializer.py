@@ -2,9 +2,17 @@ from rest_framework import serializers
 from ..models import User
 from phonenumber_field.serializerfields import PhoneNumberField
 
+from users.validators import (
+    validate_otp,
+)
+
 class UserSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberField(region='IR')
-    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    password = serializers.CharField(
+        write_only=True,
+        style={'input_type': 'password'},
+        required=False,
+    )
 
     class Meta:
         model = User
@@ -31,3 +39,24 @@ class UserSerializer(serializers.ModelSerializer):
         #     instance.set_password(password)
         instance.save()
         return instance
+
+class VerifyOTPSerializer(serializers.Serializer):
+    """
+    Serializer تأیید کد یکبار مصرف.
+    """
+
+    phone_number = PhoneNumberField(
+        region="IR",
+        required=True,
+    )
+
+    otp = serializers.CharField(
+        max_length=6,
+        min_length=6,
+        trim_whitespace=True,
+    )
+
+    def validate_otp(self, value):
+        validate_otp(value)
+
+        return value
