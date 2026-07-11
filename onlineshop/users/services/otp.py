@@ -1,4 +1,4 @@
-from random import randint
+from secrets import randbelow
 
 from django.core.cache import cache
 
@@ -22,9 +22,9 @@ def generate_otp() -> str:
     تولید کد یکبار مصرف.
     """
     minimum = 10 ** (OTP_LENGTH - 1)
-    maximum = (10 ** OTP_LENGTH) - 1
+    maximum = 10 ** OTP_LENGTH
 
-    return str(randint(minimum, maximum))
+    return str(minimum + randbelow(maximum - minimum))
 
 
 def save_otp(
