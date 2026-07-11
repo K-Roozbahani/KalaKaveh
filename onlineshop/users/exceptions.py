@@ -62,3 +62,15 @@ class IPAddressBlockedException(AuthenticationException):
     status_code = status.HTTP_403_FORBIDDEN
     default_code = "ip_address_blocked"
     default_detail = _("دسترسی این آدرس IP مسدود شده است.")
+
+
+class RateLimitExceededException(AuthenticationException):
+    """
+    تعداد درخواست‌های مجاز به پایان رسیده است.
+    """
+
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    default_code = "rate_limit_exceeded"
+    default_detail = _(
+        "تعداد درخواست‌های مجاز به پایان رسیده است. لطفاً بعداً دوباره تلاش کنید."
+    )
