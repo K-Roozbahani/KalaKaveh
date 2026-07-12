@@ -26,7 +26,7 @@ class BrandViewSet(ListModelMixin, GenericViewSet):
     """
     API برندها
     """
-    authentication_classes = [AllowAny]
+    permission_classes = [AllowAny,]
     serializer_class = BrandSerializer
     lookup_field = "slug"
 
