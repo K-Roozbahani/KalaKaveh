@@ -12,6 +12,14 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os.path
 from pathlib import Path
 
+from .logging import LOGGING
+
+from environ import Env
+
+PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
+env = Env()
+
+env.read_env(PROJECT_DIR / ".env")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,11 +31,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zykf^%wub*g_hp62h%sfsx!k*^@kqc%gbld^!-gp36=#%i_l-p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ["http://localhost:3000",
-                 "http://127.0.0.1:3000",
-                 "*",]
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=["127.0.0.1", "localhost"],
+)
 
 
 # Application definition
@@ -90,12 +99,15 @@ WSGI_APPLICATION = 'onlineshop.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+
+
 
 
 # Password validation

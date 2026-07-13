@@ -90,7 +90,7 @@ LOGGING = {
 
     "formatters": {
         "standard": {
-            "()": "config.logging.formatters.ProductionFormatter",
+            "()": "config.loggers.formatters.ProductionFormatter",
             "format": (
                 "[%(asctime)s] "
                 "%(levelname)-8s "
@@ -99,7 +99,7 @@ LOGGING = {
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
         "error": {
-            "()": "config.logging.formatters.ProductionFormatter",
+            "()": "config.loggers.formatters.ProductionFormatter",
             "format": (
                 "\n"
                 "================================================================================\n"
@@ -140,13 +140,12 @@ LOGGING = {
             "propagate": False,
         },
 
-        "loggers": {
-                "authentication": {
-                    "handlers": ["console", "file"],
-                    "level": "INFO",
-                    "propagate": False,
-                },
-            },
+        "authentication": {
+            "handlers": ["console",],
+            "level": "INFO",
+            "propagate": False,
+        },
+
     },
 
     "root": {
