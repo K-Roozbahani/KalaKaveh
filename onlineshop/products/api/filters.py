@@ -64,7 +64,7 @@ class ProductFilter(filters.FilterSet):
 
 def filter_category(self, queryset, name, value):
     """
-    فیلتر محصولات بر اساس دسته‌بندی و زیرمجموعه‌های آن.
+    فیلتر محصولات بر اساس دسته‌بندی و تمام زیرمجموعه‌های آن.
     """
 
     category = get_category_by_slug(slug=value)

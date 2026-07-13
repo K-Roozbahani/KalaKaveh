@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.db.models import (
     Prefetch,
     QuerySet,
@@ -38,31 +40,35 @@ def get_category_by_slug(
         slug=slug,
     )
 
-def get_category_descendants(
-    *,
-    category: Category,
-    include_self: bool = True,
-) -> list[Category]:
+def get_category_descendants(*, category: Category) -> list[Category]:
     """
-    دریافت زیرمجموعه‌های یک دسته‌بندی.
+    دریافت دسته‌بندی و تمام زیرمجموعه‌های آن.
+
+    این تابع تمام دسته‌بندی‌ها را تنها با یک Query از دیتابیس
+    دریافت کرده و سپس پیمایش درخت را در حافظه انجام می‌دهد.
     """
 
-    categories = [category] if include_self else []
-
-    children = (
-        Category.objects.filter(parent=category)
-        .only("id", "parent_id")
+    all_categories = Category.objects.only(
+        "id",
+        "parent_id",
     )
 
-    for child in children:
-        categories.extend(
-            get_category_descendants(
-                category=child,
-                include_self=True,
-            )
-        )
+    children_map = defaultdict(list)
 
-    return categories
+    for item in all_categories:
+        children_map[item.parent_id].append(item)
+
+    result = []
+
+    def collect(node: Category):
+        result.append(node)
+
+        for child in children_map[node.id]:
+            collect(child)
+
+    collect(category)
+
+    return result
 
 
 # =====================================================
