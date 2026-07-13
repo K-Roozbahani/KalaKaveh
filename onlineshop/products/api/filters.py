@@ -62,18 +62,18 @@ class ProductFilter(filters.FilterSet):
 
         return queryset
 
-def filter_category(self, queryset, name, value):
-    """
-    فیلتر محصولات بر اساس دسته‌بندی و تمام زیرمجموعه‌های آن.
-    """
+    def filter_category(self, queryset, name, value):
+        """
+        فیلتر محصولات بر اساس دسته‌بندی و تمام زیرمجموعه‌های آن.
+        """
 
-    category = get_category_by_slug(slug=value)
+        category = get_category_by_slug(slug=value)
 
-    if category is None:
-        return queryset.none()
+        if category is None:
+            return queryset.none()
 
-    categories = get_category_descendants(category=category)
+        categories = get_category_descendants(category=category)
 
-    return queryset.filter(
-        category__in=categories,
-    )
+        return queryset.filter(
+            category__in=categories,
+        )
