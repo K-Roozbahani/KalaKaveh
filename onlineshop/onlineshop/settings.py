@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os.path
 from pathlib import Path
 
-from .logging import LOGGING
+from config.logging import LOGGING
 
 from environ import Env
 
