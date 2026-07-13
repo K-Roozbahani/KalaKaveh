@@ -26,6 +26,7 @@ class BrandViewSet(ListModelMixin, GenericViewSet):
     """
     API برندها
     """
+    pagination_class = None
     permission_classes = [AllowAny,]
     serializer_class = BrandSerializer
     lookup_field = "slug"

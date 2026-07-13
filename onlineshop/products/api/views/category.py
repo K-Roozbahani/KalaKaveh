@@ -26,6 +26,7 @@ class CategoryViewSet(ListModelMixin, GenericViewSet):
     API دسته‌بندی‌ها
     """
 
+    pagination_class = None
     permission_classes = [AllowAny,]
     serializer_class = CategorySerializer
     lookup_field = "slug"
