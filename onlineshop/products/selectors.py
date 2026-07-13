@@ -38,6 +38,32 @@ def get_category_by_slug(
         slug=slug,
     )
 
+def get_category_descendants(
+    *,
+    category: Category,
+    include_self: bool = True,
+) -> list[Category]:
+    """
+    دریافت زیرمجموعه‌های یک دسته‌بندی.
+    """
+
+    categories = [category] if include_self else []
+
+    children = (
+        Category.objects.filter(parent=category)
+        .only("id", "parent_id")
+    )
+
+    for child in children:
+        categories.extend(
+            get_category_descendants(
+                category=child,
+                include_self=True,
+            )
+        )
+
+    return categories
+
 
 # =====================================================
 # Brand
