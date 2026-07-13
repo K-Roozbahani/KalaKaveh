@@ -11,8 +11,8 @@ class ProductFilter(filters.FilterSet):
     min_price = filters.NumberFilter(method="filter_min_price")
     max_price = filters.NumberFilter(method="filter_max_price")
 
-    brand = filters.CharFilter(field_name="brand_slug")
-    category = filters.CharFilter(field_name="category_slug")
+    brand = filters.CharFilter(field_name="brand__slug")
+    category = filters.CharFilter(field_name="category__slug")
 
     has_stock = filters.BooleanFilter(method="filter_has_stock")
 
