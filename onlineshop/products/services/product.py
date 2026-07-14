@@ -1,10 +1,13 @@
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import NotFound
 
 from products.models import (
     Product,
     ProductVariant,
     Review,
 )
+from products.selectors import get_product_by_slug
 
 
 @transaction.atomic
@@ -131,3 +134,21 @@ def create_review(
     )
 
     return review
+
+def prepare_retrieve_product_by_slug(
+    *,
+    slug: str,
+) -> Product:
+    """
+    آماده‌سازی اطلاعات محصول برای نمایش جزئیات.
+
+    Raises:
+        NotFound: اگر محصول با اسلاگ موردنظر یافت نشود.
+    """
+
+    product = get_product_by_slug(slug=slug)
+
+    if product is None:
+        raise NotFound(_("محصول مورد نظر یافت نشد."))
+
+    return product
