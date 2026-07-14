@@ -110,9 +110,22 @@ def get_active_products() -> QuerySet[Product]:
     )
 
 
+from django.db.models import OuterRef, Prefetch, QuerySet, Subquery
+
+from products.models import Product, ProductVariant
+
+
 def get_products_for_listing() -> QuerySet[Product]:
     """
-    دریافت محصولات برای صفحه لیست فروشگاه
+    دریافت محصولات برای صفحه لیست فروشگاه.
+
+    برای هر محصول، Variant پیش‌فرض بر اساس:
+        1- کمترین قیمت
+        2- بیشترین موجودی
+        3- کمترین شناسه
+
+    انتخاب شده و قیمت آن به صورت Annotation
+    روی محصول قرار می‌گیرد.
     """
 
     variants = (
@@ -130,6 +143,19 @@ def get_products_for_listing() -> QuerySet[Product]:
         )
     )
 
+    default_variant = (
+        ProductVariant.objects
+        .filter(
+            product=OuterRef("pk"),
+            is_active=True,
+        )
+        .order_by(
+            "final_price",
+            "-stock",
+            "id",
+        )
+    )
+
     return (
         Product.objects
         .filter(
@@ -144,6 +170,11 @@ def get_products_for_listing() -> QuerySet[Product]:
             Prefetch(
                 "variants",
                 queryset=variants,
+            ),
+        )
+        .annotate(
+            default_price=Subquery(
+                default_variant.values("final_price")[:1],
             ),
         )
     )
