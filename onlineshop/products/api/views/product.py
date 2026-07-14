@@ -24,6 +24,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
+from products.services.product import prepare_retrieve_product_by_slug
 
 
 @extend_schema_view(
@@ -139,7 +140,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         جزئیات محصول
         """
 
-        product = get_product_detail_by_slug(
+        product = prepare_retrieve_product_by_slug(
             slug=kwargs["slug"],
         )
 
