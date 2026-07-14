@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os.path
 from pathlib import Path
 
-from config.logging import LOGGING
-
 from environ import Env
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -174,7 +172,7 @@ REST_FRAMEWORK = {
         "drf_spectacular.openapi.AutoSchema",
 
     #logging
-    "EXCEPTION_HANDLER": "config.exceptions.handlers.custom_exception_handler",
+    "EXCEPTION_HANDLER": "onlineshop.config.exceptions.handlers.custom_exception_handler",
 }
 
 # _____________________________Cache redis____________________________________________
