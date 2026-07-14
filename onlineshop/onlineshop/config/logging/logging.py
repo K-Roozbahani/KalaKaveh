@@ -9,7 +9,7 @@ from environ import Env
 
 env = Env()
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 # ------------------------------------------------------------------
 # Logging Environment Variables
