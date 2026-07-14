@@ -66,7 +66,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
     ordering_fields = (
         "created_at",
-        "final_price",
+        "default_price",
     )
 
     ordering = ("-created_at",)
