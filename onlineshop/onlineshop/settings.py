@@ -16,7 +16,7 @@ from environ import Env
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 env = Env()
-
+from .config.logging import LOGGING
 env.read_env(PROJECT_DIR / ".env")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
