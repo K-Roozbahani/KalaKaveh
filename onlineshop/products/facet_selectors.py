@@ -60,18 +60,8 @@ class ProductFacetSelector:
         """
 
         prices = queryset.aggregate(
-            min=Min(
-                "variants__final_price",
-                filter=Q(
-                    variants__is_active=True,
-                ),
-            ),
-            max=Max(
-                "variants__final_price",
-                filter=Q(
-                    variants__is_active=True,
-                ),
-            ),
+            min=Min("default_price"),
+            max=Max("default_price"),
         )
 
         return {
