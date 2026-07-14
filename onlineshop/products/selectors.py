@@ -183,7 +183,7 @@ def get_products_for_listing() -> QuerySet[Product]:
 def get_product_detail_by_slug(
     *,
     slug: str,
-) -> Product:
+) -> Product | None:
     """
     دریافت اطلاعات کامل محصول برای صفحه جزئیات
     """
@@ -213,17 +213,17 @@ def get_product_detail_by_slug(
             "attribute_values__attribute",
             "reviews__user",
         )
-        .get(
+        .filter(
             slug=slug,
             is_active=True,
-        )
+        ).first()
     )
 
 
 def get_product_by_slug(
     *,
     slug: str,
-) -> Product:
+) -> Product| None:
     """
     دریافت محصول بر اساس اسلاگ
     """
@@ -239,24 +239,24 @@ def get_product_by_slug(
             "variants",
             "attribute_values",
         )
-        .get(
+        .filter(
             slug=slug,
             is_active=True,
-        )
+        ).first()
     )
 
 
 def get_product_by_id(
     *,
     product_id: int,
-) -> Product:
+) -> Product | None:
     """
     دریافت محصول بر اساس شناسه
     """
 
-    return Product.objects.get(
+    return Product.objects.filter(
         pk=product_id,
-    )
+    ).first()
 
 
 # =====================================================
@@ -266,7 +266,7 @@ def get_product_by_id(
 def get_variant_by_id(
     *,
     variant_id: int,
-) -> ProductVariant:
+) -> ProductVariant | None:
     """
     دریافت تنوع محصول
     """
@@ -279,16 +279,16 @@ def get_variant_by_id(
         .prefetch_related(
             "images",
         )
-        .get(
+        .filter(
             pk=variant_id,
-        )
+        ).first()
     )
 
 
 def get_variant_by_sku(
     *,
     sku: str,
-) -> ProductVariant:
+) -> ProductVariant | None:
     """
     دریافت تنوع محصول بر اساس SKU
     """
@@ -301,9 +301,9 @@ def get_variant_by_sku(
         .prefetch_related(
             "images",
         )
-        .get(
+        .filter(
             sku=sku,
-        )
+        ).first()
     )
 
 
@@ -378,7 +378,7 @@ def get_product_reviews(
 def get_review_by_id(
     *,
     review_id: int,
-) -> Review:
+) -> Review | None:
     """
     دریافت نظر بر اساس شناسه
     """
@@ -389,16 +389,16 @@ def get_review_by_id(
             "product",
             "user",
         )
-        .get(
+        .filter(
             pk=review_id,
-        )
+        ).first()
     )
 
 def get_user_review(
     *,
     product: Product,
     user,
-) -> Review:
+) -> Review | None:
     """
     دریافت نظر کاربر برای یک محصول
     """
@@ -409,10 +409,10 @@ def get_user_review(
             "product",
             "user",
         )
-        .get(
+        .filter(
             product=product,
             user=user,
-        )
+        ).first()
     )
 
 
