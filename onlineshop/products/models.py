@@ -191,9 +191,11 @@ class ProductVariant(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if self.final_price is None:
+        if self.final_price in (None, 0):
             self.final_price = self.price
 
+        if self.stock in (None, 0):
+            self.is_active = False
         super().save(*args, **kwargs)
 
     class Meta:
