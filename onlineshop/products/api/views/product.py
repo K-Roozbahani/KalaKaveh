@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
 from products.api.pagination import ProductPagination
+from products.facet_selectors import ProductFacetSelector
 from products.models import Product
 from products.selectors import (
     get_products_for_listing,
@@ -92,6 +93,46 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             return ProductDetailSerializer
 
         return ProductListSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(
+            self.get_queryset()
+        )
+
+        # استخراج اطلاعات فیلترها قبل از Pagination
+        facets = ProductFacetSelector.get_facets(
+            queryset=queryset,
+        )
+
+        page = self.paginate_queryset(
+            queryset,
+        )
+
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+            )
+
+            response = self.get_paginated_response(
+                serializer.data,
+            )
+
+            response.data["facets"] = facets
+
+            return response
+
+        serializer = self.get_serializer(
+            queryset,
+            many=True,
+        )
+
+        return Response(
+            {
+                "facets": facets,
+                "results": serializer.data,
+            }
+        )
 
     def retrieve(self, request, *args, **kwargs):
         """
