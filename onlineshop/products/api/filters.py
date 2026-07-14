@@ -7,6 +7,8 @@ from products.selectors import (
 )
 
 
+class CharInFilter(filters.BooleanFilter, filters.CharFilter):
+    pass
 
 class ProductFilter(filters.FilterSet):
     """
@@ -16,7 +18,11 @@ class ProductFilter(filters.FilterSet):
     min_price = filters.NumberFilter(method="filter_min_price")
     max_price = filters.NumberFilter(method="filter_max_price")
 
-    brand = filters.CharFilter(field_name="brand__slug")
+    brand = CharInFilter(
+    field_name="brand__slug",
+    lookup_expr="in",
+    )
+
     category = filters.CharFilter(method="filter_category")
 
     has_stock = filters.BooleanFilter(method="filter_has_stock")
