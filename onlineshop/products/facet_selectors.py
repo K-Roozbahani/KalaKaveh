@@ -1,6 +1,4 @@
-from django.db.models import Max, Min, Q
-
-from products.models import Product
+from django.db.models import Count, Max, Min
 
 
 class ProductFacetSelector:
@@ -11,11 +9,11 @@ class ProductFacetSelector:
     @classmethod
     def get_facets(cls, queryset):
         """
-        استخراج تمامی Facet های مورد نیاز برای لیست محصولات.
+        استخراج Facet های مورد نیاز برای صفحه لیست محصولات.
 
-        توجه:
-            queryset باید بعد از اعمال تمامی فیلترها و جستجو و
-            قبل از Pagination ارسال شود.
+        نکته:
+            queryset باید پس از اعمال تمامی فیلترها و جستجو
+            و قبل از Pagination ارسال شود.
         """
         return {
             "categories": cls.get_categories(queryset),
@@ -28,13 +26,16 @@ class ProductFacetSelector:
         """
         استخراج دسته‌بندی‌های موجود در QuerySet.
         """
+
         return list(
-            queryset.values_list(
-                "category__name",
-                flat=True,
+            queryset.values(
+                name="category__name",
+                slug="category__slug",
             )
-            .distinct()
-            .order_by("category__name")
+            .annotate(
+                count=Count("id"),
+            )
+            .order_by("name")
         )
 
     @staticmethod
@@ -42,21 +43,22 @@ class ProductFacetSelector:
         """
         استخراج برندهای موجود در QuerySet.
         """
+
         return list(
-            queryset.values_list(
-                "brand__name",
-                flat=True,
+            queryset.values(
+                name="brand__name",
+                slug="brand__slug",
             )
-            .distinct()
-            .order_by("brand__name")
+            .annotate(
+                count=Count("id"),
+            )
+            .order_by("name")
         )
 
     @staticmethod
     def get_price(queryset):
         """
         استخراج بازه قیمت محصولات.
-
-        قیمت‌ها بر اساس Variant های فعال محاسبه می‌شوند.
         """
 
         prices = queryset.aggregate(
