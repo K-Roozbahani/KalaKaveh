@@ -68,7 +68,7 @@ def get_category_descendants(*, category: Category) -> list[Category]:
 
     collect(category)
 
-    return result
+    return result.reverse()
 
 
 # =====================================================
