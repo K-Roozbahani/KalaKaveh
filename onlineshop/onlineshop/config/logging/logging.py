@@ -90,7 +90,7 @@ LOGGING = {
 
     "formatters": {
         "standard": {
-            "()": "config.logging.formatters.ProductionFormatter",
+            "()": "onlineshop.config.logging.formatters.ProductionFormatter",
             "format": (
                 "[%(asctime)s] "
                 "%(levelname)-8s "
@@ -99,7 +99,7 @@ LOGGING = {
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
         "error": {
-            "()": "config.logging.formatters.ProductionFormatter",
+            "()": "onlineshop.config.logging.formatters.ProductionFormatter",
             "format": (
                 "\n"
                 "================================================================================\n"
