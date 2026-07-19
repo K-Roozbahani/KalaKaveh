@@ -1,4 +1,4 @@
-from django.db.models import Count, Max, Min
+from django.db.models import Count, Max, Min, F
 
 
 class ProductFacetSelector:
@@ -29,13 +29,13 @@ class ProductFacetSelector:
 
         return list(
             queryset.values(
-                name="category__name",
-                slug="category__slug",
+                "category__name",
+                "category__slug",
             )
             .annotate(
                 count=Count("id"),
             )
-            .order_by("name")
+            .order_by("count")
         )
 
     @staticmethod
@@ -46,13 +46,13 @@ class ProductFacetSelector:
 
         return list(
             queryset.values(
-                name="brand__name",
-                slug="brand__slug",
+                "brand__name",
+                "brand__slug",
             )
             .annotate(
                 count=Count("id"),
             )
-            .order_by("name")
+            .order_by("count")
         )
 
     @staticmethod
