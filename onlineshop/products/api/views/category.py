@@ -1,4 +1,4 @@
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
@@ -21,7 +21,11 @@ from drf_spectacular.utils import (
 @extend_schema(
     tags=["categories"],
 )
-class CategoryViewSet(ListModelMixin, GenericViewSet):
+class CategoryViewSet(
+    ListModelMixin,
+    RetrieveModelMixin,
+    GenericViewSet
+):
     """
     API دسته‌بندی‌ها
     """
