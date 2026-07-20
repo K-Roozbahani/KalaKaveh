@@ -191,7 +191,13 @@ class ProductVariant(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if self.final_price is None:
+        """
+        ذخیره تنوع محصول.
+
+        مقداردهی اولیه قیمت نهایی فقط هنگام ایجاد رکورد انجام می‌شود.
+        محاسبه قیمت و تخفیف توسط Price Engine انجام می‌شود.
+        """
+        if self._state.adding and self.final_price is None:
             self.final_price = self.price
 
         super().save(*args, **kwargs)
