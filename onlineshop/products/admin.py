@@ -1,10 +1,12 @@
 from django.contrib import admin
+from django.forms.models import BaseInlineFormSet
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
 
+from discounts.services.price_sync import sync_variant_discount
 from products.models import (
     Category,
     Brand,
@@ -92,12 +94,31 @@ class ProductImageInline(admin.TabularInline):
     image_preview.short_description = _("پیش نمایش")
 
 
+class ProductVariantInlineFormSet(BaseInlineFormSet):
+
+    def save_new(self, form, commit=True):
+        instance = super().save_new(form, commit)
+
+        if commit:
+            sync_variant_discount(variant=instance)
+
+        return instance
+
+    def save_existing(self, form, instance, commit=True):
+        instance = super().save_existing(form, instance, commit)
+
+        if commit:
+            sync_variant_discount(variant=instance)
+
+        return instance
+
 class ProductVariantInline(admin.TabularInline):
     """
     تنوع‌های محصول
     """
 
     model = ProductVariant
+    formset = ProductVariantInlineFormSet
 
     extra = 1
 
@@ -476,6 +497,19 @@ class ProductVariantAdmin(admin.ModelAdmin):
     list_per_page = 30
 
     show_full_result_count = False
+
+    def save_model(self, request, obj, form, change):
+        """
+        ذخیره تنوع محصول در پنل مدیریت.
+
+        پس از ذخیره، Snapshot قیمت توسط Price Engine
+        بروزرسانی می‌شود.
+        """
+        super().save_model(request, obj, form, change)
+
+        sync_variant_discount(
+            variant=obj,
+        )
 
 
 # ==========================================================
