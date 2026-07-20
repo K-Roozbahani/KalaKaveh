@@ -126,12 +126,14 @@ class ReviewSelectorTests(TestCase):
             is_valid=True,
         )
 
-        with self.assertRaises(Review.DoesNotExist):
-
+        self.assertIsNone(
             get_user_review(
                 product=self.product,
                 user=self.user2,
             )
+        )
+
+
 
     def test_get_user_review_invalid_review_is_returned(self):
         """
