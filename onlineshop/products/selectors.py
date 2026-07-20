@@ -3,6 +3,8 @@ from collections import defaultdict
 from django.db.models import (
     Prefetch,
     QuerySet,
+    Subquery,
+    OuterRef
 )
 
 from .models import (
@@ -31,14 +33,14 @@ def get_categories() -> QuerySet[Category]:
 def get_category_by_slug(
     *,
     slug: str,
-) -> Category:
+) -> Category | None:
     """
     دریافت دسته‌بندی بر اساس اسلاگ
     """
 
-    return Category.objects.get(
+    return Category.objects.filter(
         slug=slug,
-    )
+    ).first()
 
 def get_category_descendants(*, category: Category) -> list[Category]:
     """
@@ -67,8 +69,8 @@ def get_category_descendants(*, category: Category) -> list[Category]:
             collect(child)
 
     collect(category)
-
-    return result.reverse()
+    result.reverse()
+    return result
 
 
 # =====================================================
@@ -86,14 +88,14 @@ def get_brands() -> QuerySet[Brand]:
 def get_brand_by_slug(
     *,
     slug: str,
-) -> Brand:
+) -> Brand | None:
     """
     دریافت برند بر اساس اسلاگ
     """
 
-    return Brand.objects.get(
+    return Brand.objects.filter(
         slug=slug,
-    )
+    ).first()
 
 
 # =====================================================
@@ -109,10 +111,6 @@ def get_active_products() -> QuerySet[Product]:
         is_active=True,
     )
 
-
-from django.db.models import OuterRef, Prefetch, QuerySet, Subquery
-
-from products.models import Product, ProductVariant
 
 
 def get_products_for_listing() -> QuerySet[Product]:
