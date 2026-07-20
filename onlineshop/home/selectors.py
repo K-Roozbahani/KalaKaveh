@@ -4,6 +4,7 @@ Selectorهای مربوط به صفحه اصلی فروشگاه
 
 from django.db.models import QuerySet
 
+from home.constants import HomeSectionType
 from home.models import (
     Banner,
     HeroSlide,
@@ -12,6 +13,9 @@ from home.models import (
     HomeSectionCategory,
     HomeSectionProduct,
 )
+
+from products.models import Product
+from products.selectors import get_products_for_listing
 
 
 def get_active_home_sections() -> QuerySet[HomeSection]:
@@ -122,3 +126,46 @@ def get_home_section_brands(
         )
         .order_by("order")
     )
+
+def get_home_products(
+    *,
+    section_type: str,
+    limit: int,
+) -> QuerySet[Product]:
+    """
+    دریافت محصولات مورد نیاز برای سکشن‌های صفحه اصلی.
+    """
+
+    queryset = get_products_for_listing()
+
+    match section_type:
+
+        case HomeSectionType.FEATURED_PRODUCTS:
+            queryset = queryset.filter(
+                is_featured=True,
+            )
+
+        case HomeSectionType.LATEST_PRODUCTS:
+            queryset = queryset.order_by(
+                "-created_at",
+            )
+
+        case HomeSectionType.DISCOUNT_PRODUCTS:
+            queryset = (
+                queryset
+                .filter(
+                    variants__discount_amount__gt=0,
+                )
+                .distinct()
+            )
+
+        case HomeSectionType.BEST_SELLER_PRODUCTS:
+            # TODO
+            pass
+
+        case _:
+            raise ValueError(
+                f"Unsupported home section type: {section_type}"
+            )
+
+    return queryset[:limit]
