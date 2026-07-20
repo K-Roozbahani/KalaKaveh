@@ -26,3 +26,11 @@ class HomeSectionType(models.TextChoices):
     BRANDS = "brands", _("برندها")
 
     CUSTOM_PRODUCTS = "custom_products", _("محصولات انتخابی")
+
+
+
+class HomeSectionLayout(models.TextChoices):
+    GRID = "grid", _("شبکه‌ای")
+    SLIDER = "slider", _("اسلایدر")
+    CAROUSEL = "carousel", _("کاروسل")
+    BANNER = "banner", _("بنر")
