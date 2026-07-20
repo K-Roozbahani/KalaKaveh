@@ -182,7 +182,7 @@ class ProductVariant(models.Model):
 
     is_active = models.BooleanField(
         _("فعال"),
-        default=True
+        default=False
     )
 
     created_at = models.DateTimeField(
@@ -191,11 +191,9 @@ class ProductVariant(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if self.final_price in (None, 0):
+        if self.final_price is None:
             self.final_price = self.price
 
-        if self.stock in (None, 0):
-            self.is_active = False
         super().save(*args, **kwargs)
 
     class Meta:
