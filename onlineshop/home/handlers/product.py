@@ -1,7 +1,7 @@
 from home.handlers.base import BaseSectionHandler
 from home.models import HomeSection
 
-from products.selectors import get_home_products
+from home.selectors import get_home_products
 
 
 class ProductSectionHandler(BaseSectionHandler):
