@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
+from django import forms
+from django_ckeditor_5.widgets import CKEditor5Widget
+
 from products.models import (
     Category,
     Brand,
@@ -270,8 +273,22 @@ class ProductAttributeAdmin(admin.ModelAdmin):
 # Product
 # ==========================================================
 
+class ProductAdminForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+        widgets = {
+            "description": CKEditor5Widget(
+                config_name="default",
+            ),
+        }
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+
+    form = ProductAdminForm
 
     list_display = (
         "id",
