@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    "django_ckeditor_5",
     'utils',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -236,3 +237,30 @@ CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
+
+# _________________________Txt  editor___________________________
+
+
+CKEDITOR_5_CONFIGS = {
+    "default": {
+        "toolbar": [
+            "heading",
+            "|",
+            "bold",
+            "italic",
+            "underline",
+            "link",
+            "|",
+            "bulletedList",
+            "numberedList",
+            "|",
+            "insertTable",
+            "blockQuote",
+            "|",
+            "imageUpload",
+            "|",
+            "undo",
+            "redo",
+        ]
+    }
+}

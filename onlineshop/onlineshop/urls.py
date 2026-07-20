@@ -42,21 +42,22 @@ urlpatterns = [
             name="schema",
         ),
 
-        path(
-            "api/docs/",
-            SpectacularSwaggerView.as_view(
-                url_name="schema",
-            ),
-            name="swagger-ui",
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(
+            url_name="schema",
         ),
+        name="swagger-ui",
+    ),
 
-        path(
-            "api/redoc/",
-            SpectacularRedocView.as_view(
-                url_name="schema",
-            ),
-            name="redoc",
+    path(
+        "api/redoc/",
+        SpectacularRedocView.as_view(
+            url_name="schema",
         ),
+        name="redoc",
+    ),
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
     path('api/user/', include('users.api.urls')) ,
     path('api/', include('products.api.urls')),
     path('api/cart/', include('carts.api.urls')),
