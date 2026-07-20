@@ -11,6 +11,8 @@ env = Env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 
+env.read_env(BASE_DIR / ".env")
+
 # ------------------------------------------------------------------
 # Logging Environment Variables
 # ------------------------------------------------------------------
@@ -74,7 +76,12 @@ if LOG_TO_CONSOLE:
 activity_handlers = ["activity_file"]
 payment_handlers = ["payment_file"]
 error_handlers = ["error_file"]
+authentication_handlers = []
 
+if LOG_TO_CONSOLE:
+    authentication_handlers.append("console")
+else:
+    authentication_handlers.append("activity_file")
 if LOG_TO_CONSOLE:
     activity_handlers.append("console")
     payment_handlers.append("console")
@@ -141,7 +148,7 @@ LOGGING = {
         },
 
         "authentication": {
-            "handlers": ["console",],
+            "handlers": authentication_handlers,
             "level": "INFO",
             "propagate": False,
         },
