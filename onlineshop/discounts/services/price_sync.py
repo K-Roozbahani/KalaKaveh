@@ -26,19 +26,17 @@ def sync_variant_discount(
         variant=variant,
     )
 
-    variant.discount_amount = (
-        snapshot.discount_amount
-    )
+    updated_fields = []
 
-    variant.final_price = (
-        snapshot.final_price
-    )
+    if variant.discount_amount != snapshot.discount_amount:
+        variant.discount_amount = snapshot.discount_amount
+        updated_fields.append("discount_amount")
 
-    variant.save(
-        update_fields=[
-            "discount_amount",
-            "final_price",
-        ],
-    )
+    if variant.final_price != snapshot.final_price:
+        variant.final_price = snapshot.final_price
+        updated_fields.append("final_price")
+
+    if updated_fields:
+        variant.save(update_fields=updated_fields)
 
     return variant
