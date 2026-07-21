@@ -141,9 +141,7 @@ def get_home_products(
     match section_type:
 
         case HomeSectionType.FEATURED_PRODUCTS:
-            queryset = queryset.filter(
-                is_featured=True,
-            )
+            pass
 
         case HomeSectionType.LATEST_PRODUCTS:
             queryset = queryset.order_by(
