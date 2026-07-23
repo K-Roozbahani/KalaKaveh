@@ -107,6 +107,23 @@ if DEBUG:
         }
     }
 
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST", default="db"),
+            "PORT": env.int("DB_PORT", default=5432),
+            # نگه داشتن Connection برای افزایش Performance
+            "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=600),
+            "CONN_HEALTH_CHECKS": True,
+            "OPTIONS": {
+                "connect_timeout": 10,
+            },
+        }
+    }
 
 
 
@@ -181,20 +198,29 @@ REST_FRAMEWORK = {
 
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": env("CACHE_REDIS_URL"),
+        "TIMEOUT": 300,
         "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "socket_connect_timeout": 5,
+            "socket_timeout": 5,
         },
-        "KEY_PREFIX": "shop",
     }
 }
 
 # ______________________________Celery___________________________________________________
 
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+"""
+تنظیمات Celery
+"""
 
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+from environ import Env
+
+env = Env()
+
+CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
 
 CELERY_ACCEPT_CONTENT = ["json"]
 
@@ -203,6 +229,14 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 CELERY_TIMEZONE = "Asia/Tehran"
+
+CELERY_ENABLE_UTC = False
+
+CELERY_TASK_TRACK_STARTED = True
+
+CELERY_TASK_TIME_LIMIT = 60 * 30
+
+CELERY_TASK_SOFT_TIME_LIMIT = 60 * 25
 
 # _____________________drf-spectacular_________________
 
