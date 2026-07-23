@@ -17,7 +17,7 @@ from environ import Env
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 env = Env()
 
-ENV_DIR = PROJECT_DIR.joinpath("development/env/")
+ENV_DIR = PROJECT_DIR / 'development/env/'
 
 from .config.logging import LOGGING
 env.read_env(ENV_DIR / ".env")
@@ -164,8 +164,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join("../static_root/")
-MEDIA_ROOT = os.path.join("../media_root/")
+STATIC_ROOT = BASE_DIR.parent / "static_root"
+MEDIA_ROOT = BASE_DIR.parent / "media_root"
 MEDIA_URL = "media/"
 
 AUTH_USER_MODEL = "users.User"
