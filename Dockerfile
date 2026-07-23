@@ -29,6 +29,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ------------------------------
 COPY requirements/ /tmp/requirements/
 
+
+# ------------------------------
+# Copy Deployment Scripts
+# ------------------------------
+COPY deployment/scripts/ /deployment/scripts/
+
+RUN chmod +x /deployment/scripts/*.sh
+
+# ------------------------------
+# Install Python Requirements
+# ------------------------------
 RUN pip install --upgrade pip \
     && pip install -r /tmp/requirements/production.txt
 
@@ -45,4 +56,11 @@ EXPOSE 8000
 # ------------------------------
 # Default Command
 # ------------------------------
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["/deployment/scripts/entrypoint.sh"]
+
+CMD [
+    "gunicorn",
+    "--config",
+    "deployment/gunicorn.conf.py",
+    "config.wsgi:application"
+]
