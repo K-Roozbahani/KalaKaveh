@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
 
     env_file:
-      - development/env/development.env
+      - deployment/env/development.env
 
     ports:
       - "5432:5432"
@@ -21,21 +21,32 @@ services:
       - "6379:6379"
 
   django:
+    image: onlineshop-django:dev
     build:
       context: .
       dockerfile: Dockerfile
 
-    restart: unless-stopped
 
     env_file:
-      - development/env/development.env
+      - deployment/env/development.env
+
+    volumes:
+      - ./onlineshop:/app
+      - ./static_root:/static_root
+      - ./media_root:/media_root
+      - ./logs:/logs
 
     ports:
       - "8000:8000"
 
-    depends_on:
-      - postgres
-      - redis
+    entrypoint:
+      - /deployment/scripts/entrypoint.sh
+
+    command:
+      - python
+      - manage.py
+      - runserver
+      - 0.0.0.0:8000
 
 volumes:
   postgres_data:
