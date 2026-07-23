@@ -26,12 +26,12 @@ class HomePageAPIViewTests(APITestCase):
             status.HTTP_200_OK,
         )
 
-    def test_returns_list(self):
+    def test_returns_dict(self):
         response = self.client.get(
             reverse("home:home-page"),
         )
 
         self.assertIsInstance(
             response.data,
-            list,
+            dict,
         )
