@@ -120,7 +120,7 @@ docker/
 .dockerignore
 
 # Python-dotenv
-.env
+*.env
 .venv
 
 # Miscellaneous
