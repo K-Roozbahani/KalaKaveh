@@ -113,12 +113,6 @@ logs/
 # .env
 # secrets.yaml
 
-# Docker specific files
-docker-compose.yml
-docker-compose.*.yml
-docker/
-.dockerignore
-
 # Python-dotenv
 *.env
 .venv
