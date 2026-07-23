@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from home.api.serializers import HomeSectionSerializer
+from home.api.serializers import HomePageSerializer
 from home.services import get_home_sections
 
 
@@ -21,9 +21,8 @@ class HomePageAPIView(APIView):
 
         sections = get_home_sections()
 
-        serializer = HomeSectionSerializer(
+        serializer = HomePageSerializer(
             sections,
-            many=True,
             context={
                 "request": request,
             },
