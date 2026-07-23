@@ -22,6 +22,13 @@ class Category(models.Model):
         blank=True
     )
 
+    image = models.ImageField(
+        _("تصویر"),
+        upload_to='categories/images/',
+        blank=True,
+        null=True
+    )
+
     def save(self, *args, **kwargs):
         if not self.slug: # اگر slug خالی بود، آن را بساز
             self.slug = slugify(self.name, allow_unicode=True)
