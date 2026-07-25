@@ -63,12 +63,21 @@ static_root/
 # cache/
 # *.mo *.po
 
-# Virtual environment
-venv/
-env/
-ENV/
-env.bak/
-venv.bak/
+# ------------------------------------------------------
+# Python Virtual Environments (root only)
+# ------------------------------------------------------
+/.venv/
+/venv/
+/env/
+/ENV/
+/env.bak/
+/venv.bak/
+
+# ------------------------------------------------------
+# Deployment Environment Files
+# ------------------------------------------------------
+deployment/env/*.env
+!deployment/env/.env.example
 
 # IDE / Editor specific files
 .idea/
