@@ -113,13 +113,13 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": env("DB_NAME"),
-            "USER": env("DB_USER"),
-            "PASSWORD": env("DB_PASSWORD"),
-            "HOST": env("DB_HOST", default="db"),
-            "PORT": env.int("DB_PORT", default=5432),
+            "NAME": env("POSTGRES_DB"),
+            "USER": env("POSTGRES_USER"),
+            "PASSWORD": env("POSTGRES_PASSWORD"),
+            "HOST": env("POSTGRES_HOST", default="postgres"),
+            "PORT": env.int("POSTGRES_PORT", default=5432),
             # نگه داشتن Connection برای افزایش Performance
-            "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=600),
+            "CONN_MAX_AGE": env.int("POSTGRES_CONN_MAX_AGE", default=600),
             "CONN_HEALTH_CHECKS": True,
             "OPTIONS": {
                 "connect_timeout": 10,
