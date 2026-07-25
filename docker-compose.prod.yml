@@ -15,12 +15,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:8-alpine
 
@@ -58,11 +52,8 @@ services:
       config.wsgi:application
 
     depends_on:
-      postgres:
-        condition: service_healthy
-
-      redis:
-        condition: service_healthy
+      - postgres
+      - redis
 
     expose:
       - "8000"
