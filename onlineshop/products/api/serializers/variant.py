@@ -18,6 +18,7 @@ class VariantSerializer(serializers.ModelSerializer):
     has_stock = serializers.SerializerMethodField()
 
     attributes = VariantAttributeSerializer(
+        source="variant_attributes",
         many=True,
         read_only=True
     )
@@ -34,7 +35,7 @@ class VariantSerializer(serializers.ModelSerializer):
             "stock",
             "has_stock",
             "images",
-            'attribute'
+            'attributes'
         )
 
         read_only_fields = fields
