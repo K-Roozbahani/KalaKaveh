@@ -3,7 +3,7 @@ from rest_framework import serializers
 from products.models import ProductVariant
 
 from .image import VariantImageSerializer
-
+from .attribute import VariantAttributeSerializer
 
 class VariantSerializer(serializers.ModelSerializer):
     """
@@ -17,6 +17,12 @@ class VariantSerializer(serializers.ModelSerializer):
 
     has_stock = serializers.SerializerMethodField()
 
+    attributes = VariantAttributeSerializer(
+        source="variant_attributes",
+        many=True,
+        read_only=True
+    )
+
     class Meta:
         model = ProductVariant
 
@@ -29,6 +35,7 @@ class VariantSerializer(serializers.ModelSerializer):
             "stock",
             "has_stock",
             "images",
+            'attributes'
         )
 
         read_only_fields = fields
