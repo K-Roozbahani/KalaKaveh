@@ -53,14 +53,12 @@ COPY onlineshop/ .
 # ------------------------------
 EXPOSE 8000
 
+# --------------------------------------------------
+# Entrypoint
+# --------------------------------------------------
+ENTRYPOINT ["/deployment/scripts/entrypoint.sh"]
+
 # ------------------------------
 # Default Command
 # ------------------------------
-ENTRYPOINT ["/deployment/scripts/entrypoint.sh"]
-
-CMD [
-    "gunicorn",
-    "--config",
-    "deployment/gunicorn.conf.py",
-    "config.wsgi:application"
-]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
