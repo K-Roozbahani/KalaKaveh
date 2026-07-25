@@ -18,7 +18,7 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            'descriptions'
+            'description'
         )
 
 
@@ -27,9 +27,11 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
     مقدار ویژگیهای تنوع محصول
     """
 
-    Attribute = ProductAttributeSerializer(read_only=True)
+    attribute = ProductAttributeSerializer(read_only=True)
 
     class Meta:
+        model = ProductAttributeValue
+
         fields = (
             'id',
             'attribute',
@@ -42,11 +44,12 @@ class VariantAttributeSerializer(serializers.ModelSerializer):
         مدل واسط بین تنوع محصول و مقدار ویژگی
     """
 
-    attribute = ProductAttributeSerializer(read_only=True)
+    attribute_value = ProductAttributeValueSerializer(read_only=True)
 
     class Meta:
+        model = ProductVariantAttribute
+
         fields = (
             'id',
-            'attribute',
-            'value',
+            'attribute_value',
         )
