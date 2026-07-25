@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from products.models import Product
+from .attribute import ProductAttributeValueSerializer
 
 from .brand import BrandSerializer
 from .category import CategorySerializer
@@ -37,6 +38,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    attributes = ProductAttributeValueSerializer(
+        source='attribute_values',
+        many=True,
+        read_only=True,
+    )
+
     class Meta:
         model = Product
 
@@ -48,6 +55,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "brand",
             "category",
             "images",
+            'attributes',
             "variants",
             "reviews",
         )
