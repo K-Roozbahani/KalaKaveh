@@ -33,7 +33,7 @@ COPY requirements/ /tmp/requirements/
 # ------------------------------
 # Copy Deployment Scripts
 # ------------------------------
-COPY deployment/scripts/ /deployment/scripts/
+COPY deployment/ /deployment/
 
 RUN chmod +x /deployment/scripts/*.sh
 
