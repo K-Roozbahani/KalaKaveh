@@ -43,10 +43,16 @@ RUN chmod +x /deployment/scripts/*.sh
 RUN pip install --upgrade pip \
     && pip install -r /tmp/requirements/production.txt
 
+
 # ------------------------------
 # Copy Project
 # ------------------------------
 COPY onlineshop/ .
+
+RUN mkdir -p \
+    /static_root \
+    /media_root \
+    /logs
 
 # ------------------------------
 # Expose Port
