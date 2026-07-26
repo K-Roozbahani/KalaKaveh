@@ -68,14 +68,25 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # --------------------------------------------------
+    # Security
+    # --------------------------------------------------
+    "django.middleware.security.SecurityMiddleware",
+
+    # --------------------------------------------------
+    # CORS
+    # --------------------------------------------------
+    "corsheaders.middleware.CorsMiddleware",
+
+    # --------------------------------------------------
+    # Django
+    # --------------------------------------------------
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = 'onlineshop.urls'
@@ -297,3 +308,19 @@ CKEDITOR_5_CONFIGS = {
         ]
     }
 }
+
+
+# ==========================================================
+# Security
+# ==========================================================
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+X_FRAME_OPTIONS = "DENY"
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
+)
