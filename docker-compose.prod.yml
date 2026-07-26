@@ -48,19 +48,17 @@ services:
 
     command: >
       gunicorn
-      --config deployment/gunicorn.conf.py
-      config.wsgi:application
+      --config /deployment/gunicorn.conf.py
+      onlineshop.wsgi:application
 
     depends_on:
       - postgres
       - redis
 
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
 
     volumes:
-      - ./onlineshop:/app
-
       - ./static_root:/static_root
 
       - ./media_root:/media_root
