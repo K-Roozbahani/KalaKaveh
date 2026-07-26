@@ -3,6 +3,7 @@ version: "3.9"
 services:
 
   postgres:
+
     image: postgres:17
 
     container_name: onlineshop_postgres
@@ -16,11 +17,21 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    networks:
+      - backend
+
 
   redis:
 
@@ -39,6 +50,16 @@ services:
       timeout: 5s
       retries: 5
 
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    networks:
+      - backend
+
+
   django:
 
     image: onlineshop-django:latest
@@ -49,7 +70,16 @@ services:
 
     container_name: onlineshop_django
 
+    init: true
+
     restart: unless-stopped
+
+    stop_signal: SIGTERM
+
+    stop_grace_period: 30s
+
+    security_opt:
+      - no-new-privileges:true
 
     env_file:
       - ./deployment/env/production.env
@@ -70,10 +100,18 @@ services:
 
     volumes:
       - ./static_root:/static_root
-
       - ./media_root:/media_root
-
       - ./logs:/logs
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    networks:
+      - backend
+
 
   nginx:
 
@@ -85,7 +123,16 @@ services:
 
     container_name: onlineshop_nginx
 
+    init: true
+
     restart: unless-stopped
+
+    stop_signal: SIGQUIT
+
+    stop_grace_period: 30s
+
+    security_opt:
+      - no-new-privileges:true
 
     depends_on:
       - django
@@ -95,13 +142,27 @@ services:
 
     volumes:
       - ./static_root:/static_root:ro
-
       - ./media_root:/media_root:ro
-
       - ./logs:/logs
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    networks:
+      - backend
+
 
 volumes:
 
   postgres_data:
 
   redis_data:
+
+
+networks:
+
+  backend:
+    driver: bridge
