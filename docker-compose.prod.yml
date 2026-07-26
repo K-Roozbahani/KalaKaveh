@@ -55,13 +55,38 @@ services:
       - postgres
       - redis
 
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
 
     volumes:
       - ./static_root:/static_root
 
       - ./media_root:/media_root
+
+      - ./logs:/logs
+
+  nginx:
+
+    image: onlineshop-nginx:latest
+
+    build:
+      context: .
+      dockerfile: deployment/docker/nginx.Dockerfile
+
+    container_name: onlineshop_nginx
+
+    restart: unless-stopped
+
+    depends_on:
+      - django
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./static_root:/static_root:ro
+
+      - ./media_root:/media_root:ro
 
       - ./logs:/logs
 
