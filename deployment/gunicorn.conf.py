@@ -109,3 +109,23 @@ pidfile = "/tmp/gunicorn.pid"
 
 # استفاده از RAM برای فایل‌های موقت Worker
 worker_tmp_dir = "/dev/shm"
+
+# ------------------------------------------------------------------
+# Proxy
+# ------------------------------------------------------------------
+
+# اعتماد به Reverse Proxy
+forwarded_allow_ips = env(
+    "GUNICORN_FORWARDED_ALLOW_IPS",
+    default="*",
+)
+
+# ------------------------------------------------------------------
+# Process
+# ------------------------------------------------------------------
+
+# نام Process برای مانیتورینگ
+proc_name = env(
+    "GUNICORN_PROC_NAME",
+    default="onlineshop",
+)
