@@ -17,7 +17,7 @@ from environ import Env
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 env = Env()
 
-ENV_DIR = PROJECT_DIR / 'development/env/'
+ENV_DIR = PROJECT_DIR / 'deployment/env/'
 
 from .config.logging import LOGGING
 env.read_env(ENV_DIR / ".env")
@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'orders',
     'payments',
     'shipping',
-    'checkout'
+    'checkout',
     'health'
 ]
 
