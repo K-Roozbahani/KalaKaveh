@@ -103,6 +103,16 @@ services:
       - ./media_root:/media_root
       - ./logs:/logs
 
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request;",
+           "urllib.request.urlopen('http://127.0.0.1:8000/health/')"
+        ]
+
     logging:
       driver: json-file
       options:
@@ -158,7 +168,8 @@ services:
         hard: 8192
 
     depends_on:
-      - django
+      django:
+        condition: service_healthy
 
     ports:
       - "80:80"
