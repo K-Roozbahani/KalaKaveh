@@ -247,6 +247,11 @@ CELERY_TASK_TIME_LIMIT = 60 * 30
 
 CELERY_TASK_SOFT_TIME_LIMIT = 60 * 25
 
+HEALTH_CHECK_CELERY = env.bool(
+    "HEALTH_CHECK_CELERY",
+    default=False,
+)
+
 # _____________________drf-spectacular_________________
 
 SPECTACULAR_SETTINGS = {
