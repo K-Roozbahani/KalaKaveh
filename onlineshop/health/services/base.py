@@ -10,6 +10,7 @@ class HealthStatus(StrEnum):
     """وضعیت سلامت سرویس."""
 
     HEALTHY = "healthy"
+    DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
 
 
