@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'payments',
     'shipping',
     'checkout'
+    'health'
 ]
 
 MIDDLEWARE = [
