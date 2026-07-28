@@ -50,7 +50,9 @@ media_root/
 # ------------------------------
 # Local Database
 # ------------------------------
-*.sqlite3
+db.sqlite3
+**/*.sqlite3
+onlineshop/db.sqlite3
 
 # ------------------------------
 # Environment files
