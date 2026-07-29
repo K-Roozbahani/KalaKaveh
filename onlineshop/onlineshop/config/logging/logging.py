@@ -11,7 +11,8 @@ env = Env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-env.read_env(BASE_DIR / ".env")
+ENV_DIR = BASE_DIR / "deployment" / "env"
+env.read_env(ENV_DIR / ".env")
 
 # ------------------------------------------------------------------
 # Logging Environment Variables
