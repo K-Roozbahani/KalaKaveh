@@ -219,6 +219,7 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+    },
 
     "root": {
         "handlers": ["console"] if LOG_TO_CONSOLE else [],
