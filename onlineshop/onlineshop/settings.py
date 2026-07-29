@@ -14,6 +14,8 @@ from pathlib import Path
 
 from environ import Env
 
+from kombu import Exchange, Queue
+
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 env = Env()
 
@@ -263,6 +265,58 @@ HEALTH_CHECK_CELERY = env.bool(
     default=False,
 )
 
+# ---------------------------------------------------------
+# Default Queue
+# ---------------------------------------------------------
+
+CELERY_TASK_DEFAULT_QUEUE = "notification"
+
+CELERY_TASK_DEFAULT_EXCHANGE = "notification"
+
+CELERY_TASK_DEFAULT_ROUTING_KEY = "notification"
+
+# ---------------------------------------------------------
+# Queues
+# ---------------------------------------------------------
+
+CELERY_TASK_QUEUES = (
+    Queue(
+        "notification",
+        Exchange("notification"),
+        routing_key="notification",
+    ),
+    Queue(
+        "pricing",
+        Exchange("pricing"),
+        routing_key="pricing",
+    ),
+)
+
+# ---------------------------------------------------------
+# Routes
+# ---------------------------------------------------------
+
+CELERY_TASK_ROUTES = {
+    # -------------------------
+    # Price Engine
+    # -------------------------
+    "discounts.refresh_variant_price": {
+        "queue": "pricing",
+    },
+    "discounts.refresh_product_variants_price": {
+        "queue": "pricing",
+    },
+    "discounts.refresh_all_variant_prices": {
+        "queue": "pricing",
+    },
+
+    # -------------------------
+    # Notifications
+    # -------------------------
+    "accounts.send_otp": {
+        "queue": "notification",
+    },
+}
 # _____________________drf-spectacular_________________
 
 SPECTACULAR_SETTINGS = {
