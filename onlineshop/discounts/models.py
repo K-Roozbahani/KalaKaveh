@@ -1,10 +1,11 @@
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 
-from products.models import Product, ProductVariant, Category, Brand
+# from products.models import Product, ProductVariant, Category, Brand
+
 
 
 class Discount(models.Model):
@@ -80,7 +81,7 @@ class DiscountScope(models.Model):
     )
 
     product = models.ForeignKey(
-        Product,
+        'products.Product',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -88,7 +89,7 @@ class DiscountScope(models.Model):
     )
 
     variant = models.ForeignKey(
-        ProductVariant,
+        'products.ProductVariant',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -96,7 +97,7 @@ class DiscountScope(models.Model):
     )
 
     category = models.ForeignKey(
-        Category,
+        'products.Category',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -104,7 +105,7 @@ class DiscountScope(models.Model):
     )
 
     brand = models.ForeignKey(
-        Brand,
+        'products.Brand',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -131,9 +132,24 @@ class DiscountScope(models.Model):
             )
 
     def save(self, *args, **kwargs):
+        """
+        ذخیره تخفیف.
+
+        پس از Commit شدن تراکنش، بروزرسانی قیمت
+        تمامی Variantها در صف Celery قرار می‌گیرد.
+        """
+
         self.full_clean()
+
         super().save(*args, **kwargs)
 
+        def enqueue_price_refresh():
+            # جلوگیری از Circular Import
+            from discounts.tasks import refresh_all_variant_prices_task
+
+            refresh_all_variant_prices_task.delay()
+
+        transaction.on_commit(enqueue_price_refresh)
 
     class Meta:
         verbose_name = _("هدف تخفیف")
