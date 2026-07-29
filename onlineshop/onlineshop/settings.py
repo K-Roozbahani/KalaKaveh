@@ -214,7 +214,7 @@ REST_FRAMEWORK = {
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": env("CACHE_REDIS_URL"),
         "TIMEOUT": 300,
         "OPTIONS": {
