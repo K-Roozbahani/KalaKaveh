@@ -17,7 +17,7 @@ logger = logging.getLogger("celery")
 @shared_task(
     base=BaseTask,
     name="discounts.refresh_variant_price",
-    queue="maintenance",
+    queue="pricing",
 )
 def refresh_variant_price_task(variant_id: int):
     """
@@ -57,7 +57,7 @@ def refresh_variant_price_task(variant_id: int):
 @shared_task(
     base=BaseTask,
     name="discounts.refresh_product_variants_price",
-    queue="maintenance",
+    queue="pricing",
 )
 def refresh_product_variants_price_task(
     product_id: int,
@@ -94,7 +94,7 @@ def refresh_product_variants_price_task(
 @shared_task(
     base=BaseTask,
     name="discounts.refresh_all_variant_prices",
-    queue="maintenance",
+    queue="pricing",
 )
 def refresh_all_variant_prices_task():
     """
