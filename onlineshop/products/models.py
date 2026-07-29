@@ -1,10 +1,9 @@
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 
-# from discounts.models import
 User = get_user_model()
 
 class Category(models.Model):
@@ -199,15 +198,36 @@ class ProductVariant(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        ذخیره تنوع محصول.
+        ذخیره Variant محصول.
 
-        مقداردهی اولیه قیمت نهایی فقط هنگام ایجاد رکورد انجام می‌شود.
-        محاسبه قیمت و تخفیف توسط Price Engine انجام می‌شود.
+        هنگام ایجاد رکورد، مقدار اولیه final_price برابر
+        قیمت پایه قرار می‌گیرد.
+
+        پس از Commit شدن تراکنش، قیمت Variant
+        مجدداً محاسبه و بروزرسانی می‌شود.
         """
-        if self._state.adding and self.final_price is None:
+
+        is_create = self._state.adding
+
+        if is_create and self.final_price is None:
             self.final_price = self.price
 
+        self.full_clean()
+
         super().save(*args, **kwargs)
+
+        if not is_create:
+            def enqueue_price_refresh():
+                # جلوگیری از Circular Import
+                from discounts.tasks import refresh_variant_price_task
+
+                refresh_variant_price_task.delay(
+                    variant_id=self.pk,
+                )
+
+            transaction.on_commit(
+                enqueue_price_refresh,
+            )
 
     class Meta:
         verbose_name = _("تنوع محصول")
