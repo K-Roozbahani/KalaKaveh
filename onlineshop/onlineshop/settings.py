@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     "drf_spectacular",
+    "django_filters",
     'corsheaders',
     'users',
     'home',
@@ -115,7 +116,9 @@ WSGI_APPLICATION = 'onlineshop.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if DEBUG:
+DB_SQLITE = env.bool("DB_SQULITE", default=True)
+
+if DB_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
