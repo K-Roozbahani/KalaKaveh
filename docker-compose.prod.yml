@@ -1,6 +1,55 @@
 version: "3.9"
 
+# --------------------------------------------------
+# تنظیمات مشترک سرویس‌های مبتنی بر Django
+# --------------------------------------------------
+x-django-service: &django-service
+
+  image: onlineshop-django:latest
+
+  build:
+    context: .
+    dockerfile: Dockerfile
+
+  init: true
+
+  restart: unless-stopped
+
+  stop_signal: SIGTERM
+
+  stop_grace_period: 30s
+
+  security_opt:
+    - no-new-privileges:true
+
+  env_file:
+    - ./deployment/env/production.env
+
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+  volumes:
+    - ./static_root:/static_root
+    - ./media_root:/media_root
+    - ./logs:/logs
+
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+  networks:
+    - backend
+
 services:
+
+  # --------------------------------------------------
+  # PostgreSQL
+  # --------------------------------------------------
 
   postgres:
 
@@ -32,6 +81,9 @@ services:
     networks:
       - backend
 
+  # --------------------------------------------------
+  # Redis
+  # --------------------------------------------------
 
   redis:
 
@@ -59,49 +111,23 @@ services:
     networks:
       - backend
 
+  # --------------------------------------------------
+  # Django
+  # --------------------------------------------------
 
   django:
 
-    image: onlineshop-django:latest
-
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *django-service
 
     container_name: onlineshop_django
-
-    init: true
-
-    restart: unless-stopped
-
-    stop_signal: SIGTERM
-
-    stop_grace_period: 30s
-
-    security_opt:
-      - no-new-privileges:true
-
-    env_file:
-      - ./deployment/env/production.env
 
     command: >
       gunicorn
       --config /deployment/gunicorn.conf.py
       onlineshop.wsgi:application
 
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
     expose:
       - "8000"
-
-    volumes:
-      - ./static_root:/static_root
-      - ./media_root:/media_root
-      - ./logs:/logs
 
     healthcheck:
       test:
@@ -109,19 +135,44 @@ services:
           "CMD",
           "python",
           "-c",
-          "import urllib.request;",
-           "urllib.request.urlopen('http://127.0.0.1:8000/health/')"
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/')"
         ]
 
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "5"
+  # --------------------------------------------------
+  # Celery Worker
+  # --------------------------------------------------
 
-    networks:
-      - backend
+  celery_worker:
 
+    <<: *django-service
+
+    container_name: onlineshop_celery_worker
+
+    command: >
+      celery
+      -A onlineshop
+      worker
+      --loglevel=INFO
+
+  # --------------------------------------------------
+  # Celery Beat
+  # --------------------------------------------------
+
+  celery_beat:
+
+    <<: *django-service
+
+    container_name: onlineshop_celery_beat
+
+    command: >
+      celery
+      -A onlineshop
+      beat
+      --loglevel=INFO
+
+  # --------------------------------------------------
+  # Nginx
+  # --------------------------------------------------
 
   nginx:
 
@@ -188,13 +239,11 @@ services:
     networks:
       - backend
 
-
 volumes:
 
   postgres_data:
 
   redis_data:
-
 
 networks:
 
