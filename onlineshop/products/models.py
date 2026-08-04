@@ -106,6 +106,75 @@ class ProductAttributeValue(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.attribute.name}: {self.value}"
 
+
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+class ProductAttributeValueProperty(models.Model):
+    """
+    اطلاعات تکمیلی مربوط به مقدار ویژگی محصول.
+
+    مثال:
+        رنگ = قرمز
+
+        properties:
+            color_code = #FF0000
+            rgb = 255,0,0
+            image = red.png
+    """
+
+    attribute_value = models.ForeignKey(
+        "products.ProductAttributeValue",
+        on_delete=models.CASCADE,
+        related_name="properties",
+        verbose_name=_("مقدار ویژگی"),
+    )
+
+    key = models.CharField(
+        _("کلید"),
+        max_length=100,
+        db_index=True,
+        help_text=_(
+            "نام استاندارد ویژگی تکمیلی مانند color_code یا rgb"
+        ),
+    )
+
+    value = models.CharField(
+        _("مقدار"),
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = _("خاصیت مقدار ویژگی")
+        verbose_name_plural = _("خاصیت‌های مقدار ویژگی")
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=(
+                    "attribute_value",
+                    "key",
+                ),
+                name="unique_attribute_value_property_key",
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=(
+                    "key",
+                    "value",
+                )
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.attribute_value} - "
+            f"{self.key}: {self.value}"
+        )
+
+
 class ProductImage(models.Model):
     """
     برای ذخیره چندین عکس برای هر محصول.
