@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils.text import slugify
@@ -263,6 +264,35 @@ class ProductVariantAttribute(models.Model):
             "variant",
             "attribute_value"
         )
+
+    def clean(self):
+        """
+        اعتبارسنجی ارتباط بین Variant و AttributeValue.
+
+        - مقدار ویژگی باید متعلق به همان محصول Variant باشد.
+        """
+
+        super().clean()
+
+        # در زمان ساخت شیء ممکن است هنوز FKها مقدار نداشته باشند.
+        if not self.variant_id or not self.attribute_value_id:
+            return
+
+        if self.variant.product_id != self.attribute_value.product_id:
+            raise ValidationError(
+                {
+                    "attribute_value": _(
+                        "مقدار ویژگی انتخاب شده متعلق به محصول این تنوع نیست."
+                    )
+                }
+            )
+
+    def save(self, *args, **kwargs):
+        """
+        قبل از ذخیره، اعتبارسنجی مدل انجام می‌شود.
+        """
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return (
