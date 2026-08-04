@@ -17,7 +17,7 @@ from products.models import (
     ProductVariant,
     ProductVariantAttribute,
     VariantImage,
-    Review,
+    Review, ProductAttributeValueProperty,
 )
 
 
@@ -50,6 +50,25 @@ def reject_reviews(
 # ==========================================================
 # Inline Admins
 # ==========================================================
+class ProductAttributeValuePropertyInline(admin.TabularInline):
+    """
+    ویژگی‌های تکمیلی مقدار ویژگی محصول
+
+    مثال:
+        رنگ = قرمز
+
+        color_code = #FF0000
+    """
+
+    model = ProductAttributeValueProperty
+
+    extra = 1
+
+    fields = (
+        "key",
+        "value",
+    )
+
 
 class ProductAttributeValueInline(admin.TabularInline):
     """
@@ -63,6 +82,7 @@ class ProductAttributeValueInline(admin.TabularInline):
         "attribute",
     )
 
+    show_change_link = True
 
 class ProductImageInline(admin.TabularInline):
     """
@@ -148,9 +168,42 @@ class ProductVariantAttributeInline(admin.TabularInline):
 
     extra = 1
 
-    autocomplete_fields = (
-        "attribute_value",
-    )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """
+        فقط مقادیر ویژگی مربوط به همان محصول Variant
+        قابل انتخاب هستند.
+        """
+
+        if db_field.name == "attribute_value":
+            object_id = request.resolver_match.kwargs.get("object_id")
+
+            if object_id:
+                variant = (
+                    ProductVariant.objects
+                    .only("product_id")
+                    .filter(pk=object_id)
+                    .first()
+                )
+
+                if variant:
+                    kwargs["queryset"] = (
+                        ProductAttributeValue.objects
+                        .filter(product_id=variant.product_id)
+                        .select_related("attribute")
+                        .order_by("attribute__name", "value")
+                    )
+                else:
+                    kwargs["queryset"] = ProductAttributeValue.objects.none()
+            else:
+                # هنگام ایجاد Variant جدید هنوز محصول مشخص نیست.
+                kwargs["queryset"] = ProductAttributeValue.objects.none()
+
+        return super().formfield_for_foreignkey(
+            db_field,
+            request,
+            **kwargs,
+        )
 
 
 class VariantImageInline(admin.TabularInline):
@@ -397,6 +450,10 @@ class ProductAttributeValueAdmin(admin.ModelAdmin):
     list_per_page = 30
 
     show_full_result_count = False
+
+    inlines = (
+        ProductAttributeValuePropertyInline,
+    )
 
 
 # ==========================================================

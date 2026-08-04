@@ -3,6 +3,16 @@ from rest_framework import serializers
 from products.models import Review
 
 
+class ReviewSummarySerializer(serializers.Serializer):
+    """
+    خلاصه امتیازهای محصول.
+    """
+
+    average_rate = serializers.FloatField()
+    total_count = serializers.IntegerField()
+    counts = serializers.DictField()
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     """
     نمایش نظرات کاربران

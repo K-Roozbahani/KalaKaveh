@@ -1,10 +1,10 @@
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 
-# from discounts.models import
 User = get_user_model()
 
 class Category(models.Model):
@@ -106,6 +106,72 @@ class ProductAttributeValue(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.attribute.name}: {self.value}"
 
+
+
+class ProductAttributeValueProperty(models.Model):
+    """
+    اطلاعات تکمیلی مربوط به مقدار ویژگی محصول.
+
+    مثال:
+        رنگ = قرمز
+
+        properties:
+            color_code = #FF0000
+            rgb = 255,0,0
+            image = red.png
+    """
+
+    attribute_value = models.ForeignKey(
+        "products.ProductAttributeValue",
+        on_delete=models.CASCADE,
+        related_name="properties",
+        verbose_name=_("مقدار ویژگی"),
+    )
+
+    key = models.CharField(
+        _("کلید"),
+        max_length=100,
+        db_index=True,
+        help_text=_(
+            "نام استاندارد ویژگی تکمیلی مانند color_code یا rgb"
+        ),
+    )
+
+    value = models.CharField(
+        _("مقدار"),
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = _("خاصیت مقدار ویژگی")
+        verbose_name_plural = _("خاصیت‌های مقدار ویژگی")
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=(
+                    "attribute_value",
+                    "key",
+                ),
+                name="unique_attribute_value_property_key",
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=(
+                    "key",
+                    "value",
+                )
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.attribute_value} - "
+            f"{self.key}: {self.value}"
+        )
+
+
 class ProductImage(models.Model):
     """
     برای ذخیره چندین عکس برای هر محصول.
@@ -199,15 +265,36 @@ class ProductVariant(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        ذخیره تنوع محصول.
+        ذخیره Variant محصول.
 
-        مقداردهی اولیه قیمت نهایی فقط هنگام ایجاد رکورد انجام می‌شود.
-        محاسبه قیمت و تخفیف توسط Price Engine انجام می‌شود.
+        هنگام ایجاد رکورد، مقدار اولیه final_price برابر
+        قیمت پایه قرار می‌گیرد.
+
+        پس از Commit شدن تراکنش، قیمت Variant
+        مجدداً محاسبه و بروزرسانی می‌شود.
         """
-        if self._state.adding and self.final_price is None:
+
+        is_create = self._state.adding
+
+        if is_create and self.final_price is None:
             self.final_price = self.price
 
+        self.full_clean()
+
         super().save(*args, **kwargs)
+
+        if not is_create:
+            def enqueue_price_refresh():
+                # جلوگیری از Circular Import
+                from discounts.tasks import refresh_variant_price_task
+
+                refresh_variant_price_task.delay(
+                    variant_id=self.pk,
+                )
+
+            transaction.on_commit(
+                enqueue_price_refresh,
+            )
 
     class Meta:
         verbose_name = _("تنوع محصول")
@@ -243,6 +330,35 @@ class ProductVariantAttribute(models.Model):
             "variant",
             "attribute_value"
         )
+
+    def clean(self):
+        """
+        اعتبارسنجی ارتباط بین Variant و AttributeValue.
+
+        - مقدار ویژگی باید متعلق به همان محصول Variant باشد.
+        """
+
+        super().clean()
+
+        # در زمان ساخت شیء ممکن است هنوز FKها مقدار نداشته باشند.
+        if not self.variant_id or not self.attribute_value_id:
+            return
+
+        if self.variant.product_id != self.attribute_value.product_id:
+            raise ValidationError(
+                {
+                    "attribute_value": _(
+                        "مقدار ویژگی انتخاب شده متعلق به محصول این تنوع نیست."
+                    )
+                }
+            )
+
+    def save(self, *args, **kwargs):
+        """
+        قبل از ذخیره، اعتبارسنجی مدل انجام می‌شود.
+        """
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return (

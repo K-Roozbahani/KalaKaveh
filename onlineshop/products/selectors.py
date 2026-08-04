@@ -6,6 +6,7 @@ from django.db.models import (
     Subquery,
     OuterRef
 )
+from django.db.models.aggregates import Avg, Count
 
 from .models import (
     Product,
@@ -178,12 +179,22 @@ def get_products_for_listing() -> QuerySet[Product]:
     )
 
 
+from django.db.models import Prefetch
+
+from products.models import (
+    Product,
+    ProductVariant,
+    ProductAttributeValue,
+    ProductAttributeValueProperty,
+)
+
+
 def get_product_detail_by_slug(
     *,
     slug: str,
 ) -> Product | None:
     """
-    دریافت اطلاعات کامل محصول برای صفحه جزئیات
+    دریافت اطلاعات کامل محصول برای صفحه جزئیات.
     """
 
     variants = (
@@ -196,6 +207,19 @@ def get_product_detail_by_slug(
         )
     )
 
+    attribute_values = (
+        ProductAttributeValue.objects
+        .select_related(
+            "attribute",
+        )
+        .prefetch_related(
+            Prefetch(
+                "properties",
+                queryset=ProductAttributeValueProperty.objects.all(),
+            )
+        )
+    )
+
     return (
         Product.objects
         .select_related(
@@ -204,17 +228,22 @@ def get_product_detail_by_slug(
         )
         .prefetch_related(
             "images",
+
             Prefetch(
                 "variants",
                 queryset=variants,
             ),
-            "attribute_values__attribute",
-            "reviews__user",
+
+            Prefetch(
+                "attribute_values",
+                queryset=attribute_values,
+            ),
         )
         .filter(
             slug=slug,
             is_active=True,
-        ).first()
+        )
+        .first()
     )
 
 
@@ -354,6 +383,43 @@ def get_default_variant(
 # =====================================================
 # Review
 # =====================================================
+
+def get_product_review_summary(
+    *,
+    product_id: int,
+) -> dict:
+    """
+    دریافت خلاصه آماری امتیازهای محصول.
+    """
+
+    reviews = Review.objects.filter(
+        product_id=product_id,
+        is_valid=True,
+    )
+
+    summary = reviews.aggregate(
+        average_rate=Avg("rating"),
+        total_count=Count("id"),
+    )
+
+    counts = {}
+
+    for rate in range(1, 6):
+        count = reviews.filter(
+            rating=rate,
+        ).count()
+
+        if count:
+            counts[str(rate)] = count
+
+    return {
+        "average_rate": round(
+            summary["average_rate"] or 0,
+            1,
+        ),
+        "total_count": summary["total_count"],
+        "counts": counts,
+    }
 
 def get_product_reviews(
     *,
