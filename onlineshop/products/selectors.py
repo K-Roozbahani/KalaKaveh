@@ -178,12 +178,22 @@ def get_products_for_listing() -> QuerySet[Product]:
     )
 
 
+from django.db.models import Prefetch
+
+from products.models import (
+    Product,
+    ProductVariant,
+    ProductAttributeValue,
+    ProductAttributeValueProperty,
+)
+
+
 def get_product_detail_by_slug(
     *,
     slug: str,
 ) -> Product | None:
     """
-    دریافت اطلاعات کامل محصول برای صفحه جزئیات
+    دریافت اطلاعات کامل محصول برای صفحه جزئیات.
     """
 
     variants = (
@@ -196,6 +206,19 @@ def get_product_detail_by_slug(
         )
     )
 
+    attribute_values = (
+        ProductAttributeValue.objects
+        .select_related(
+            "attribute",
+        )
+        .prefetch_related(
+            Prefetch(
+                "properties",
+                queryset=ProductAttributeValueProperty.objects.all(),
+            )
+        )
+    )
+
     return (
         Product.objects
         .select_related(
@@ -204,17 +227,24 @@ def get_product_detail_by_slug(
         )
         .prefetch_related(
             "images",
+
             Prefetch(
                 "variants",
                 queryset=variants,
             ),
-            "attribute_values__attribute",
+
+            Prefetch(
+                "attribute_values",
+                queryset=attribute_values,
+            ),
+
             "reviews__user",
         )
         .filter(
             slug=slug,
             is_active=True,
-        ).first()
+        )
+        .first()
     )
 
 
