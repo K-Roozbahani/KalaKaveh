@@ -17,7 +17,7 @@ from products.models import (
     ProductVariant,
     ProductVariantAttribute,
     VariantImage,
-    Review,
+    Review, ProductAttributeValueProperty,
 )
 
 
@@ -50,6 +50,25 @@ def reject_reviews(
 # ==========================================================
 # Inline Admins
 # ==========================================================
+class ProductAttributeValuePropertyInline(admin.TabularInline):
+    """
+    ویژگی‌های تکمیلی مقدار ویژگی محصول
+
+    مثال:
+        رنگ = قرمز
+
+        color_code = #FF0000
+    """
+
+    model = ProductAttributeValueProperty
+
+    extra = 1
+
+    fields = (
+        "key",
+        "value",
+    )
+
 
 class ProductAttributeValueInline(admin.TabularInline):
     """
@@ -63,6 +82,7 @@ class ProductAttributeValueInline(admin.TabularInline):
         "attribute",
     )
 
+    show_change_link = True
 
 class ProductImageInline(admin.TabularInline):
     """
@@ -430,6 +450,10 @@ class ProductAttributeValueAdmin(admin.ModelAdmin):
     list_per_page = 30
 
     show_full_result_count = False
+
+    inlines = (
+        ProductAttributeValuePropertyInline,
+    )
 
 
 # ==========================================================
