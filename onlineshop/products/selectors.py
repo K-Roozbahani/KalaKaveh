@@ -6,6 +6,7 @@ from django.db.models import (
     Subquery,
     OuterRef
 )
+from django.db.models.aggregates import Avg, Count
 
 from .models import (
     Product,
@@ -237,8 +238,6 @@ def get_product_detail_by_slug(
                 "attribute_values",
                 queryset=attribute_values,
             ),
-
-            "reviews__user",
         )
         .filter(
             slug=slug,
@@ -384,6 +383,43 @@ def get_default_variant(
 # =====================================================
 # Review
 # =====================================================
+
+def get_product_review_summary(
+    *,
+    product_id: int,
+) -> dict:
+    """
+    دریافت خلاصه آماری امتیازهای محصول.
+    """
+
+    reviews = Review.objects.filter(
+        product_id=product_id,
+        is_valid=True,
+    )
+
+    summary = reviews.aggregate(
+        average_rate=Avg("rating"),
+        total_count=Count("id"),
+    )
+
+    counts = {}
+
+    for rate in range(1, 6):
+        count = reviews.filter(
+            rating=rate,
+        ).count()
+
+        if count:
+            counts[str(rate)] = count
+
+    return {
+        "average_rate": round(
+            summary["average_rate"] or 0,
+            1,
+        ),
+        "total_count": summary["total_count"],
+        "counts": counts,
+    }
 
 def get_product_reviews(
     *,
