@@ -107,9 +107,6 @@ class ProductAttributeValue(models.Model):
         return f"{self.product.name} - {self.attribute.name}: {self.value}"
 
 
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-
 
 class ProductAttributeValueProperty(models.Model):
     """
