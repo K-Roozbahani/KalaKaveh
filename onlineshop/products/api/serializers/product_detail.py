@@ -7,7 +7,8 @@ from .brand import BrandSerializer
 from .category import CategorySerializer
 from .image import ProductImageSerializer
 from .variant import VariantSerializer
-from .review import ReviewSerializer
+from .review import ReviewSerializer, ReviewSummarySerializer
+from ...selectors import get_product_review_summary
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -33,10 +34,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    reviews = ReviewSerializer(
-        many=True,
-        read_only=True,
-    )
+    reviews = serializers.SerializerMethodField()
 
     attributes = ProductAttributeValueSerializer(
         source='attribute_values',
@@ -61,3 +59,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         )
 
         read_only_fields = fields
+
+    def get_reviews(self, obj):
+        return ReviewSummarySerializer(
+            get_product_review_summary(
+                product_id=obj.id
+            )
+        ).data
