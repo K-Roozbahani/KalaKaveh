@@ -148,9 +148,42 @@ class ProductVariantAttributeInline(admin.TabularInline):
 
     extra = 1
 
-    autocomplete_fields = (
-        "attribute_value",
-    )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """
+        فقط مقادیر ویژگی مربوط به همان محصول Variant
+        قابل انتخاب هستند.
+        """
+
+        if db_field.name == "attribute_value":
+            object_id = request.resolver_match.kwargs.get("object_id")
+
+            if object_id:
+                variant = (
+                    ProductVariant.objects
+                    .only("product_id")
+                    .filter(pk=object_id)
+                    .first()
+                )
+
+                if variant:
+                    kwargs["queryset"] = (
+                        ProductAttributeValue.objects
+                        .filter(product_id=variant.product_id)
+                        .select_related("attribute")
+                        .order_by("attribute__name", "value")
+                    )
+                else:
+                    kwargs["queryset"] = ProductAttributeValue.objects.none()
+            else:
+                # هنگام ایجاد Variant جدید هنوز محصول مشخص نیست.
+                kwargs["queryset"] = ProductAttributeValue.objects.none()
+
+        return super().formfield_for_foreignkey(
+            db_field,
+            request,
+            **kwargs,
+        )
 
 
 class VariantImageInline(admin.TabularInline):
