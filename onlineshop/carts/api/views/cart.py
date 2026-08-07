@@ -25,13 +25,18 @@ from carts.services.pricing import (
     list=extend_schema(
         tags=["Cart"],
         summary="نمایش سبد خرید",
+        responses={200: CartSerializer},
     ),
     clear=extend_schema(
         tags=["Cart"],
         summary="پاک کردن سبد خرید",
+        request=None,
+        responses={200: CartSerializer},
     ),
 )
 class CartViewSet(ViewSet):
+
+    serializer_class = CartSerializer
 
     permission_classes = [
         AllowAny,

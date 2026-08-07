@@ -24,13 +24,35 @@ from carts.services.pricing import calculate_cart_totals
 
 
 @extend_schema_view(
-    create=extend_schema(tags=["Cart"], summary="افزودن آیتم"),
-    partial_update=extend_schema(tags=["Cart"], summary="ویرایش آیتم"),
-    destroy=extend_schema(tags=["Cart"], summary="حذف آیتم"),
+    create=extend_schema(
+        tags=["Cart"],
+        summary="افزودن آیتم",
+        request=AddCartItemSerializer,
+        responses={
+            status.HTTP_201_CREATED: CartSerializer,
+        },
+    ),
+    partial_update=extend_schema(
+        tags=["Cart"],
+        summary="ویرایش آیتم",
+        request=UpdateCartItemSerializer,
+        responses={
+            status.HTTP_200_OK: CartSerializer,
+        },
+    ),
+    destroy=extend_schema(
+        tags=["Cart"],
+        summary="حذف آیتم",
+        request=None,
+        responses={
+            status.HTTP_200_OK: CartSerializer,
+        },
+    ),
 )
 class CartItemViewSet(ViewSet):
-
-    permission_classes = [AllowAny]
+    permission_classes = [
+        AllowAny,
+    ]
 
     # =====================================================
     # Helpers
