@@ -8,7 +8,7 @@ from products.validators import (
     validate_product_is_active, validate_variant_is_active, validate_variant_has_stock,
 )
 
-def ensure_variant_can_be_purchased(*, variant, quantity):
+def ensure_variant_can_be_purchased(*, variant, quantity: int = 1):
     """
     بررسی کامل امکان خرید
     """
