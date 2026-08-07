@@ -60,17 +60,30 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
         }
 
 
-class VariantAttributeSerializer(serializers.ModelSerializer):
-    """"
-        مدل واسط بین تنوع محصول و مقدار ویژگی
+class ProductVariantAttributeSerializer(serializers.ModelSerializer):
+    """
+    ویژگی‌های تنوع محصول
     """
 
-    attribute_value = ProductAttributeValueSerializer(read_only=True)
+    attribute = serializers.CharField(
+        source="attribute.name",
+        read_only=True,
+    )
+
+    properties = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductVariantAttribute
 
         fields = (
-            'id',
-            'attribute_value',
+            "id",
+            "attribute",
+            "value",
+            "properties",
         )
+
+    def get_properties(self, obj):
+        return {
+            item.key: item.value
+            for item in obj.properties.all()
+        }
