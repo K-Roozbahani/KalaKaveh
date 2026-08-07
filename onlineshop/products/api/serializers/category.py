@@ -29,7 +29,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
         current = obj
         while current is not None:
-            path.append(current.slug)
+            path.append(
+                {
+                    "slug": current.slug,
+                    "name": current.name
+                }
+            )
             current = current.parent
 
         return list(reversed(path))
