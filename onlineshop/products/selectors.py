@@ -15,7 +15,7 @@ from .models import (
     Brand,
     Review,
     ProductImage,
-    VariantImage,
+    VariantImage, ProductVariantAttribute, ProductVariantAttributeProperty,
 )
 
 
@@ -197,6 +197,19 @@ def get_product_detail_by_slug(
     دریافت اطلاعات کامل محصول برای صفحه جزئیات.
     """
 
+    variant_attributes = (
+        ProductVariantAttribute.objects
+        .select_related(
+            "attribute",
+        )
+        .prefetch_related(
+            Prefetch(
+                "properties",
+                queryset=ProductVariantAttributeProperty.objects.all(),
+            )
+        )
+    )
+
     variants = (
         ProductVariant.objects
         .filter(
@@ -204,6 +217,11 @@ def get_product_detail_by_slug(
         )
         .prefetch_related(
             "images",
+            Prefetch(
+                "attributes",
+                queryset=variant_attributes,
+                to_attr="prefetched_attributes",
+            ),
         )
     )
 
@@ -217,6 +235,10 @@ def get_product_detail_by_slug(
                 "properties",
                 queryset=ProductAttributeValueProperty.objects.all(),
             )
+        )
+        .order_by(
+            "sort_order",
+            "id",
         )
     )
 
@@ -232,11 +254,23 @@ def get_product_detail_by_slug(
             Prefetch(
                 "variants",
                 queryset=variants,
+                to_attr="prefetched_variants",
             ),
 
+            # تمام مشخصات محصول
             Prefetch(
                 "attribute_values",
                 queryset=attribute_values,
+                to_attr="prefetched_attribute_values",
+            ),
+
+            # ویژگی‌های شاخص
+            Prefetch(
+                "attribute_values",
+                queryset=attribute_values.filter(
+                    is_highlight=True,
+                ),
+                to_attr="highlight_attributes",
             ),
         )
         .filter(
