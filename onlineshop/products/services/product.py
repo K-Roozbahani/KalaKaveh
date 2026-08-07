@@ -7,7 +7,7 @@ from products.models import (
     ProductVariant,
     Review,
 )
-from products.selectors import get_product_by_slug
+from products.selectors import get_product_detail_by_slug
 
 
 @transaction.atomic
@@ -146,7 +146,7 @@ def prepare_retrieve_product_by_slug(
         NotFound: اگر محصول با اسلاگ موردنظر یافت نشود.
     """
 
-    product = get_product_by_slug(slug=slug)
+    product = get_product_detail_by_slug(slug=slug)
 
     if product is None:
         raise NotFound(_("محصول مورد نظر یافت نشد."))

@@ -38,7 +38,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     )
 
     highlight_attributes = ProductAttributeValueSerializer(
-        source="highlight_attributes",
         many=True,
         read_only=True,
     )
