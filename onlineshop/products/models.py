@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils.text import slugify
@@ -147,8 +146,12 @@ class ProductAttributeValue(models.Model):
 
         constraints = [
             models.UniqueConstraint(
-                fields=("product", "attribute"),
-                name="unique_product_attribute",
+                fields=(
+                    "product",
+                    "attribute",
+                    "value",
+                ),
+                name="unique_product_attribute_value",
             )
         ]
 
@@ -302,13 +305,6 @@ class ProductVariant(models.Model):
     stock = models.PositiveIntegerField(
         _("موجودی"),
         default=0
-    )
-
-    attribute_values = models.ManyToManyField(
-        ProductAttributeValue,
-        through="ProductVariantAttribute",
-        related_name="product_variants",
-        verbose_name=_("ویژگی‌های تنوع")
     )
 
     is_active = models.BooleanField(
