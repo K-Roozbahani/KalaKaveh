@@ -17,7 +17,7 @@ from products.models import (
     ProductVariant,
     ProductVariantAttribute,
     VariantImage,
-    Review, ProductAttributeValueProperty,
+    Review, ProductAttributeValueProperty, ProductVariantAttributeProperty,
 )
 
 
@@ -63,6 +63,34 @@ class ProductAttributeValuePropertyInline(admin.TabularInline):
     model = ProductAttributeValueProperty
 
     extra = 1
+
+    autocomplete_fields = (
+        "attribute_value",
+    )
+
+    fields = (
+        "key",
+        "value",
+    )
+
+
+class ProductVariantAttributeValuePropertyInline(admin.TabularInline):
+    """
+    اطلاعات تکمیلی مربوط به مقدار ویژگی تنوع محصول
+
+    مثال:
+        رنگ = قرمز
+
+        color_code = #FF0000
+    """
+
+    model = ProductVariantAttributeProperty
+
+    extra = 1
+
+    autocomplete_fields = (
+        "variant_attribute",
+    )
 
     fields = (
         "key",
@@ -161,49 +189,23 @@ class ProductVariantInline(admin.TabularInline):
 
 class ProductVariantAttributeInline(admin.TabularInline):
     """
-    ویژگی‌های تنوع
+    ویژگی‌های تنوع محصول
     """
 
     model = ProductVariantAttribute
 
     extra = 1
 
+    autocomplete_fields = (
+        "attribute",
+    )
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """
-        فقط مقادیر ویژگی مربوط به همان محصول Variant
-        قابل انتخاب هستند.
-        """
+    fields = (
+        "attribute",
+        "value",
+    )
 
-        if db_field.name == "attribute_value":
-            object_id = request.resolver_match.kwargs.get("object_id")
-
-            if object_id:
-                variant = (
-                    ProductVariant.objects
-                    .only("product_id")
-                    .filter(pk=object_id)
-                    .first()
-                )
-
-                if variant:
-                    kwargs["queryset"] = (
-                        ProductAttributeValue.objects
-                        .filter(product_id=variant.product_id)
-                        .select_related("attribute")
-                        .order_by("attribute__name", "value")
-                    )
-                else:
-                    kwargs["queryset"] = ProductAttributeValue.objects.none()
-            else:
-                # هنگام ایجاد Variant جدید هنوز محصول مشخص نیست.
-                kwargs["queryset"] = ProductAttributeValue.objects.none()
-
-        return super().formfield_for_foreignkey(
-            db_field,
-            request,
-            **kwargs,
-        )
+    show_change_link = True
 
 
 class VariantImageInline(admin.TabularInline):
@@ -581,23 +583,32 @@ class ProductVariantAttributeAdmin(admin.ModelAdmin):
 
     list_display = (
         "variant",
-        "attribute_value",
+        "attribute",
+        "value",
     )
 
     search_fields = (
         "variant__sku",
-        "attribute_value__value",
-        "attribute_value__attribute__name",
+        "value",
+        "attribute__name",
     )
+
+    inlines = (ProductVariantAttributeValuePropertyInline,)
 
     autocomplete_fields = (
         "variant",
-        "attribute_value",
+        "attribute",
+    )
+
+    list_filter = (
+        "attribute",
     )
 
     list_per_page = 30
 
     show_full_result_count = False
+
+    show_change_link = True
 
 
 # ==========================================================
