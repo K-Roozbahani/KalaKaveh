@@ -16,13 +16,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     نمایش جزئیات محصول
     """
 
-    brand = BrandSerializer(
-        read_only=True,
-    )
+    brand = BrandSerializer(read_only=True)
 
-    category = CategorySerializer(
-        read_only=True,
-    )
+    category = CategorySerializer(read_only=True)
 
     images = ProductImageSerializer(
         many=True,
@@ -30,17 +26,24 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     )
 
     variants = VariantSerializer(
+        source="prefetched_variants",
+        many=True,
+        read_only=True,
+    )
+
+    attributes = ProductAttributeValueSerializer(
+        source="prefetched_attribute_values",
+        many=True,
+        read_only=True,
+    )
+
+    highlight_attributes = ProductAttributeValueSerializer(
+        source="highlight_attributes",
         many=True,
         read_only=True,
     )
 
     reviews = serializers.SerializerMethodField()
-
-    attributes = ProductAttributeValueSerializer(
-        source='attribute_values',
-        many=True,
-        read_only=True,
-    )
 
     class Meta:
         model = Product
@@ -53,7 +56,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "brand",
             "category",
             "images",
-            'attributes',
+            "highlight_attributes",
+            "attributes",
             "variants",
             "reviews",
         )
