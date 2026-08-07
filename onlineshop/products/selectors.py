@@ -15,7 +15,11 @@ from .models import (
     Brand,
     Review,
     ProductImage,
-    VariantImage, ProductVariantAttribute, ProductVariantAttributeProperty,
+    VariantImage,
+    ProductVariantAttribute,
+    ProductVariantAttributeProperty,
+    ProductAttributeValue,
+    ProductAttributeValueProperty,
 )
 
 
@@ -177,16 +181,6 @@ def get_products_for_listing() -> QuerySet[Product]:
             ),
         )
     )
-
-
-from django.db.models import Prefetch
-
-from products.models import (
-    Product,
-    ProductVariant,
-    ProductAttributeValue,
-    ProductAttributeValueProperty,
-)
 
 
 def get_product_detail_by_slug(
