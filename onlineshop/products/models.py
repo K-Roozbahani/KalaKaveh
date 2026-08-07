@@ -62,6 +62,11 @@ class ProductAttribute(models.Model):
     name = models.CharField(_("نام ویژگی"), max_length=100)
     description = models.TextField(_("توضیحات"), blank=True)
 
+    is_filterable = models.BooleanField(
+        _("قابل استفاده در فیلتر"),
+        default=False,
+    )
+
     def __str__(self):
         return self.name
 
@@ -94,17 +99,70 @@ class Product(models.Model):
 
 class ProductAttributeValue(models.Model):
     """
-    مقادیر واقعی برای ویژگی‌های محصول (مثلاً رنگ “قرمز” برای ویژگی “رنگ”).
+    مقدار ویژگی برای یک محصول.
+
+    مثال:
+
+        محصول:
+            iPhone 16
+
+        ویژگی:
+            وزن = 190 گرم
+
+            جنس = آلومینیوم
     """
-    product = models.ForeignKey(Product, related_name='attribute_values', on_delete=models.CASCADE)
-    attribute = models.ForeignKey(ProductAttribute, related_name='values', on_delete=models.CASCADE)
-    value = models.CharField(_("مقدار"), max_length=255)
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="attribute_values",
+        verbose_name=_("محصول"),
+    )
+
+    attribute = models.ForeignKey(
+        ProductAttribute,
+        on_delete=models.CASCADE,
+        related_name="product_values",
+        verbose_name=_("ویژگی"),
+    )
+
+    value = models.CharField(
+        _("مقدار"),
+        max_length=255,
+    )
+
+    is_highlight = models.BooleanField(
+        _("نمایش به عنوان ویژگی شاخص"),
+        default=False,
+    )
+
+    sort_order = models.PositiveSmallIntegerField(
+        _("ترتیب نمایش"),
+        default=0,
+    )
 
     class Meta:
-        unique_together = ('product', 'attribute', 'value') # اطمینان از اینکه هر ویژگی برای یک محصول فقط یک بار تعریف شده است
+        verbose_name = _("مقدار ویژگی محصول")
+        verbose_name_plural = _("مقادیر ویژگی محصول")
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=("product", "attribute"),
+                name="unique_product_attribute",
+            )
+        ]
+
+        ordering = (
+            "sort_order",
+            "id",
+        )
 
     def __str__(self):
-        return f"{self.product.name} - {self.attribute.name}: {self.value}"
+        return (
+            f"{self.product} - "
+            f"{self.attribute}: "
+            f"{self.value}"
+        )
 
 
 
@@ -306,65 +364,113 @@ class ProductVariant(models.Model):
 
 class ProductVariantAttribute(models.Model):
     """
-    مدل واسط بین تنوع محصول و مقدار ویژگی
+    مقدار ویژگی مربوط به یک تنوع محصول.
+
+    مثال:
+
+        رنگ = قرمز
+        حافظه = 256 گیگابایت
     """
 
     variant = models.ForeignKey(
         ProductVariant,
         on_delete=models.CASCADE,
-        related_name="variant_attributes",
-        verbose_name=_("تنوع محصول")
+        related_name="attributes",
+        verbose_name=_("تنوع محصول"),
     )
 
-    attribute_value = models.ForeignKey(
-        ProductAttributeValue,
+    attribute = models.ForeignKey(
+        ProductAttribute,
         on_delete=models.CASCADE,
-        related_name="variant_attributes",
-        verbose_name=_("مقدار ویژگی")
+        related_name="variant_values",
+        verbose_name=_("ویژگی"),
+    )
+
+    value = models.CharField(
+        _("مقدار"),
+        max_length=255,
     )
 
     class Meta:
         verbose_name = _("ویژگی تنوع محصول")
         verbose_name_plural = _("ویژگی‌های تنوع محصول")
-        unique_together = (
-            "variant",
-            "attribute_value"
-        )
 
-    def clean(self):
-        """
-        اعتبارسنجی ارتباط بین Variant و AttributeValue.
-
-        - مقدار ویژگی باید متعلق به همان محصول Variant باشد.
-        """
-
-        super().clean()
-
-        # در زمان ساخت شیء ممکن است هنوز FKها مقدار نداشته باشند.
-        if not self.variant_id or not self.attribute_value_id:
-            return
-
-        if self.variant.product_id != self.attribute_value.product_id:
-            raise ValidationError(
-                {
-                    "attribute_value": _(
-                        "مقدار ویژگی انتخاب شده متعلق به محصول این تنوع نیست."
-                    )
-                }
+        constraints = [
+            models.UniqueConstraint(
+                fields=("variant", "attribute"),
+                name="unique_variant_attribute",
             )
-
-    def save(self, *args, **kwargs):
-        """
-        قبل از ذخیره، اعتبارسنجی مدل انجام می‌شود.
-        """
-        self.full_clean()
-        return super().save(*args, **kwargs)
+        ]
 
     def __str__(self):
         return (
             f"{self.variant.sku} - "
-            f"{self.attribute_value.attribute.name}: "
-            f"{self.attribute_value.value}"
+            f"{self.attribute}: "
+            f"{self.value}"
+        )
+
+
+class ProductVariantAttributeProperty(models.Model):
+    """
+    اطلاعات تکمیلی مربوط به مقدار ویژگی تنوع محصول.
+
+    مثال:
+        رنگ = قرمز
+
+        properties:
+            color_code = #FF0000
+            rgb = 255,0,0
+            image = red.png
+    """
+
+    variant_attribute = models.ForeignKey(
+        "products.ProductVariantAttribute",
+        on_delete=models.CASCADE,
+        related_name="properties",
+        verbose_name=_("ویژگی تنوع"),
+    )
+
+    key = models.CharField(
+        _("کلید"),
+        max_length=100,
+        db_index=True,
+        help_text=_(
+            "نام استاندارد ویژگی تکمیلی مانند color_code یا rgb"
+        ),
+    )
+
+    value = models.CharField(
+        _("مقدار"),
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = _("خاصیت ویژگی تنوع")
+        verbose_name_plural = _("خاصیت‌های ویژگی تنوع")
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=(
+                    "variant_attribute",
+                    "key",
+                ),
+                name="unique_variant_attribute_property_key",
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=(
+                    "key",
+                    "value",
+                )
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.variant_attribute} - "
+            f"{self.key}: {self.value}"
         )
 
 
