@@ -430,15 +430,12 @@ def get_product_review_summary(
         total_count=Count("id"),
     )
 
-    counts = {}
-
-    for rate in range(1, 6):
-        count = reviews.filter(
+    counts = {
+        str(rate): reviews.filter(
             rating=rate,
         ).count()
-
-        if count:
-            counts[str(rate)] = count
+        for rate in range(1, 6)
+    }
 
     return {
         "average_rate": round(
