@@ -1,9 +1,12 @@
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
 from products.models import ProductVariant
 
 from .image import VariantImageSerializer
-from .attribute import VariantAttributeSerializer
+from .attribute import ProductVariantAttributeSerializer
+from ...services.stock import ensure_variant_can_be_purchased
+
 
 class VariantSerializer(serializers.ModelSerializer):
     """
@@ -17,10 +20,10 @@ class VariantSerializer(serializers.ModelSerializer):
 
     has_stock = serializers.SerializerMethodField()
 
-    attributes = VariantAttributeSerializer(
-        source="variant_attributes",
+    attributes = ProductVariantAttributeSerializer(
+        source="prefetched_attributes",
         many=True,
-        read_only=True
+        read_only=True,
     )
 
     class Meta:
@@ -35,20 +38,21 @@ class VariantSerializer(serializers.ModelSerializer):
             "stock",
             "has_stock",
             "images",
-            'attributes'
+            "attributes",
         )
 
         read_only_fields = fields
 
-    def get_has_stock(
-        self,
-        obj,
-    ):
+    def get_has_stock(self, obj):
         """
-        بررسی موجود بودن تنوع
+        بررسی امکان خرید تنوع محصول.
         """
 
-        return (
-            obj.is_active and
-            obj.stock > 0
-        )
+        try:
+            ensure_variant_can_be_purchased(
+                variant=obj,
+            )
+        except ValidationError:
+            return False
+
+        return True
