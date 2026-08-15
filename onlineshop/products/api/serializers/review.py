@@ -1,11 +1,15 @@
 from rest_framework import serializers
 
 from products.models import Review
+from products.validators import (
+    validate_review_comment,
+    validate_review_rating,
+)
 
 
 class ReviewSummarySerializer(serializers.Serializer):
     """
-    خلاصه امتیازهای محصول.
+    خلاصه امتیازهای محصول
     """
 
     average_rate = serializers.FloatField()
@@ -55,9 +59,17 @@ class ReviewWriteSerializer(serializers.ModelSerializer):
         اعتبارسنجی امتیاز
         """
 
-        if not 1 <= value <= 5:
-            raise serializers.ValidationError(
-                "امتیاز باید بین ۱ تا ۵ باشد."
-            )
+        validate_review_rating(
+            rating=value,
+        )
 
         return value
+
+    def validate_comment(self, value):
+        """
+        اعتبارسنجی و پاکسازی متن نظر
+        """
+
+        return validate_review_comment(
+            comment=value,
+        )
