@@ -11,6 +11,10 @@ from rest_framework.viewsets import ViewSet
 
 from carts.api.serializers import CartSerializer
 
+from carts.selectors import (
+    get_cart_queryset,
+)
+
 from carts.services.cart import (
     clear_cart,
     get_or_create_cart,
@@ -18,6 +22,10 @@ from carts.services.cart import (
 
 from carts.services.pricing import (
     calculate_cart_totals,
+)
+
+from utils.session import (
+    get_session_key,
 )
 
 
@@ -35,8 +43,9 @@ from carts.services.pricing import (
     ),
 )
 class CartViewSet(ViewSet):
-
-    serializer_class = CartSerializer
+    """
+    API مدیریت سبد خرید.
+    """
 
     permission_classes = [
         AllowAny,
@@ -49,17 +58,23 @@ class CartViewSet(ViewSet):
     # =====================================================
 
     def get_cart(self):
+        """
+        دریافت یا ایجاد سبد خرید فعال.
 
-        if not self.request.session.session_key:
-            self.request.session.create()
+        برای کاربر احراز هویت‌شده، سبد بر اساس User
+        و برای مهمان، سبد بر اساس Session مدیریت می‌شود.
+        """
+
+        if self.request.user.is_authenticated:
+
+            return get_or_create_cart(
+                user=self.request.user,
+            )
 
         return get_or_create_cart(
-            user=(
-                self.request.user
-                if self.request.user.is_authenticated
-                else None
+            session_key=get_session_key(
+                request=self.request,
             ),
-            session_key=self.request.session.session_key,
         )
 
     def cart_response(
@@ -68,10 +83,22 @@ class CartViewSet(ViewSet):
         cart,
         status_code=status.HTTP_200_OK,
     ):
+        """
+        آماده‌سازی و نمایش سبد خرید.
+        """
+
+        cart = (
+            get_cart_queryset()
+            .filter(
+                pk=cart.pk,
+            )
+            .first()
+        )
 
         serializer = CartSerializer(
             cart,
             context={
+                "request": self.request,
                 "pricing": calculate_cart_totals(
                     cart=cart,
                 ),
@@ -91,6 +118,9 @@ class CartViewSet(ViewSet):
         self,
         request,
     ):
+        """
+        نمایش سبد خرید فعال.
+        """
 
         return self.cart_response(
             cart=self.get_cart(),
@@ -104,6 +134,9 @@ class CartViewSet(ViewSet):
         self,
         request,
     ):
+        """
+        پاک کردن تمام آیتم‌های سبد خرید.
+        """
 
         cart = self.get_cart()
 
