@@ -30,11 +30,6 @@ def validate_variant_has_stock(
         raise ValidationError(_("موجودی کافی نیست."))
 
 
-def validate_review_rating(*, rating: int) -> None:
-    if rating < 1 or rating > 5:
-        raise ValidationError(_("امتیاز باید بین ۱ تا ۵ باشد."))
-
-
 def validate_attribute_value_belongs_to_product(
     *,
     variant: ProductVariant,
@@ -42,6 +37,7 @@ def validate_attribute_value_belongs_to_product(
 ) -> None:
     if attribute_value.product_id != variant.product_id:
         raise ValidationError(_("مقدار ویژگی متعلق به این محصول نیست."))
+
 
 def validate_review_rating(
     *,
@@ -59,20 +55,37 @@ def validate_review_rating(
 
 def validate_review_comment(
     *,
-    comment: str,
-) -> None:
+    comment: str | None,
+) -> str | None:
     """
-    اعتبارسنجی متن نظر
+    اعتبارسنجی و پاکسازی متن نظر
     """
 
     if comment is None:
-        return
+        return None
 
     comment = comment.strip()
 
     if len(comment) > 5000:
         raise ValidationError(
             _("متن نظر نمی‌تواند بیشتر از ۵۰۰۰ کاراکتر باشد.")
+        )
+
+    return comment
+
+
+def validate_review_product(
+    *,
+    review: Review,
+    product: Product,
+) -> None:
+    """
+    بررسی تعلق نظر به محصول مشخص
+    """
+
+    if review.product_id != product.id:
+        raise ValidationError(
+            _("نظر موردنظر متعلق به این محصول نیست.")
         )
 
 
