@@ -11,7 +11,8 @@ env = Env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 
-env.read_env(BASE_DIR / ".env")
+ENV_DIR = BASE_DIR / "deployment" / "env"
+env.read_env(ENV_DIR / ".env")
 
 # ------------------------------------------------------------------
 # Logging Environment Variables
@@ -19,6 +20,17 @@ env.read_env(BASE_DIR / ".env")
 
 LOG_DIR = Path(env("LOG_DIR", default=BASE_DIR / "logs"))
 LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+DJANGO_LOG_DIR = LOG_DIR / "django"
+# ------------------------------------------------------------------
+# Celery Log Directory
+# ------------------------------------------------------------------
+
+CELERY_LOG_DIR = LOG_DIR / "celery"
+CELERY_LOG_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
 
 LOG_LEVEL = env("LOG_LEVEL", default="INFO")
 LOG_BACKUP_COUNT = env.int("LOG_BACKUP_COUNT", default=30)
@@ -33,7 +45,7 @@ handlers = {
     "activity_file": {
         "class": "logging.handlers.TimedRotatingFileHandler",
         "level": LOG_LEVEL,
-        "filename": LOG_DIR / "activity.log",
+        "filename": DJANGO_LOG_DIR / "activity.log",
         "when": LOG_ROTATE_WHEN,
         "backupCount": LOG_BACKUP_COUNT,
         "encoding": "utf-8",
@@ -43,7 +55,7 @@ handlers = {
     "payment_file": {
         "class": "logging.handlers.TimedRotatingFileHandler",
         "level": LOG_LEVEL,
-        "filename": LOG_DIR / "payment.log",
+        "filename": DJANGO_LOG_DIR / "payment.log",
         "when": LOG_ROTATE_WHEN,
         "backupCount": LOG_BACKUP_COUNT,
         "encoding": "utf-8",
@@ -53,7 +65,51 @@ handlers = {
     "error_file": {
         "class": "logging.handlers.TimedRotatingFileHandler",
         "level": "ERROR",
-        "filename": LOG_DIR / "error.log",
+        "filename": DJANGO_LOG_DIR / "error.log",
+        "when": LOG_ROTATE_WHEN,
+        "backupCount": LOG_BACKUP_COUNT,
+        "encoding": "utf-8",
+        "delay": True,
+        "formatter": "error",
+    },
+    # ------------------------------------------------------------------
+    # Celery Worker Handler
+    # ------------------------------------------------------------------
+
+    "celery_worker_file": {
+        "class": "logging.handlers.TimedRotatingFileHandler",
+        "level": "INFO",
+        "filename": CELERY_LOG_DIR / "worker.log",
+        "when": LOG_ROTATE_WHEN,
+        "backupCount": LOG_BACKUP_COUNT,
+        "encoding": "utf-8",
+        "delay": True,
+        "formatter": "standard",
+    },
+
+    # ------------------------------------------------------------------
+    # Celery Beat Handler
+    # ------------------------------------------------------------------
+
+    "celery_beat_file": {
+        "class": "logging.handlers.TimedRotatingFileHandler",
+        "level": "INFO",
+        "filename": CELERY_LOG_DIR / "beat.log",
+        "when": LOG_ROTATE_WHEN,
+        "backupCount": LOG_BACKUP_COUNT,
+        "encoding": "utf-8",
+        "delay": True,
+        "formatter": "standard",
+    },
+
+    # ------------------------------------------------------------------
+    # Celery Error Handler
+    # ------------------------------------------------------------------
+
+    "celery_error_file": {
+        "class": "logging.handlers.TimedRotatingFileHandler",
+        "level": "ERROR",
+        "filename": CELERY_LOG_DIR / "error.log",
         "when": LOG_ROTATE_WHEN,
         "backupCount": LOG_BACKUP_COUNT,
         "encoding": "utf-8",
@@ -152,7 +208,32 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "celery": {
+            "handlers": [
+                "celery_worker_file",
+                "celery_error_file",
+            ],
+            "level": "INFO",
+            "propagate": False,
+        },
 
+        "celery.worker": {
+            "handlers": [
+                "celery_worker_file",
+                "celery_error_file",
+            ],
+            "level": "INFO",
+            "propagate": False,
+        },
+
+        "celery.beat": {
+            "handlers": [
+                "celery_beat_file",
+                "celery_error_file",
+            ],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 
     "root": {

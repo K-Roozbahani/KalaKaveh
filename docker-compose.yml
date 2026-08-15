@@ -1,0 +1,53 @@
+services:
+
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+
+    env_file:
+      - deployment/env/development.env
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
+
+  django:
+    image: onlineshop-django:dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+
+    env_file:
+      - deployment/env/development.env
+
+    volumes:
+      - ./onlineshop:/app
+      - ./static_root:/static_root
+      - ./media_root:/media_root
+      - ./logs:/logs
+
+    ports:
+      - "8000:8000"
+
+    entrypoint:
+      - /deployment/scripts/entrypoint.sh
+
+    command:
+      - python
+      - manage.py
+      - runserver
+      - 0.0.0.0:8000
+
+volumes:
+  postgres_data:
+    driver: local

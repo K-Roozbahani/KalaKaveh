@@ -14,10 +14,15 @@ from pathlib import Path
 
 from environ import Env
 
+from kombu import Exchange, Queue
+
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 env = Env()
+
+ENV_DIR = PROJECT_DIR / 'deployment/env/'
+
 from .config.logging import LOGGING
-env.read_env(PROJECT_DIR / ".env")
+env.read_env(ENV_DIR / ".env")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -46,12 +51,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_extensions',
     "django_ckeditor_5",
     'utils',
     'rest_framework',
     'rest_framework_simplejwt',
     "drf_spectacular",
+    "django_filters",
     'corsheaders',
     'users',
     'home',
@@ -62,18 +67,30 @@ INSTALLED_APPS = [
     'orders',
     'payments',
     'shipping',
-    'checkout'
+    'checkout',
+    'health'
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # --------------------------------------------------
+    # Security
+    # --------------------------------------------------
+    "django.middleware.security.SecurityMiddleware",
+
+    # --------------------------------------------------
+    # CORS
+    # --------------------------------------------------
+    "corsheaders.middleware.CorsMiddleware",
+
+    # --------------------------------------------------
+    # Django
+    # --------------------------------------------------
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = 'onlineshop.urls'
@@ -99,7 +116,9 @@ WSGI_APPLICATION = 'onlineshop.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if DEBUG:
+DB_SQLITE = env.bool("DB_SQULITE", default=True)
+
+if DB_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -111,13 +130,13 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": env("DB_NAME"),
-            "USER": env("DB_USER"),
-            "PASSWORD": env("DB_PASSWORD"),
-            "HOST": env("DB_HOST", default="db"),
-            "PORT": env.int("DB_PORT", default=5432),
+            "NAME": env("POSTGRES_DB"),
+            "USER": env("POSTGRES_USER"),
+            "PASSWORD": env("POSTGRES_PASSWORD"),
+            "HOST": env("POSTGRES_HOST", default="postgres"),
+            "PORT": env.int("POSTGRES_PORT", default=5432),
             # نگه داشتن Connection برای افزایش Performance
-            "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=600),
+            "CONN_MAX_AGE": env.int("POSTGRES_CONN_MAX_AGE", default=600),
             "CONN_HEALTH_CHECKS": True,
             "OPTIONS": {
                 "connect_timeout": 10,
@@ -151,7 +170,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Asia/Tehran"
 
 USE_I18N = True
 
@@ -162,8 +181,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join("../static_root/")
-MEDIA_ROOT = os.path.join("../media_root/")
+STATIC_ROOT = BASE_DIR.parent / "static_root"
+MEDIA_ROOT = BASE_DIR.parent / "media_root"
 MEDIA_URL = "media/"
 
 AUTH_USER_MODEL = "users.User"
@@ -198,7 +217,7 @@ REST_FRAMEWORK = {
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": env("CACHE_REDIS_URL"),
         "TIMEOUT": 300,
         "OPTIONS": {
@@ -224,7 +243,7 @@ CELERY_TASK_SERIALIZER = "json"
 
 CELERY_RESULT_SERIALIZER = "json"
 
-CELERY_TIMEZONE = "Asia/Tehran"
+CELERY_TIMEZONE = TIME_ZONE
 
 CELERY_ENABLE_UTC = False
 
@@ -234,6 +253,73 @@ CELERY_TASK_TIME_LIMIT = 60 * 30
 
 CELERY_TASK_SOFT_TIME_LIMIT = 60 * 25
 
+CELERY_TASK_ACKS_LATE = True
+
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+CELERY_RESULT_EXPIRES = 60 * 60 * 24
+
+HEALTH_CHECK_CELERY = env.bool(
+    "HEALTH_CHECK_CELERY",
+    default=False,
+)
+
+# ---------------------------------------------------------
+# Default Queue
+# ---------------------------------------------------------
+
+CELERY_TASK_DEFAULT_QUEUE = "notification"
+
+CELERY_TASK_DEFAULT_EXCHANGE = "notification"
+
+CELERY_TASK_DEFAULT_ROUTING_KEY = "notification"
+
+# ---------------------------------------------------------
+# Queues
+# ---------------------------------------------------------
+
+CELERY_TASK_QUEUES = (
+    Queue(
+        "notification",
+        Exchange("notification"),
+        routing_key="notification",
+    ),
+    Queue(
+        "pricing",
+        Exchange("pricing"),
+        routing_key="pricing",
+    ),
+)
+
+# ---------------------------------------------------------
+# Routes
+# ---------------------------------------------------------
+
+CELERY_TASK_ROUTES = {
+    # -------------------------
+    # Price Engine
+    # -------------------------
+    "discounts.refresh_variant_price": {
+        "queue": "pricing",
+    },
+    "discounts.refresh_product_variants_price": {
+        "queue": "pricing",
+    },
+    "discounts.refresh_all_variant_prices": {
+        "queue": "pricing",
+    },
+
+    # -------------------------
+    # Notifications
+    # -------------------------
+    "accounts.send_otp": {
+        "queue": "notification",
+    },
+}
 # _____________________drf-spectacular_________________
 
 SPECTACULAR_SETTINGS = {
@@ -295,3 +381,19 @@ CKEDITOR_5_CONFIGS = {
         ]
     }
 }
+
+
+# ==========================================================
+# Security
+# ==========================================================
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+X_FRAME_OPTIONS = "DENY"
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
+)
