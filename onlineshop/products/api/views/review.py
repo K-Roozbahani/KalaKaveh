@@ -1,65 +1,86 @@
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
+from rest_framework.exceptions import NotFound
 from rest_framework.mixins import (
     CreateModelMixin,
+    DestroyModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
-    UpdateModelMixin, DestroyModelMixin,
+    UpdateModelMixin,
 )
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
-from utils.permissions import IsOwnerOrAdmin
-
-from products.api.serializers.review import (
-    ReviewSerializer,
-    ReviewWriteSerializer,
-)
-from products.selectors import (
-    get_product_by_id,
-    get_product_reviews,
-    get_review_by_id,
-)
-from products.services.review import (
-    create_review,
-    update_review,
-    deactivate_review,
-)
 
 from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
 
+from products.api.serializers.review import (
+    ReviewSerializer,
+    ReviewWriteSerializer,
+)
+from products.selectors import (
+    get_product_by_slug,
+    get_product_reviews,
+    get_review_by_id,
+)
+from products.services.review import (
+    create_review,
+    deactivate_review,
+    update_review,
+)
+from products.validators import (
+    validate_review_product,
+)
+from utils.permissions import IsOwnerOrAdmin
+
 
 @extend_schema_view(
     list=extend_schema(
         summary="لیست نظرات",
-        description="دریافت لیست نظرات معتبر",
+        description="دریافت لیست نظرات تایید شده محصول",
         responses=ReviewSerializer,
-
+    ),
+    retrieve=extend_schema(
+        summary="جزئیات نظر",
+        description="دریافت جزئیات نظر ثبت شده توسط کاربر",
+        responses=ReviewSerializer,
     ),
     create=extend_schema(
         summary="ثبت نظر",
-        description="ثبت نظر جدید کاربر یا بروزرسانی نظر ثبت شده کاربر",
-        responses=ReviewWriteSerializer,
+        description="ثبت نظر جدید برای محصول",
+        request=ReviewWriteSerializer,
+        responses=ReviewSerializer,
     ),
     update=extend_schema(
-        summary="بروز رسانی نظر",
-        description="بروزرسانی نظر ثبت شده کاربر",
-        responses=ReviewWriteSerializer,
+        summary="بروزرسانی نظر",
+        description="بروزرسانی کامل نظر ثبت شده توسط کاربر",
+        request=ReviewWriteSerializer,
+        responses=ReviewSerializer,
+    ),
+    partial_update=extend_schema(
+        summary="ویرایش نظر",
+        description="ویرایش بخشی از نظر ثبت شده توسط کاربر",
+        request=ReviewWriteSerializer,
+        responses=ReviewSerializer,
     ),
     destroy=extend_schema(
-        summary="حذف نظر کاربر",
-        description="حذف نظر کاربر نظر ثبت شده",
+        summary="حذف نظر",
+        description="حذف منطقی نظر ثبت شده توسط کاربر",
     ),
-
 )
 @extend_schema(
     tags=["review"],
 )
 class ReviewViewSet(
     ListModelMixin,
+    RetrieveModelMixin,
     CreateModelMixin,
     UpdateModelMixin,
     DestroyModelMixin,
@@ -71,58 +92,86 @@ class ReviewViewSet(
 
     def get_permissions(self):
         """
-        تعیین Permission بر اساس Action
+        تعیین سطح دسترسی بر اساس عملیات
         """
 
-        if self.action in (
-            "list",
-            "retrieve",
-        ):
-            permission_classes = [
+        if self.action == "list":
+            permission_classes = (
                 AllowAny,
-            ]
+            )
 
         elif self.action == "create":
-            permission_classes = [
+            permission_classes = (
                 IsAuthenticated,
-            ]
+            )
 
         else:
-            permission_classes = [
+            permission_classes = (
                 IsOwnerOrAdmin,
-            ]
+            )
 
         return [
             permission()
             for permission in permission_classes
         ]
 
-    def get_queryset(self):
+    def get_product(self):
         """
-        لیست نظرات تایید شده محصول
+        دریافت محصول بر اساس slug
         """
 
+        return get_product_by_slug(
+            slug=self.kwargs["product_slug"],
+        )
+
+    def get_queryset(self):
+        """
+        دریافت نظرات تایید شده محصول
+        """
+
+        product = self.get_product()
+
         return get_product_reviews(
-            product_id=self.kwargs["product_pk"],
+            product_id=product.id,
         )
 
     def get_object(self):
         """
-        دریافت یک نظر
+        دریافت نظر متعلق به محصول جاری
         """
 
-        obj = get_review_by_id(
+        product = self.get_product()
+
+        review = get_review_by_id(
             review_id=self.kwargs["pk"],
         )
 
+        if review is None:
+            raise NotFound(
+                _("نظر موردنظر یافت نشد.")
+            )
+
+        try:
+            validate_review_product(
+                review=review,
+                product=product,
+            )
+        except ValidationError as exc:
+            raise NotFound(
+                _("نظر موردنظر یافت نشد.")
+            ) from exc
+
         self.check_object_permissions(
             self.request,
-            obj,
+            review,
         )
 
-        return obj
+        return review
 
     def get_serializer_class(self):
+        """
+        تعیین Serializer بر اساس عملیات
+        """
 
         if self.action in (
             "create",
@@ -133,7 +182,15 @@ class ReviewViewSet(
 
         return ReviewSerializer
 
-    def create(self, request, *args, **kwargs):
+    def create(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        """
+        ثبت نظر جدید
+        """
 
         serializer = self.get_serializer(
             data=request.data,
@@ -143,32 +200,37 @@ class ReviewViewSet(
             raise_exception=True,
         )
 
-        product = get_product_by_id(
-            product_id=self.kwargs["product_pk"],
-        )
-
         review = create_review(
-            product=product,
+            product=self.get_product(),
             user=request.user,
             **serializer.validated_data,
         )
 
+        response_serializer = ReviewSerializer(
+            review,
+            context=self.get_serializer_context(),
+        )
+
         return Response(
-            ReviewSerializer(review).data,
+            response_serializer.data,
             status=status.HTTP_201_CREATED,
         )
 
-    def update(self, request, *args, **kwargs):
+    def update(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        """
+        بروزرسانی کامل نظر
+        """
 
         review = self.get_object()
 
         serializer = self.get_serializer(
             review,
             data=request.data,
-            partial=kwargs.get(
-                "partial",
-                False,
-            ),
         )
 
         serializer.is_valid(
@@ -180,11 +242,57 @@ class ReviewViewSet(
             **serializer.validated_data,
         )
 
-        return Response(
-            ReviewSerializer(review).data,
+        response_serializer = ReviewSerializer(
+            review,
+            context=self.get_serializer_context(),
         )
 
-    def destroy(self, request, *args, **kwargs):
+        return Response(
+            response_serializer.data,
+        )
+
+    def partial_update(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        """
+        بروزرسانی بخشی از نظر
+        """
+
+        review = self.get_object()
+
+        serializer = self.get_serializer(
+            review,
+            data=request.data,
+            partial=True,
+        )
+
+        serializer.is_valid(
+            raise_exception=True,
+        )
+
+        review = update_review(
+            review=review,
+            **serializer.validated_data,
+        )
+
+        response_serializer = ReviewSerializer(
+            review,
+            context=self.get_serializer_context(),
+        )
+
+        return Response(
+            response_serializer.data,
+        )
+
+    def destroy(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
         """
         حذف منطقی نظر
         """
