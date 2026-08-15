@@ -11,6 +11,16 @@ from discounts.services.price_engine import (
 
 from products.models import ProductVariant
 
+from products.selectors import (
+    get_primary_product_image,
+    get_primary_variant_image,
+)
+
+from products.api.serializers import (
+    ProductImageSerializer,
+    ProductVariantAttributeSerializer,
+    VariantImageSerializer,
+)
 
 # ==========================================================
 # Cart Item Serializer
@@ -51,6 +61,14 @@ class CartItemSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    image = serializers.SerializerMethodField()
+
+    attributes = ProductVariantAttributeSerializer(
+        source="variant.variant_attributes",
+        many=True,
+        read_only=True,
+    )
+
     unit_price = serializers.SerializerMethodField()
 
     discount_amount = serializers.SerializerMethodField()
@@ -69,6 +87,8 @@ class CartItemSerializer(serializers.ModelSerializer):
             "product_name",
             "product_category",
             "product_brand",
+            "attributes",
+            "image",
 
             "sku",
 
@@ -125,6 +145,36 @@ class CartItemSerializer(serializers.ModelSerializer):
         return self._get_price_snapshot(
             obj,
         ).final_price
+
+    def get_image(self, obj):
+        """
+        دریافت تصویر مناسب برای نمایش آیتم سبد خرید.
+
+        ابتدا تصویر تنوع محصول بررسی می‌شود.
+        در صورت نبود تصویر تنوع، تصویر اصلی محصول استفاده می‌شود.
+        """
+
+        variant_image = get_primary_variant_image(
+            variant=obj.variant,
+        )
+
+        if variant_image:
+            return VariantImageSerializer(
+                variant_image,
+                context=self.context,
+            ).data
+
+        product_image = get_primary_product_image(
+            product=obj.variant.product,
+        )
+
+        if product_image:
+            return ProductImageSerializer(
+                product_image,
+                context=self.context,
+            ).data
+
+        return None
 
 
 # ==========================================================
