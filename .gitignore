@@ -129,3 +129,7 @@ logs/
 # Miscellaneous
 *.bak
 *~
+
+# Celery Beat
+celerybeat-schedule
+celerybeat-schedule-*
