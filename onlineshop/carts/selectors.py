@@ -1,7 +1,10 @@
 from django.db.models import Prefetch
 
 from .constants import CartStatus
-from .models import Cart, CartItem
+from .models import (
+    Cart,
+    CartItem,
+)
 
 from products.models import (
     ProductImage,
@@ -14,9 +17,9 @@ def get_cart_queryset():
     """
     QuerySet بهینه برای نمایش سبد خرید.
 
-    اطلاعات مورد نیاز Cart، Product، Variant، تصاویر،
-    ویژگی‌ها و Propertyها از قبل بارگذاری می‌شوند
-    تا از ایجاد N+1 Query جلوگیری شود.
+    اطلاعات مورد نیاز سبد خرید، محصول، تنوع محصول،
+    تصاویر، ویژگی‌ها و Propertyها از قبل بارگذاری می‌شوند
+    تا از ایجاد Queryهای اضافی و N+1 جلوگیری شود.
     """
 
     primary_variant_images = Prefetch(
@@ -65,9 +68,15 @@ def get_cart_queryset():
     )
 
 
-def get_user_active_cart(user):
+def get_user_active_cart(
+    *,
+    user,
+):
     """
-    دریافت سبد فعال کاربر.
+    دریافت سبد خرید فعال کاربر.
+
+    اطلاعات مرتبط مورد نیاز برای نمایش سبد خرید
+    نیز به صورت بهینه بارگذاری می‌شوند.
     """
 
     return (
@@ -80,9 +89,12 @@ def get_user_active_cart(user):
     )
 
 
-def get_guest_active_cart(session_key):
+def get_guest_active_cart(
+    *,
+    session_key,
+):
     """
-    دریافت سبد فعال مهمان.
+    دریافت سبد خرید فعال مهمان بر اساس Session.
     """
 
     return (
@@ -98,6 +110,10 @@ def get_guest_active_cart(session_key):
 def get_cart_item_queryset():
     """
     QuerySet بهینه برای آیتم‌های سبد خرید.
+
+    اطلاعات Cart، Variant، Product، Brand، Category،
+    تصاویر، ویژگی‌ها و Propertyهای ویژگی‌ها از قبل
+    بارگذاری می‌شوند تا از N+1 Query جلوگیری شود.
     """
 
     primary_variant_images = Prefetch(
@@ -117,7 +133,7 @@ def get_cart_item_queryset():
     )
 
     variant_attributes = Prefetch(
-        "variant__variant_attributes",
+        "variant__attributes",
         queryset=(
             ProductVariantAttribute.objects
             .select_related(
@@ -153,10 +169,10 @@ def get_cart_item_by_id(
     session_key=None,
 ):
     """
-    دریافت آیتم سبد خرید بر اساس شناسه.
+    دریافت یک آیتم از سبد خرید فعال.
 
-    فقط آیتم متعلق به سبد فعال کاربر یا مهمان
-    برگردانده می‌شود.
+    آیتم فقط در صورتی برگردانده می‌شود که متعلق به
+    سبد خرید فعال کاربر یا Session مهمان باشد.
     """
 
     queryset = get_cart_item_queryset().filter(
