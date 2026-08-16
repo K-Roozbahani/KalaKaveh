@@ -1,5 +1,6 @@
 from .serializers import UserSerializer
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from utils.permissions import IsOwnerOrAdmin
 from django.contrib.auth import get_user_model
@@ -70,6 +71,8 @@ class AuthenticationViewSet(GenericViewSet):
             status=status.HTTP_200_OK,
         )
 
+
+
     @action(
         detail=False,
         methods=["post"],
@@ -77,8 +80,21 @@ class AuthenticationViewSet(GenericViewSet):
         url_path="verify-otp",
     )
     def verify_otp(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        """
+        تأیید کد OTP و ورود کاربر.
+
+        پس از تأیید موفق OTP، توکن‌های JWT صادر می‌شوند.
+        Session فعلی کاربر مهمان دست‌نخورده باقی می‌ماند تا
+        در اولین درخواست Cart، سبد مهمان با سبد کاربر ادغام شود.
+        """
+
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+
+        serializer.is_valid(
+            raise_exception=True,
+        )
 
         user = authenticate_by_otp(
             phone_number=serializer.validated_data["phone_number"],
@@ -86,9 +102,13 @@ class AuthenticationViewSet(GenericViewSet):
             ip_address=get_client_ip(request),
         )
 
+        refresh = RefreshToken.for_user(user)
+
         return Response(
             {
                 "user_id": user.id,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
             },
             status=status.HTTP_200_OK,
         )
