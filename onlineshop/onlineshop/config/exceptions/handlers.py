@@ -1,12 +1,15 @@
 """
 Exception Handler مرکزی پروژه
 
-این ماژول مسئول ثبت Exceptionهای DRF در سیستم Logging
-و حفظ رفتار پیش‌فرض DRF است.
+این ماژول مسئول ثبت Exceptionهای DRF و Django در سیستم Logging
+و حفظ رفتار استاندارد DRF است.
 """
 
 import logging
 
+from django.core.exceptions import ValidationError as DjangoValidationError
+
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.views import exception_handler
 
 
@@ -15,7 +18,11 @@ logger = logging.getLogger("error")
 
 def custom_exception_handler(exc, context):
     """
-    مدیریت مرکزی Exceptionهای DRF.
+    مدیریت مرکزی Exceptionهای API.
+
+    ValidationErrorهای Django که در Service Layer و
+    Domain Layer ایجاد می‌شوند، به ValidationError استاندارد
+    DRF تبدیل می‌شوند تا به‌صورت HTTP 400 به کلاینت برگردند.
     """
 
     request = context.get("request")
@@ -37,4 +44,12 @@ def custom_exception_handler(exc, context):
         },
     )
 
-    return exception_handler(exc, context)
+    if isinstance(exc, DjangoValidationError):
+        exc = DRFValidationError(
+            detail=exc.messages,
+        )
+
+    return exception_handler(
+        exc,
+        context,
+    )
