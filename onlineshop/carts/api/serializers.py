@@ -36,6 +36,11 @@ class CartItemSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    variant_stock = serializers.IntegerField(
+        source="variant.stock",
+        read_only=True,
+    )
+
     product_id = serializers.IntegerField(
         source="variant.product.id",
         read_only=True,
@@ -64,7 +69,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
     attributes = ProductVariantAttributeSerializer(
-        source="variant.variant_attributes",
+        source="variant.attributes",
         many=True,
         read_only=True,
     )
@@ -82,6 +87,7 @@ class CartItemSerializer(serializers.ModelSerializer):
             "id",
 
             "variant_id",
+            "variant_stock",
 
             "product_id",
             "product_name",
