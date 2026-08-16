@@ -61,20 +61,25 @@ class CartViewSet(ViewSet):
         """
         دریافت یا ایجاد سبد خرید فعال.
 
-        برای کاربر احراز هویت‌شده، سبد بر اساس User
-        و برای مهمان، سبد بر اساس Session مدیریت می‌شود.
+        برای کاربر احراز‌شده، سبد بر اساس User مدیریت می‌شود
+        و در صورت وجود Guest Cart مربوط به Session فعلی،
+        ادغام به‌صورت Lazy انجام خواهد شد.
+
+        برای کاربر مهمان، سبد بر اساس Session مدیریت می‌شود.
         """
 
-        if self.request.user.is_authenticated:
+        session_key = get_session_key(
+            request=self.request,
+        )
 
+        if self.request.user.is_authenticated:
             return get_or_create_cart(
                 user=self.request.user,
+                session_key=session_key,
             )
 
         return get_or_create_cart(
-            session_key=get_session_key(
-                request=self.request,
-            ),
+            session_key=session_key,
         )
 
     def cart_response(
