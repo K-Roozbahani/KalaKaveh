@@ -1,6 +1,9 @@
 from rest_framework import serializers
+
+from utils.phone import format_phone_number
 from ..models import User
 from phonenumber_field.serializerfields import PhoneNumberField
+
 
 from users.validators import (
     validate_otp,
@@ -39,6 +42,18 @@ class UserSerializer(serializers.ModelSerializer):
         #     instance.set_password(password)
         instance.save()
         return instance
+
+    def to_representation(self, instance):
+        """
+        تبدیل شماره تلفن به فرمت موردنظر API در خروجی.
+        """
+        data = super().to_representation(instance)
+
+        data["phone_number"] = format_phone_number(
+            instance.phone_number,
+        )
+
+        return data
 
 
 
