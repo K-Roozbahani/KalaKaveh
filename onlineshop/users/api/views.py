@@ -37,9 +37,9 @@ class UserApiView(ModelViewSet):
             self.permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
         elif self.action == 'list':
-            self.permission_classes = [IsAdminUser]
+            self.permission_classes = [IsAdminUser,]
         else:
-            self.permission_classes = [IsAuthenticated()]
+            self.permission_classes = [IsAuthenticated,]
 
         return super().get_permissions()
 
