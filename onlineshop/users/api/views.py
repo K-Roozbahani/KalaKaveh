@@ -22,7 +22,10 @@ from users.services.authentication import (
     authenticate_by_otp,
     request_otp,
 )
-from users.authentication.cookies import set_auth_cookies
+from users.authentication.cookies import (
+    set_auth_cookies,
+    delete_auth_cookies,
+)
 
 User = get_user_model() # این خط مدل سفارشی شما را به درستی پیدا می‌کند
 
@@ -215,14 +218,6 @@ class AuthenticationViewSet(GenericViewSet):
             status=status.HTTP_200_OK,
         )
 
-        response.delete_cookie(
-            key=settings.AUTH_COOKIE_ACCESS,
-            path="/",
-        )
-
-        response.delete_cookie(
-            key=settings.AUTH_COOKIE_REFRESH,
-            path="/",
-        )
+        delete_auth_cookies(response)
 
         return response
