@@ -2,6 +2,9 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework.permissions import AllowAny
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
@@ -27,7 +30,10 @@ from authentication.utils.cookies import (
 
 User = get_user_model() # این خط مدل سفارشی شما را به درستی پیدا می‌کند
 
-
+@method_decorator(
+    csrf_protect,
+    name="dispatch"
+)
 class AuthenticationViewSet(GenericViewSet):
     """
     عملیات احراز هویت کاربران.
