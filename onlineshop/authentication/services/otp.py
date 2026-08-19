@@ -7,7 +7,7 @@ from users.constants import (
     OTP_TTL,
     REDIS_KEY_OTP,
 )
-from users.exceptions import (
+from authentication.exceptions import (
     InvalidOTPException,
     OTPExpiredException,
 )

@@ -5,15 +5,15 @@ from users.constants import (
     RATE_LIMIT_ACTION_OTP_VERIFY,
 )
 
-from users.services.otp import (
+from authentication.services.otp import (
     generate_otp,
     save_otp,
     verify_otp,
 )
 
-from users.services.rate_limit import check_rate_limit
-from users.services.request_validation import validate_request_source
-from users.services.sms import send_otp
+from authentication.services.rate_limit import check_rate_limit
+from authentication.services.request_validation import validate_request_source
+from authentication.services.sms import send_otp
 from users.services.user import get_or_create_user_by_phone
 
 

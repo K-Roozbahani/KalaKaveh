@@ -4,7 +4,7 @@ from users.constants import (
     RATE_LIMITS,
     REDIS_KEY_RATE_LIMIT,
 )
-from users.exceptions import RateLimitExceededException
+from authentication.exceptions import RateLimitExceededException
 
 
 def check_rate_limit(
