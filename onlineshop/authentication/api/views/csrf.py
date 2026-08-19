@@ -8,6 +8,11 @@ CSRF Token توسط Django تولید و در Cookie قرار می‌گیرد
 
 from django.middleware.csrf import get_token
 
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiResponse,
+)
+
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -23,6 +28,26 @@ class CSRFTokenView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        summary="دریافت CSRF Token",
+        description=(
+            "یک CSRF Token توسط Django ایجاد کرده و آن را "
+            "در Cookie مربوط به CSRF قرار می‌دهد. "
+            "Frontend باید مقدار این Cookie را برای درخواست‌های "
+            "POST، PUT، PATCH و DELETE در Header با نام "
+            "`X-CSRFToken` ارسال کند."
+        ),
+        request=None,
+        responses={
+            200: OpenApiResponse(
+                description=(
+                    "CSRF Token با موفقیت ایجاد شد "
+                    "و در Cookie قرار گرفت."
+                ),
+            ),
+        },
+        tags=["Authentication"],
+    )
     def get(self, request):
         """
         ایجاد CSRF Token و قرار دادن آن در Cookie.
