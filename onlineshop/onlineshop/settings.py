@@ -534,6 +534,7 @@ CORS_ALLOW_CREDENTIALS = True
 # CSRF
 # ==========================================================
 
+# Originهای مجاز برای درخواست‌های حساس به CSRF.
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=[
@@ -542,14 +543,24 @@ CSRF_TRUSTED_ORIGINS = env.list(
     ],
 )
 
-# CSRF Cookie باید برای React قابل خواندن باشد.
-CSRF_COOKIE_HTTPONLY = False
+# Frontend باید بتواند مقدار CSRF Cookie را بخواند
+# تا آن را در Header با نام X-CSRFToken ارسال کند.
+CSRF_COOKIE_HTTPONLY = env.bool(
+    "CSRF_COOKIE_HTTPONLY",
+    default=False,
+)
 
 # در Production فقط روی HTTPS ارسال شود.
-CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = env.bool(
+    "CSRF_COOKIE_SECURE",
+    default=not DEBUG,
+)
 
 # جلوگیری از ارسال Cookie در Cross-Site Requestهای ناخواسته.
-CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = env(
+    "CSRF_COOKIE_SAMESITE",
+    default="Lax",
+)
 
 
 # ==========================================================
