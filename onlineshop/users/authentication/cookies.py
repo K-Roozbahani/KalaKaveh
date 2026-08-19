@@ -2,8 +2,6 @@
 ابزارهای مدیریت Cookieهای مربوط به احراز هویت JWT.
 """
 
-from datetime import timedelta
-
 from django.conf import settings
 from django.http import HttpResponse
 
@@ -42,7 +40,7 @@ def set_auth_cookies(
         httponly=True,
         secure=settings.AUTH_COOKIE_SECURE,
         samesite=settings.AUTH_COOKIE_SAMESITE,
-        path="/api/token/refresh/",
+        path="/",
     )
 
     return response
