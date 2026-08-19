@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     # Local Apps
     # ------------------------------------------------------
     "utils",
+    'authentication',
     "users",
     "home",
     "products",
@@ -307,7 +308,7 @@ REST_FRAMEWORK = {
     # ------------------------------------------------------
 
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "users.authentication.jwt.CookieJWTAuthentication",
+        "authentication.utils.jwt.CookieJWTAuthentication",
     ),
 
     # ------------------------------------------------------
