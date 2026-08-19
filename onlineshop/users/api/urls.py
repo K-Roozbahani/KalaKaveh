@@ -1,10 +1,8 @@
 from rest_framework.routers import DefaultRouter
-from .views import UserApiView, AuthenticationViewSet
+from .views import UserApiView
 
 
 router = DefaultRouter()
-
-router.register("auth", AuthenticationViewSet, basename="authentication")
 
 router.register('', UserApiView, basename='user')
 
