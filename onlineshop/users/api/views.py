@@ -19,6 +19,7 @@ from users.services.authentication import (
     authenticate_by_otp,
     request_otp,
 )
+from users.authentication.cookies import set_auth_cookies
 
 User = get_user_model() # این خط مدل سفارشی شما را به درستی پیدا می‌کند
 
@@ -72,7 +73,6 @@ class AuthenticationViewSet(GenericViewSet):
         )
 
 
-
     @action(
         detail=False,
         methods=["post"],
@@ -83,9 +83,8 @@ class AuthenticationViewSet(GenericViewSet):
         """
         تأیید کد OTP و ورود کاربر.
 
-        پس از تأیید موفق OTP، توکن‌های JWT صادر می‌شوند.
-        Session فعلی کاربر مهمان دست‌نخورده باقی می‌ماند تا
-        در اولین درخواست Cart، سبد مهمان با سبد کاربر ادغام شود.
+        پس از تأیید موفق OTP، توکن‌های JWT ایجاد شده و
+        به صورت HttpOnly Cookie در Response قرار می‌گیرند.
         """
 
         serializer = self.get_serializer(
@@ -104,11 +103,17 @@ class AuthenticationViewSet(GenericViewSet):
 
         refresh = RefreshToken.for_user(user)
 
-        return Response(
+        response = Response(
             {
                 "user_id": user.id,
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
             },
             status=status.HTTP_200_OK,
         )
+
+        set_auth_cookies(
+            response=response,
+            access_token=str(refresh.access_token),
+            refresh_token=str(refresh),
+        )
+
+        return response
