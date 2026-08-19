@@ -4,7 +4,7 @@ from users.exceptions import (
     IPAddressBlockedException,
     PhoneNumberBlockedException,
 )
-from users.services.request_validation import validate_request_source
+from authentication.services.request_validation import validate_request_source
 from users.tests.factories import create_blacklist
 
 

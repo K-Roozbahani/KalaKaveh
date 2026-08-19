@@ -6,7 +6,7 @@ from users.constants import (
     REDIS_KEY_RATE_LIMIT,
 )
 from users.exceptions import RateLimitExceededException
-from users.services.rate_limit import check_rate_limit
+from authentication.services.rate_limit import check_rate_limit
 
 
 class RateLimitServiceTests(TestCase):

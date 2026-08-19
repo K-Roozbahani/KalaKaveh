@@ -3,7 +3,7 @@ from unittest.mock import patch
 from django.test import TestCase
 from phonenumber_field.phonenumber import PhoneNumber
 
-from users.services.authentication import (
+from authentication.services.authentication import (
     authenticate_by_otp,
     request_otp,
 )

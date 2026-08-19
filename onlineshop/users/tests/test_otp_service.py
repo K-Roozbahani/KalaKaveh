@@ -10,7 +10,7 @@ from users.exceptions import (
     InvalidOTPException,
     OTPExpiredException,
 )
-from users.services.otp import (
+from authentication.services.otp import (
     delete_otp,
     generate_otp,
     get_otp,
