@@ -1,13 +1,16 @@
 from .serializers import UserSerializer
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from utils.permissions import IsOwnerOrAdmin
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_simplejwt.exceptions import TokenError
 
 from utils.network import get_client_ip
 
@@ -114,6 +117,112 @@ class AuthenticationViewSet(GenericViewSet):
             response=response,
             access_token=str(refresh.access_token),
             refresh_token=str(refresh),
+        )
+
+        return response
+
+    @action(
+        detail=False,
+        methods=["post"],
+        serializer_class=TokenRefreshSerializer,
+        url_path="refresh",
+    )
+    def refresh(self, request):
+        """
+        دریافت Refresh Token از Cookie و صدور Tokenهای جدید.
+
+        در صورت فعال بودن Rotation در Simple JWT،
+        Refresh Token قبلی Blacklist شده و Refresh Token
+        جدید صادر می‌شود.
+        """
+
+        refresh_token = request.COOKIES.get(
+            settings.AUTH_COOKIE_REFRESH,
+        )
+
+        if not refresh_token:
+            return Response(
+                {
+                    "detail": "Refresh Token یافت نشد.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        serializer = self.get_serializer(
+            data={
+                "refresh": refresh_token,
+            },
+        )
+
+        serializer.is_valid(
+            raise_exception=True,
+        )
+
+        response = Response(
+            {
+                "detail": "توکن با موفقیت به‌روزرسانی شد.",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+        set_auth_cookies(
+            response=response,
+            access_token=serializer.validated_data["access"],
+            refresh_token=serializer.validated_data.get(
+                "refresh",
+                refresh_token,
+            ),
+        )
+
+        return response
+
+    @action(
+        detail=False,
+        methods=["post"],
+        serializer_class=None,
+        url_path="logout",
+    )
+    def logout(self, request):
+        """
+        خروج کاربر.
+
+        Refresh Token موجود در Cookie را Blacklist کرده
+        و سپس Cookieهای احراز هویت را حذف می‌کند.
+        """
+
+        refresh_token = request.COOKIES.get(
+            settings.AUTH_COOKIE_REFRESH,
+        )
+
+        if refresh_token:
+
+            try:
+                token = RefreshToken(
+                    refresh_token,
+                )
+
+                token.blacklist()
+
+            except TokenError:
+                # اگر Token قبلاً منقضی یا Blacklist شده باشد،
+                # Logout همچنان باید موفقیت‌آمیز باشد.
+                pass
+
+        response = Response(
+            {
+                "detail": "با موفقیت خارج شدید.",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+        response.delete_cookie(
+            key=settings.AUTH_COOKIE_ACCESS,
+            path="/",
+        )
+
+        response.delete_cookie(
+            key=settings.AUTH_COOKIE_REFRESH,
+            path="/",
         )
 
         return response
