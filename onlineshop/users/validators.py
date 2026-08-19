@@ -5,8 +5,7 @@ from users.selectors import (
     get_blacklisted_phone,
 )
 
-from users.exceptions import (
-    InvalidOTPException,
+from authentication.exceptions import (
     PhoneNumberBlockedException,
     IPAddressBlockedException,
 )
@@ -52,24 +51,3 @@ def validate_ip_blacklist(
         raise IPAddressBlockedException
 
 
-# ===========================================================
-# OTP Validators
-# ===========================================================
-
-def validate_otp(
-    otp: str,
-) -> None:
-    """
-    اعتبارسنجی فرمت کد یکبار مصرف.
-
-    Args:
-        otp: کد یکبار مصرف.
-
-    Raises:
-        InvalidOTPException: در صورت نامعتبر بودن فرمت کد.
-    """
-    if not otp.isdigit():
-        raise InvalidOTPException
-
-    if len(otp) != 6:
-        raise InvalidOTPException
