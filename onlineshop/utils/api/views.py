@@ -9,7 +9,10 @@ ViewSetهای پایه پروژه OnlineShop.
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import (
+    ModelViewSet,
+    GenericViewSet
+)
 
 
 @method_decorator(
@@ -17,6 +20,24 @@ from rest_framework.viewsets import ModelViewSet
     name="dispatch",
 )
 class BaseModelViewSet(ModelViewSet):
+    """
+    ViewSet پایه برای تمام ModelViewSetهای پروژه.
+
+    تمام درخواست‌های API که از این کلاس ارث‌بری کنند،
+    تحت محافظت CSRF قرار می‌گیرند.
+
+    درخواست‌های Safe مانند GET، HEAD و OPTIONS توسط
+    مکانیزم CSRF جنگو نیاز به Token ندارند.
+    """
+
+    pass
+
+
+@method_decorator(
+    csrf_protect,
+    name="dispatch",
+)
+class BaseGenericViewSet(GenericViewSet):
     """
     ViewSet پایه برای تمام ModelViewSetهای پروژه.
 
