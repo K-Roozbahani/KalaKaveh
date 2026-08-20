@@ -7,7 +7,6 @@ from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
 
 from carts.api.serializers import (
     AddCartItemSerializer,
@@ -31,9 +30,8 @@ from carts.services.pricing import (
     calculate_cart_totals,
 )
 
-from utils.session import (
-    get_session_key,
-)
+from utils.api.views import BaseGenericViewSet
+from utils.session import get_session_key
 
 
 @extend_schema_view(
@@ -62,7 +60,7 @@ from utils.session import (
         },
     ),
 )
-class CartItemViewSet(ViewSet):
+class CartItemViewSet(BaseGenericViewSet):
     """
     API مدیریت آیتم‌های سبد خرید.
     """
