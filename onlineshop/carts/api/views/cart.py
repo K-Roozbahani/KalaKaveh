@@ -7,7 +7,6 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
 
 from carts.api.serializers import CartSerializer
 
@@ -24,9 +23,8 @@ from carts.services.pricing import (
     calculate_cart_totals,
 )
 
-from utils.session import (
-    get_session_key,
-)
+from utils.api.views import BaseModelViewSet
+from utils.session import get_session_key
 
 
 @extend_schema_view(
@@ -42,7 +40,7 @@ from utils.session import (
         responses={200: CartSerializer},
     ),
 )
-class CartViewSet(ViewSet):
+class CartViewSet(BaseModelViewSet):
     """
     API مدیریت سبد خرید.
     """
