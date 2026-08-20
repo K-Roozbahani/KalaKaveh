@@ -12,7 +12,6 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -29,6 +28,8 @@ from authentication.utils.cookies import (
     delete_auth_cookies,
     set_auth_cookies,
 )
+
+from utils.api.views import BaseGenericViewSet
 from utils.network import get_client_ip
 
 
@@ -119,11 +120,7 @@ User = get_user_model()
         tags=["Authentication"],
     ),
 )
-@method_decorator(
-    csrf_protect,
-    name="dispatch",
-)
-class AuthenticationViewSet(GenericViewSet):
+class AuthenticationViewSet(BaseGenericViewSet):
     """
     عملیات احراز هویت کاربران.
     """
