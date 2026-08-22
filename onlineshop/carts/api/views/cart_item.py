@@ -1,8 +1,3 @@
-from drf_spectacular.utils import (
-    extend_schema,
-    extend_schema_view,
-)
-
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny
@@ -13,6 +8,8 @@ from carts.api.serializers import (
     CartSerializer,
     UpdateCartItemSerializer,
 )
+
+from carts.api.schemas.cart_item import cart_item_schema
 
 from carts.selectors import (
     get_cart_queryset,
@@ -34,32 +31,7 @@ from utils.api.views import BaseGenericViewSet
 from utils.session import get_session_key
 
 
-@extend_schema_view(
-    create=extend_schema(
-        tags=["Cart"],
-        summary="افزودن آیتم",
-        request=AddCartItemSerializer,
-        responses={
-            status.HTTP_201_CREATED: CartSerializer,
-        },
-    ),
-    partial_update=extend_schema(
-        tags=["Cart"],
-        summary="ویرایش آیتم",
-        request=UpdateCartItemSerializer,
-        responses={
-            status.HTTP_200_OK: CartSerializer,
-        },
-    ),
-    destroy=extend_schema(
-        tags=["Cart"],
-        summary="حذف آیتم",
-        request=None,
-        responses={
-            status.HTTP_200_OK: CartSerializer,
-        },
-    ),
-)
+@cart_item_schema
 class CartItemViewSet(BaseGenericViewSet):
     """
     API مدیریت آیتم‌های سبد خرید.
