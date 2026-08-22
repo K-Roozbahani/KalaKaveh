@@ -82,9 +82,11 @@ class CartItemViewSet(BaseGenericViewSet):
         """
 
         if self.request.user.is_authenticated:
-
             return get_or_create_cart(
                 user=self.request.user,
+                session_key=get_session_key(
+                    request=self.request,
+                ),
             )
 
         return get_or_create_cart(
