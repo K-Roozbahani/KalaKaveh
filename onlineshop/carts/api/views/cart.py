@@ -8,6 +8,7 @@ from carts.api.serializers import CartSerializer
 
 from carts.selectors import (
     get_cart_queryset,
+    get_active_cart_item_count,
 )
 
 from carts.services.cart import (
@@ -19,12 +20,12 @@ from carts.services.pricing import (
     calculate_cart_totals,
 )
 
-from utils.api.views import BaseModelViewSet
+from utils.api.views import BaseGenericViewSet
 from utils.session import get_session_key
 
 
 @cart_schema
-class CartViewSet(BaseModelViewSet):
+class CartViewSet(BaseGenericViewSet):
     """
     API مدیریت سبد خرید.
     """
@@ -133,4 +134,32 @@ class CartViewSet(BaseModelViewSet):
 
         return self.cart_response(
             cart=cart,
+        )
+
+    @action(
+        detail=False,
+        methods=["get"],
+    )
+    def count(
+            self,
+            request,
+    ):
+        """
+        دریافت تعداد کالاهای موجود در سبد خرید برای نمایش آیکون.
+        """
+
+        session_key = get_session_key(
+            request=request,
+        )
+
+        item_count = get_active_cart_item_count(
+            user=request.user if request.user.is_authenticated else None,
+            session_key=session_key,
+        )
+
+        return Response(
+            {
+                "items_count": item_count,
+            },
+            status=status.HTTP_200_OK,
         )
