@@ -1,29 +1,62 @@
-from .serializers import UserSerializer
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
-from utils.permissions import IsOwnerOrAdmin
 from django.contrib.auth import get_user_model
 
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
-User = get_user_model() # این خط مدل سفارشی شما را به درستی پیدا می‌کند
+from utils.permissions import IsOwnerOrAdmin
 
+from users.api.schemas import user_api_schema
+from users.api.serializers import UserSerializer
+
+
+User = get_user_model()
+
+
+@user_api_schema
 class UserApiView(ModelViewSet):
-    lookup_field = 'phone_number'
+    """
+    ViewSet مدیریت کاربران.
+    """
+
+    lookup_field = "phone_number"
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        if self.action == 'create':
-            # اینجا چون داریم لیست رو برمیکردونیم باید از () استفاده شود
-            return [AllowAny(),]
+        if self.action == "create":
+            return [AllowAny()]
 
+        elif self.action in [
+            "retrieve",
+            "update",
+            "partial_update",
+            "destroy",
+        ]:
+            self.permission_classes = [
+                IsAuthenticated,
+                IsOwnerOrAdmin,
+            ]
 
-        elif self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
-            self.permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+        elif self.action == "list":
+            self.permission_classes = [IsAdminUser]
 
-        elif self.action == 'list':
-            self.permission_classes = [IsAdminUser,]
         else:
-            self.permission_classes = [IsAuthenticated,]
+            self.permission_classes = [IsAuthenticated]
 
         return super().get_permissions()
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="me",
+        permission_classes=[IsAuthenticated],
+    )
+    def me(self, request):
+        """
+        دریافت اطلاعات کاربر احراز هویت‌شده فعلی.
+        """
+        serializer = self.get_serializer(request.user)
+
+        return Response(serializer.data)
