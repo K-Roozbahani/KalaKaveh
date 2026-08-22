@@ -1,13 +1,9 @@
-from drf_spectacular.utils import (
-    extend_schema,
-    extend_schema_view,
-)
-
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from carts.api.schemas.cart import cart_schema
 from carts.api.serializers import CartSerializer
 
 from carts.selectors import (
@@ -27,19 +23,7 @@ from utils.api.views import BaseModelViewSet
 from utils.session import get_session_key
 
 
-@extend_schema_view(
-    list=extend_schema(
-        tags=["Cart"],
-        summary="نمایش سبد خرید",
-        responses={200: CartSerializer},
-    ),
-    clear=extend_schema(
-        tags=["Cart"],
-        summary="پاک کردن سبد خرید",
-        request=None,
-        responses={200: CartSerializer},
-    ),
-)
+@cart_schema
 class CartViewSet(BaseModelViewSet):
     """
     API مدیریت سبد خرید.
