@@ -1,4 +1,5 @@
 from django.db.models import Prefetch
+from django.db.models import Sum
 
 from .constants import CartStatus
 from .models import (
@@ -197,3 +198,48 @@ def get_cart_item_by_id(
         return None
 
     return queryset.first()
+
+
+def get_active_cart_item_count(
+    *,
+    user=None,
+    session_key=None,
+):
+    """
+    دریافت تعداد کل کالاهای موجود در سبد خرید فعال.
+
+    مقدار quantity تمام آیتم‌های سبد خرید جمع می‌شود.
+    در صورت نبودن سبد خرید یا خالی بودن آن، مقدار صفر برگردانده می‌شود.
+
+    این Selector فقط برای خواندن اطلاعات استفاده می‌شود و
+    هیچ سبد خرید جدیدی ایجاد نمی‌کند.
+    """
+
+    queryset = CartItem.objects.filter(
+        cart__status=CartStatus.ACTIVE,
+    )
+
+    if user is not None:
+
+        queryset = queryset.filter(
+            cart__user=user,
+        )
+
+    elif session_key is not None:
+
+        queryset = queryset.filter(
+            cart__session_key=session_key,
+        )
+
+    else:
+
+        return 0
+
+    return (
+        queryset
+        .aggregate(
+            total_quantity=Sum("quantity"),
+        )
+        .get("total_quantity")
+        or 0
+    )
