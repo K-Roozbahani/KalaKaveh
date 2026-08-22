@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
 
+from utils.api.views import BaseModelViewSet
 from utils.permissions import IsOwnerOrAdmin
 
 from users.api.schemas import user_api_schema
@@ -15,7 +15,7 @@ User = get_user_model()
 
 
 @user_api_schema
-class UserApiView(ModelViewSet):
+class UserApiView(BaseModelViewSet):
     """
     ViewSet مدیریت کاربران.
     """
