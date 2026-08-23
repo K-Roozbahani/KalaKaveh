@@ -1,6 +1,5 @@
 from rest_framework import (
     mixins,
-    viewsets,
 )
 
 from rest_framework.permissions import (
@@ -23,12 +22,14 @@ from shipping.api.schemas import (
     schema_shipping_method,
 )
 
+from utils.api.views import BaseGenericViewSet
+
 
 @schema_shipping_method
 class ShippingMethodViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    BaseGenericViewSet,
 ):
     """
     نمایش روش‌های ارسال فعال
@@ -52,7 +53,7 @@ class ShippingMethodViewSet(
 class ShipmentViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    BaseGenericViewSet,
 ):
     """
     نمایش مرسوله‌های کاربر
