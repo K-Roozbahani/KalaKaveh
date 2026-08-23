@@ -7,11 +7,6 @@ from rest_framework.permissions import (
     IsAuthenticated,
 )
 
-from shipping.models import (
-    ShippingMethod,
-    Shipment,
-)
-
 from shipping.serializers import (
     ShippingMethodSerializer,
     ShipmentListSerializer,
@@ -21,10 +16,15 @@ from shipping.serializers import (
 from shipping.selectors import (
     get_active_shipping_methods,
     get_user_shipments,
-    get_user_shipment_by_id,
+)
+
+from shipping.api.schemas import (
+    schema_shipment,
+    schema_shipping_method,
 )
 
 
+@schema_shipping_method
 class ShippingMethodViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -48,6 +48,7 @@ class ShippingMethodViewSet(
         return get_active_shipping_methods()
 
 
+@schema_shipment
 class ShipmentViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
