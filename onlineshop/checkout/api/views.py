@@ -9,7 +9,7 @@ from checkout.api.schemas import schema_checkout
 from checkout.api.serializers import (
     CheckoutSerializer,
     CheckoutConfirmSerializer,
-    CheckoutSummerySerializer
+    CheckoutSummarySerializer
 )
 
 from checkout.services import (
@@ -45,7 +45,7 @@ class CheckoutViewSet(
             user=request.user,
         )
 
-        serializer = CheckoutSummerySerializer(
+        serializer = CheckoutSummarySerializer(
             data,
             context={
                 "request": request,

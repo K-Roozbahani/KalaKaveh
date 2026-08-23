@@ -3,7 +3,6 @@ Schemaهای OpenAPI مربوط به فرآیند Checkout.
 """
 
 from drf_spectacular.utils import (
-    OpenApiResponse,
     extend_schema,
     extend_schema_view,
     inline_serializer,
@@ -13,6 +12,7 @@ from rest_framework import serializers
 from checkout.api.serializers import (
     CheckoutConfirmSerializer,
     CheckoutSerializer,
+    CheckoutSummarySerializer,
 )
 
 
@@ -34,9 +34,7 @@ schema_checkout = extend_schema_view(
             "برای کاربر احراز هویت‌شده."
         ),
         responses={
-            200: OpenApiResponse(
-                description="اطلاعات Checkout.",
-            ),
+            200: CheckoutSummarySerializer,
         },
         tags=["Checkout"],
     ),
@@ -48,9 +46,7 @@ schema_checkout = extend_schema_view(
         ),
         request=CheckoutSerializer,
         responses={
-            200: OpenApiResponse(
-                description="اطلاعات به‌روزشده Checkout.",
-            ),
+            200: CheckoutSummarySerializer,
         },
         tags=["Checkout"],
     ),

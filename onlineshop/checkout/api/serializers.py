@@ -37,7 +37,7 @@ class CheckoutSerializer(serializers.Serializer):
     )
 
 
-class CheckoutSummerySerializer(serializers.Serializer):
+class CheckoutSummarySerializer(serializers.Serializer):
     """
     Serializer خروجی اطلاعات Checkout.
     """
