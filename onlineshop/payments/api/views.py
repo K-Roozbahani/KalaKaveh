@@ -2,7 +2,6 @@ from django.urls import reverse
 
 from rest_framework import mixins
 from rest_framework import status
-from rest_framework import viewsets
 
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -23,12 +22,20 @@ from payments.services.callback import process_gateway_callback
 from payments.services.payment import create_payment
 from payments.services.validators import validate_order_exists
 
+from payments.api.schema import (
+    schema_payment,
+    schema_payment_callback,
+)
 
+from utils.api.views import BaseGenericViewSet
+
+
+@schema_payment
 class PaymentViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    BaseGenericViewSet,
 ):
     """
     مدیریت پرداخت‌های کاربر.
@@ -100,7 +107,7 @@ class PaymentViewSet(
             status=status.HTTP_201_CREATED,
         )
 
-
+@schema_payment_callback
 class PaymentCallbackView(APIView):
     """
     Callback پرداخت.
