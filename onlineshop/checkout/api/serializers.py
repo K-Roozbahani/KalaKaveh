@@ -1,6 +1,14 @@
 from rest_framework import serializers
 
+from addresses.api.serializers import AddressDetailSerializer
+
+from carts.api.serializers import CartSerializer
+
+from discounts.api.serializers.coupon import CouponSerializer
+
 from payments.constants import GatewayType
+
+from shipping.serializers import ShippingMethodSerializer
 
 
 # =====================================================
@@ -26,6 +34,40 @@ class CheckoutSerializer(serializers.Serializer):
         required=False,
         allow_blank=True,
         max_length=50,
+    )
+
+
+class CheckoutSummerySerializer(serializers.Serializer):
+    """
+    Serializer خروجی اطلاعات Checkout.
+    """
+
+    cart = CartSerializer(
+        help_text="اطلاعات سبد خرید فعال.",
+    )
+
+    address = AddressDetailSerializer(
+        allow_null=True,
+        help_text="آدرس انتخاب‌شده برای ارسال.",
+    )
+
+    shipping_method = ShippingMethodSerializer(
+        allow_null=True,
+        help_text="روش ارسال انتخاب‌شده.",
+    )
+
+    shipping_methods = ShippingMethodSerializer(
+        many=True,
+        help_text="روش‌های ارسال قابل انتخاب.",
+    )
+
+    coupon = CouponSerializer(
+        allow_null=True,
+        help_text="کوپن اعمال‌شده.",
+    )
+
+    shipping_cost = serializers.IntegerField(
+        help_text="هزینه ارسال.",
     )
 
 
