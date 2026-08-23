@@ -14,8 +14,10 @@ from addresses.api.serializers import (
     AddressCreateSerializer,
     AddressUpdateSerializer,
 )
+from addresses.api.schema import schema_address
 
 
+@schema_address
 class AddressViewSet(BaseModelViewSet):
     """
     مدیریت آدرس‌های کاربر
