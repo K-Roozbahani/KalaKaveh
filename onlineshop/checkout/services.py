@@ -24,46 +24,6 @@ from shipping.validators import validate_shipping_method_available
 
 
 # =====================================================
-# Checkout Preview
-# =====================================================
-
-# def preview_checkout(
-#     *,
-#     user,
-# ):
-#     """
-#     دریافت اطلاعات اولیه Checkout.
-#
-#     شامل:
-#         - سبد خرید
-#         - آدرس‌های کاربر
-#         - روش‌های ارسال هر آدرس
-#     """
-#
-#     cart = get_user_active_cart(user)
-#
-#     addresses = get_user_addresses(user=user)
-#
-#     checkout_addresses = []
-#
-#     for address in addresses:
-#         shipping_methods = get_available_shipping_methods(
-#             cart=cart,
-#             address=address,
-#         )
-#
-#         checkout_addresses.append({
-#             "address": address,
-#             "shipping_methods": shipping_methods,
-#         })
-#
-#     return {
-#         "cart": cart,
-#         "addresses": checkout_addresses,
-#     }
-
-
-# =====================================================
 # Checkout Summary
 # =====================================================
 
@@ -120,14 +80,16 @@ def prepare_checkout(
             coupon=coupon,
             user=user
         )
-
-
-    shipping_cost = shipping_method.price
+    if shipping_method is not None:
+        shipping_cost = shipping_method.price
+    else:
+        shipping_cost = None
 
     return {
         "cart": cart,
         "address": address,
         "shipping_method": shipping_method,
+        "shipping_methods": available_shipping_methods,
         "coupon": coupon,
         "shipping_cost": shipping_cost,
     }
