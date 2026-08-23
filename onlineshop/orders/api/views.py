@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from utils.api.views import BaseGenericViewSet
 from utils.permissions import IsOwnerOrAdmin
 
+from orders.api.schemas import schema_order
 from orders.api.serializers import (
     CreateOrderSerializer,
     OrderDetailSerializer,
@@ -21,6 +22,7 @@ from orders.selectors import (
 )
 
 
+@schema_order
 class OrderViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
