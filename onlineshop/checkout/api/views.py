@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
+from checkout.api.schemas import schema_checkout
 from checkout.api.serializers import (
     CheckoutSerializer,
     CheckoutConfirmSerializer,
@@ -16,7 +17,7 @@ from checkout.services import (
     confirm_checkout,
 )
 
-
+@schema_checkout
 class CheckoutViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
