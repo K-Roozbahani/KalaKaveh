@@ -14,7 +14,6 @@ from rest_framework.permissions import (
     IsAuthenticated,
 )
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
 from drf_spectacular.utils import (
     extend_schema,
@@ -38,6 +37,7 @@ from products.services.review import (
 from products.validators import (
     validate_review_product,
 )
+from utils.api.views import BaseGenericViewSet
 from utils.permissions import IsOwnerOrAdmin
 
 
@@ -84,7 +84,7 @@ class ReviewViewSet(
     CreateModelMixin,
     UpdateModelMixin,
     DestroyModelMixin,
-    GenericViewSet,
+    BaseGenericViewSet,
 ):
     """
     مدیریت نظرات محصولات
