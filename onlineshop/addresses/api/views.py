@@ -1,8 +1,9 @@
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from utils.api.views import BaseModelViewSet
 from utils.permissions import IsOwnerOrAdmin
 
 from addresses import selectors
@@ -15,7 +16,7 @@ from addresses.api.serializers import (
 )
 
 
-class AddressViewSet(viewsets.ModelViewSet):
+class AddressViewSet(BaseModelViewSet):
     """
     مدیریت آدرس‌های کاربر
     """
