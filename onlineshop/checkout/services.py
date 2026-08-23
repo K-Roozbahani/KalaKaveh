@@ -80,7 +80,7 @@ def prepare_checkout(
     در این مرحله هیچ Order ساخته نمی‌شود.
     """
 
-    cart = get_user_active_cart(user)
+    cart = get_user_active_cart(user=user)
 
     addresses = get_user_addresses(user=user)
     if addresses.first() is None:
