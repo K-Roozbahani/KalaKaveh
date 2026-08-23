@@ -4,6 +4,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from utils.api.views import BaseGenericViewSet
 from utils.permissions import IsOwnerOrAdmin
 
 from orders.api.serializers import (
@@ -19,15 +20,11 @@ from orders.selectors import (
     get_user_orders,
 )
 
-from orders.services import (
-    create_order_from_cart,
-)
-
 
 class OrderViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
+    BaseGenericViewSet,
 ):
     permission_classes = (
         IsAuthenticated,
