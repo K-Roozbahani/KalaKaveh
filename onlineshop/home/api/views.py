@@ -2,10 +2,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from home.api.schemas import schema_home_page
 from home.api.serializers import HomePageSerializer
 from home.services import get_home_sections
 
 
+@schema_home_page
 class HomePageAPIView(APIView):
     """
     دریافت اطلاعات صفحه اصلی فروشگاه.
