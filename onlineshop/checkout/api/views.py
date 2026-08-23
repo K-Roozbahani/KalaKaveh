@@ -9,6 +9,7 @@ from checkout.api.schemas import schema_checkout
 from checkout.api.serializers import (
     CheckoutSerializer,
     CheckoutConfirmSerializer,
+    CheckoutSummerySerializer
 )
 
 from checkout.services import (
@@ -44,7 +45,17 @@ class CheckoutViewSet(
             user=request.user,
         )
 
-        return Response(data)
+        serializer = CheckoutSummerySerializer(
+            data,
+            context={
+                "request": request,
+            },
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
     # =====================================================
     # Update Checkout
