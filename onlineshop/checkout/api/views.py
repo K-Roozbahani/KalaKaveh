@@ -17,11 +17,14 @@ from checkout.services import (
     confirm_checkout,
 )
 
+from utils.api.views import BaseGenericViewSet
+
+
 @schema_checkout
 class CheckoutViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
+    BaseGenericViewSet,
 ):
     """
     مدیریت فرآیند Checkout
