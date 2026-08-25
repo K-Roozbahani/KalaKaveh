@@ -61,7 +61,7 @@ def set_auth_cookies(
         httponly=True,
         secure=settings.AUTH_COOKIE_SECURE,
         samesite=settings.AUTH_COOKIE_SAMESITE,
-        path="/api/user/auth/",
+        path="/api/auth/",
     )
 
     return response
@@ -81,7 +81,7 @@ def delete_auth_cookies(
 
     response.delete_cookie(
         key=settings.AUTH_COOKIE_REFRESH,
-        path="/api/user/auth/",
+        path="/api/auth/",
     )
 
     return response
