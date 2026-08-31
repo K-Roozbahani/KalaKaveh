@@ -121,4 +121,22 @@ class AddressUpdateSerializer(serializers.ModelSerializer):
         )
 
 
+class ProvinceWithCitiesSerializer(serializers.ModelSerializer):
+    """
+    Serializer استان به همراه شهرهای زیرمجموعه.
+    """
+
+    cities = CitySerializer(
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = Province
+        fields = (
+            "id",
+            "name",
+            "cities",
+        )
+
 
