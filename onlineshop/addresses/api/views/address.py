@@ -14,7 +14,7 @@ from addresses.api.serializers import (
     AddressCreateSerializer,
     AddressUpdateSerializer,
 )
-from addresses.api.schema import schema_address
+from addresses.schemas.address import schema_address
 
 
 @schema_address
