@@ -1,4 +1,4 @@
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Prefetch
 
 from addresses.models import Address, Province, City
 
@@ -61,15 +61,37 @@ def get_address_by_id(*,
 
 def get_provinces():
     """
-    لیست استان‌ها (برای فرم‌ها)
+    لیست استان‌ها برای فرم‌ها.
     """
 
-    return Province.objects.all().order_by("name")
+    return Province.objects.order_by("name")
+
+
+def get_provinces_with_cities():
+    """
+    دریافت استان‌ها به همراه شهرهای زیرمجموعه.
+
+    برای جلوگیری از N+1 Query، شهرها با prefetch_related
+    در یک Query جداگانه دریافت می‌شوند.
+    """
+
+    cities_queryset = City.objects.order_by("name")
+
+    return (
+        Province.objects
+        .prefetch_related(
+            Prefetch(
+                "cities",
+                queryset=cities_queryset,
+            )
+        )
+        .order_by("name")
+    )
 
 
 def get_cities_by_province(*, province):
     """
-    شهرهای یک استان (Cascading dropdown)
+    دریافت شهرهای یک استان.
     """
 
     return (
@@ -81,14 +103,13 @@ def get_cities_by_province(*, province):
 
 def get_city_by_id(*, city_id: int):
     """
-    گرفتن شهر با id
+    دریافت شهر به همراه استان مربوطه.
     """
 
     return (
         City.objects
-        .filter(id=city_id)
         .select_related("province")
+        .filter(id=city_id)
         .first()
     )
-
 
