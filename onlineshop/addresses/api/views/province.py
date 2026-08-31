@@ -4,11 +4,12 @@ from rest_framework.permissions import IsAuthenticated
 from addresses.api.serializers import (
     ProvinceWithCitiesSerializer,
 )
+from addresses.schemas.province import province_schema
 from addresses.selectors import get_provinces_with_cities
 
 from utils.api.views import BaseGenericViewSet
 
-
+@province_schema
 class ProvinceViewSet(
     ListModelMixin,
     BaseGenericViewSet,
