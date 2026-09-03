@@ -13,6 +13,7 @@ class ShippingMethodAdmin(admin.ModelAdmin):
         "id",
         "name",
         "price",
+        "code",
         "estimated_days",
         "is_active",
         "created_at",
@@ -42,6 +43,7 @@ class ShippingMethodAdmin(admin.ModelAdmin):
             _("اطلاعات روش ارسال"),
             {
                 "fields": (
+                    "code",
                     "name",
                     "price",
                     "estimated_days",
