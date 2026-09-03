@@ -49,6 +49,7 @@ class CheckoutViewSet(
             data,
             context={
                 "request": request,
+                "pricing": data["pricing"],
             },
         )
 
