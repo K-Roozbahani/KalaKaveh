@@ -8,7 +8,7 @@ from discounts.api.serializers.coupon import CouponSerializer
 
 from payments.constants import GatewayType
 
-from shipping.serializers import ShippingMethodSerializer
+from shipping.api.serializers import ShippingMethodSerializer
 
 
 # =====================================================

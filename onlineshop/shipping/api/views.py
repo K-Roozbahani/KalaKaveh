@@ -6,7 +6,7 @@ from rest_framework.permissions import (
     IsAuthenticated,
 )
 
-from shipping.serializers import (
+from shipping.api.serializers import (
     ShippingMethodSerializer,
     ShipmentListSerializer,
     ShipmentDetailSerializer,
