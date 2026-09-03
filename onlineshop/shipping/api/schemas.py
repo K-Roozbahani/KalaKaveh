@@ -4,7 +4,7 @@ Schemaهای OpenAPI مربوط به ارسال و مرسوله‌ها.
 
 from drf_spectacular.utils import (
     extend_schema,
-    extend_schema_view,
+    extend_schema_view, OpenApiResponse,
 )
 
 from shipping.api.serializers import (
@@ -22,7 +22,12 @@ schema_shipping_method = extend_schema_view(
             "قابل انتخاب برای کاربر."
         ),
         responses={
-            200: ShippingMethodSerializer(many=True),
+            200: OpenApiResponse(
+                response=ShippingMethodSerializer(
+                    many=True,
+                ),
+                description="لیست روش‌های ارسال فعال.",
+            ),
         },
         tags=["ارسال"],
     ),
