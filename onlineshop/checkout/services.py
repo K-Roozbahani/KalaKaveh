@@ -7,6 +7,7 @@ from addresses.selectors import (
     get_user_addresses,
     get_address_by_id, get_default_address,
 )
+from carts.services.pricing import calculate_cart_totals
 from discounts.models import Coupon
 from discounts.selectors import get_coupon_by_code
 
@@ -85,8 +86,13 @@ def prepare_checkout(
     else:
         shipping_cost = None
 
+    pricing = calculate_cart_totals(
+        cart=cart,
+        coupon=coupon,
+    )
     return {
         "cart": cart,
+        "pricing": pricing,
         "address": address,
         "shipping_method": shipping_method,
         "shipping_methods": available_shipping_methods,
