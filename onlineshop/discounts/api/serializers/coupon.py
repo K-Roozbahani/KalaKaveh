@@ -30,3 +30,13 @@ class CouponSerializer(
         )
 
 
+class CouponCheckSerializer(
+    serializers.Serializer,
+):
+    """
+    Serializer دریافت کد تخفیف برای بررسی اعتبار.
+    """
+
+    code = serializers.CharField(
+        max_length=100,
+    )
