@@ -17,6 +17,9 @@ class ProductFilter(filters.FilterSet):
 
     min_price = filters.NumberFilter(method="filter_min_price")
     max_price = filters.NumberFilter(method="filter_max_price")
+    has_discount = filters.BooleanFilter(
+        method="filter_has_discount"
+    )
 
     brand = CharInFilter(
     field_name="brand__slug",
@@ -83,3 +86,18 @@ class ProductFilter(filters.FilterSet):
         return queryset.filter(
             category__in=categories,
         )
+
+    def filter_has_discount(self, queryset, name, value):
+        """
+        فیلتر محصولات دارای تخفیف.
+        """
+
+        if value:
+            return queryset.filter(
+                variants__is_active=True,
+                variants__final_price__lt=F(
+                    "variants__price"
+                ),
+            ).distinct()
+
+        return queryset
