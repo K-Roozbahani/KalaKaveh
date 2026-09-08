@@ -77,7 +77,17 @@ class CheckoutViewSet(
             **serializer.validated_data,
         )
 
-        return Response(data)
+        response = CheckoutSummarySerializer(
+            data,
+            context={
+                "request": request,
+                "pricing": data["pricing"],
+            },
+        )
+
+        return Response(
+            response.data,
+            status=status.HTTP_201_CREATED)
 
     # =====================================================
     # Confirm Checkout
