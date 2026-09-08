@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.conf import settings
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 
@@ -21,6 +22,14 @@ class Discount(models.Model):
     name = models.CharField(
         _("عنوان"),
         max_length=255
+    )
+
+    slug = models.SlugField(
+        _("اسلاگ"),
+        max_length=255,
+        allow_unicode=True,
+        unique=True,
+        blank=True
     )
 
     discount_type = models.CharField(
@@ -58,6 +67,12 @@ class Discount(models.Model):
     class Meta:
         verbose_name = _("تخفیف")
         verbose_name_plural = _("تخفیف‌ها")
+
+    def save(self, *args, **kwargs):
+        if not self.slug: # اگر slug خالی بود، آن را بساز
+            self.slug = slugify(self.name, allow_unicode=True)
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
