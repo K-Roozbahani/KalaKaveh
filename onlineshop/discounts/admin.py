@@ -53,6 +53,12 @@ class DiscountAdmin(admin.ModelAdmin):
         CouponInline,
     )
 
+    prepopulated_fields = {
+        "slug": (
+            "name",
+        ),
+    }
+
     readonly_fields = (
         "created_at",
     )
