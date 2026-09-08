@@ -31,7 +31,7 @@ class DiscountListSerializer(
         )
 
     def get_targets_count(self, obj):
-        return obj.targets.count()
+        return obj.scops.count()
 
 
 
@@ -92,26 +92,4 @@ class DiscountCreateUpdateSerializer(
         ])
 
         return discount
-
-    def create(self, validated_data):
-
-        targets_data = validated_data.pop(
-            "targets",
-            []
-        )
-
-        discount = Discount.objects.create(
-            **validated_data
-        )
-
-        DiscountScope.objects.bulk_create([
-            DiscountScope(
-                discount=discount,
-                **target
-            )
-            for target in targets_data
-        ])
-
-        return discount
-
     
