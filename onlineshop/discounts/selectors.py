@@ -286,3 +286,28 @@ def get_highest_priority_discount(
         )
         .first()
     )
+
+
+#============================== for api discount ==================
+
+def get_discount_products(
+    *,
+    discount: Discount,
+):
+    """
+    دریافت محصولات مشمول تخفیف.
+
+    تخفیف می‌تواند از طریق محصول، تنوع محصول،
+    دسته‌بندی یا برند اعمال شده باشد.
+    """
+
+    return (
+        Product.objects
+        .filter(
+            Q(scopes__discount=discount)
+            | Q(category__scopes__discount=discount)
+            | Q(brand__scopes__discount=discount)
+            | Q(variants__scopes__discount=discount)
+        )
+        .distinct()
+    )
