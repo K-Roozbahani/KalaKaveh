@@ -95,9 +95,7 @@ class ProductFilter(filters.FilterSet):
         if value:
             return queryset.filter(
                 variants__is_active=True,
-                variants__final_price__lt=F(
-                    "variants__price"
-                ),
+                variants__discount_amount__gt=0
             ).distinct()
 
         return queryset
