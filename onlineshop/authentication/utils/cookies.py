@@ -61,7 +61,7 @@ def set_auth_cookies(
         httponly=True,
         secure=settings.AUTH_COOKIE_SECURE,
         samesite=settings.AUTH_COOKIE_SAMESITE,
-        path="/api/auth/",
+        path="/",
     )
 
     return response
