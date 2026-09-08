@@ -1,68 +1,31 @@
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework import viewsets
 
-from discounts.api.serializers.coupon import CouponSerializer
-from discounts.api.serializers.usage import CouponUsageSerializer
+from rest_framework.permissions import AllowAny
 
-from discounts.models import (
-    Discount,
-    DiscountScope,
-    Coupon,
-    CouponUsage,
-)
+from discounts.api.schemas.discount import discount_schema
+from discounts.selectors import get_active_discounts
 
 from discounts.api.serializers.discount import (
     DiscountListSerializer,
     DiscountDetailSerializer,
-    DiscountCreateUpdateSerializer,
 )
 
 
+@discount_schema
+class DiscountViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API تخفیف‌های فعال.
+    """
 
-class DiscountViewSet(ModelViewSet):
+    lookup_field = "slug"
 
-    queryset = (
-        Discount.objects
-        .prefetch_related("targets")
-        .order_by("-priority")
-    )
+
+    permission_classes = [AllowAny]
+    def get_queryset(self):
+        return get_active_discounts()
 
     def get_serializer_class(self):
-
         if self.action == "list":
             return DiscountListSerializer
 
-        if self.action in (
-            "create",
-            "update",
-            "partial_update"
-        ):
-            return DiscountCreateUpdateSerializer
-
         return DiscountDetailSerializer
-
-
-class CouponViewSet(ModelViewSet):
-
-    queryset = Coupon.objects.select_related(
-        "discount"
-    )
-
-    serializer_class = CouponSerializer
-
-
-class CouponUsageViewSet(
-    ReadOnlyModelViewSet
-):
-
-    queryset = (
-        CouponUsage.objects
-        .select_related(
-            "coupon",
-            "user",
-            "order"
-        )
-    )
-
-    serializer_class = (
-        CouponUsageSerializer
-    )
