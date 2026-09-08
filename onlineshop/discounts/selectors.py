@@ -1,4 +1,11 @@
-from django.db.models import Q
+from django.db.models import (
+    Q,
+    OuterRef,
+    Prefetch,
+    Subquery,
+    QuerySet
+)
+
 from django.utils import timezone
 
 from discounts.models import (
@@ -293,13 +300,49 @@ def get_highest_priority_discount(
 def get_discount_products(
     *,
     discount: Discount,
-):
+) -> QuerySet[Product]:
     """
     دریافت محصولات مشمول تخفیف.
 
-    تخفیف می‌تواند از طریق محصول، تنوع محصول،
-    دسته‌بندی یا برند اعمال شده باشد.
+    تخفیف می‌تواند از طریق:
+        - محصول
+        - تنوع محصول
+        - دسته‌بندی
+        - برند
+
+    اعمال شده باشد.
+
+    قیمت نمایش محصول:
+        پایین‌ترین final_price بین Variantهای فعال.
     """
+
+    variants = (
+        ProductVariant.objects
+        .filter(
+            is_active=True,
+        )
+        .order_by(
+            "final_price",
+            "-stock",
+            "id",
+        )
+        .prefetch_related(
+            "images",
+        )
+    )
+
+    default_variant = (
+        ProductVariant.objects
+        .filter(
+            product=OuterRef("pk"),
+            is_active=True,
+        )
+        .order_by(
+            "final_price",
+            "-stock",
+            "id",
+        )
+    )
 
     return (
         Product.objects
@@ -307,7 +350,24 @@ def get_discount_products(
             Q(scopes__discount=discount)
             | Q(category__scopes__discount=discount)
             | Q(brand__scopes__discount=discount)
-            | Q(variants__scopes__discount=discount)
+            | Q(variants__scopes__discount=discount),
+            is_active=True,
+        )
+        .select_related(
+            "category",
+            "brand",
+        )
+        .prefetch_related(
+            "images",
+            Prefetch(
+                "variants",
+                queryset=variants,
+            ),
+        )
+        .annotate(
+            default_price=Subquery(
+                default_variant.values("final_price")[:1],
+            ),
         )
         .distinct()
     )
