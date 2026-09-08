@@ -78,6 +78,26 @@ def get_active_discount_by_id(
     )
 
 
+def get_active_discount_by_slug(
+    *,
+    slug: str,
+) -> Discount:
+    now = timezone.now()
+
+    return (
+        Discount.objects
+        .prefetch_related(
+            "scopes",
+        )
+        .get(
+            slug=slug,
+            is_active=True,
+            start_date__lte=now,
+            end_date__gte=now,
+        )
+    )
+
+
 # =====================================================
 # Coupon
 # =====================================================
