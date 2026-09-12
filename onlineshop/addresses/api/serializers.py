@@ -38,6 +38,7 @@ class AddressListSerializer(serializers.ModelSerializer):
             "receiver_phone",
             "province",
             "city",
+            "address_line",
             "is_default",
         )
 
