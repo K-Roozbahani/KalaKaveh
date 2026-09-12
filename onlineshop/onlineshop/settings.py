@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "users",
     "home",
     "products",
+    "favorites",
     "discounts",
     "carts",
     "addresses",

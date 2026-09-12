@@ -60,6 +60,7 @@ urlpatterns = [
     path("ckeditor5/", include("django_ckeditor_5.urls")),
     path('api/user/', include('users.api.urls')) ,
     path('api/', include('products.api.urls')),
+    path('api/favorites/', include('favorites.api.urls')),
     path('api/cart/', include('carts.api.urls')),
     path('api/address/', include('addresses.api.urls')),
     path('api/checkout/', include('checkout.api.urls', namespace="checkout")),
