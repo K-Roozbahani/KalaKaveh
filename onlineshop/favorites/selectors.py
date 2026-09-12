@@ -46,3 +46,23 @@ def list_user_favorites(
         )
         .order_by("-created_at")
     )
+
+def get_favorite_by_id(
+    *,
+    user,
+    favorite_id: int,
+):
+    """
+    دریافت یک علاقه‌مندی متعلق به کاربر.
+
+    فقط محصولات فعال و Variantهای فعال دریافت می‌شوند.
+    """
+
+    return (
+        Favorite.objects
+        .filter(
+            id=favorite_id,
+            user=user,
+        )
+        .first()
+    )
