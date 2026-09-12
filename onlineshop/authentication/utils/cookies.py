@@ -81,7 +81,7 @@ def delete_auth_cookies(
 
     response.delete_cookie(
         key=settings.AUTH_COOKIE_REFRESH,
-        path="/api/auth/",
+        path="/",
     )
 
     return response
