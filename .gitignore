@@ -133,3 +133,5 @@ logs/
 # Celery Beat
 celerybeat-schedule
 celerybeat-schedule-*
+
+frontend/
