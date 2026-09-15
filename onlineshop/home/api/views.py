@@ -13,8 +13,7 @@ class HomePageAPIView(APIView):
     دریافت اطلاعات صفحه اصلی فروشگاه.
     """
 
-    authentication_classes = ()
-    permission_classes = ()
+    permission_classes = None
 
     def get(self, request):
         """
