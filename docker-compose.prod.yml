@@ -139,6 +139,43 @@ services:
         ]
 
   # --------------------------------------------------
+  # frontend
+  # --------------------------------------------------
+
+  frontend:
+
+    image: kaveh-shop-frontend:latest
+
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    init: true
+
+    restart: unless-stopped
+
+    stop_signal: SIGTERM
+
+    stop_grace_period: 30s
+
+    security_opt:
+      - no-new-privileges:true
+
+    expose:
+      - "3000"
+
+    networks:
+      - backend
+
+    env_file:
+      - ./deployment/env/production.env
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+  # --------------------------------------------------
   # Celery Worker
   # --------------------------------------------------
 
