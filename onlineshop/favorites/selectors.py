@@ -66,3 +66,19 @@ def get_favorite_by_id(
         )
         .first()
     )
+
+
+def list_user_favorite_product_ids(
+    *,
+    user,
+):
+    """
+    دریافت شناسه محصولاتی که توسط کاربر به علاقه‌مندی‌ها اضافه شده‌اند.
+    """
+
+    return Favorite.objects.filter(
+        user=user,
+    ).values_list(
+        "product_id",
+        flat=True,
+    )
