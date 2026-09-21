@@ -7,7 +7,10 @@ from products.selectors import (
 )
 
 
-class CharInFilter(filters.BooleanFilter, filters.CharFilter):
+class CharInFilter(filters.BaseInFilter, filters.CharFilter):
+    """
+    فیلتر دریافت چند مقدار متنی برای lookup از نوع in.
+    """
     pass
 
 class ProductFilter(filters.FilterSet):
@@ -22,8 +25,8 @@ class ProductFilter(filters.FilterSet):
     )
 
     brand = CharInFilter(
-    field_name="brand__slug",
-    lookup_expr="in",
+        field_name="brand__slug",
+        lookup_expr="in",
     )
 
     category = filters.CharFilter(method="filter_category")
