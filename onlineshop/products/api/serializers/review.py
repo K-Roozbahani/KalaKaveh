@@ -1,3 +1,4 @@
+from phonenumbers.phonenumberutil import is_mobile_number_portable_region
 from rest_framework import serializers
 
 from products.models import Review
@@ -48,7 +49,6 @@ class ReviewWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-
         fields = (
             "rating",
             "comment",
@@ -73,3 +73,31 @@ class ReviewWriteSerializer(serializers.ModelSerializer):
         return validate_review_comment(
             comment=value,
         )
+
+
+class UserReviewsSerializer(serializers.ModelSerializer):
+    """
+    نمایش نظرات کاربر جاری
+    """
+
+    product = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = (
+            "id",
+            "user",
+            "product",
+            "rating",
+            "comment",
+        )
+
+        read_only_fields = (
+            "id",
+            "user",
+            "product",
+        )
+
+    def get_product(self, object):
+        from products.api.serializers import ProductListSerializer
+        return ProductListSerializer(object.product).data
