@@ -103,12 +103,22 @@ class ProductListSerializer(serializers.ModelSerializer):
         )
 
     def get_image(self, obj):
+        """
+        دریافت URL کامل تصویر اصلی محصول.
+        """
 
         image = get_primary_product_image(
             product=obj,
         )
 
-        if image:
+        if not image:
+            return None
+
+        request = self.context.get("request")
+
+        if not request:
             return image.image.url
 
-        return None
+        return request.build_absolute_uri(
+            image.image.url,
+        )
