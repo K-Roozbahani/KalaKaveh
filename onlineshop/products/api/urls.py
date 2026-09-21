@@ -4,8 +4,7 @@ from rest_framework.routers import DefaultRouter
 from products.api.views.brand import BrandViewSet
 from products.api.views.category import CategoryViewSet
 from products.api.views.product import ProductViewSet
-from products.api.views.review import ReviewViewSet
-
+from products.api.views.review import ReviewViewSet, UserReviewViewSet
 
 router = DefaultRouter()
 
@@ -27,6 +26,11 @@ router.register(
     basename="product",
 )
 
+router.register(
+    "review/me",
+    UserReviewViewSet,
+    basename="user-review",
+)
 
 urlpatterns = [
     *router.urls,
