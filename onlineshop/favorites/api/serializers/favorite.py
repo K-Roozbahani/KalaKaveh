@@ -100,3 +100,13 @@ class FavoriteAddSerializer(serializers.Serializer):
         write_only=True,
         label="شناسه محصول",
     )
+
+
+class FavoriteProductIDsSerializer(serializers.Serializer):
+    """
+    شناسه محصولات موجود در علاقه‌مندی‌های کاربر.
+    """
+
+    ids = serializers.ListField(
+        child=serializers.IntegerField(),
+    )
