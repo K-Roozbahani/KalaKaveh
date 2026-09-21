@@ -504,6 +504,41 @@ def get_user_review(
         ).first()
     )
 
+def get_user_reviews(*, user):
+    """
+    دریافت نظرات کاربر به همراه محصول، برند، دسته‌بندی
+    و واریانت‌های فعال محصول
+    """
+
+    active_variants = (
+        ProductVariant.objects
+        .filter(is_active=True)
+        .prefetch_related(
+            "images",
+        )
+        .order_by(
+            "-stock",
+            "final_price",
+            "id",
+        )
+    )
+
+    return (
+        Review.objects
+        .filter(user=user)
+        .select_related(
+            "product",
+            "product__brand",
+            "product__category",
+        )
+        .prefetch_related(
+            Prefetch(
+                "product__variants",
+                queryset=active_variants,
+            ),
+        )
+        .order_by("-created_at")
+    )
 
 # =====================================================
 # Images
