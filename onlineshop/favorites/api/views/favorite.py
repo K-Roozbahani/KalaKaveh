@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -8,9 +9,11 @@ from favorites.api.schemas.favorrite import favorite_schema
 from favorites.api.serializers.favorite import (
     FavoriteAddSerializer,
     FavoriteListSerializer,
+    FavoriteProductIDsSerializer,
 )
 from favorites.selectors import (
     list_user_favorites,
+    list_user_favorite_product_ids,
 )
 from favorites.services.favorites import (
     add_favorite,
@@ -95,3 +98,25 @@ class FavoriteViewSet(BaseGenericViewSet):
         return Response(
             status=status.HTTP_204_NO_CONTENT,
         )
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="product-ids",
+    )
+    def product_ids(self, request):
+        """
+        دریافت شناسه محصولاتی که توسط کاربر به علاقه‌مندی‌ها اضافه شده‌اند.
+        """
+
+        product_ids = list_user_favorite_product_ids(
+            user=request.user,
+        )
+
+        serializer = FavoriteProductIDsSerializer(
+            {
+                "ids": list(product_ids),
+            },
+        )
+
+        return Response(serializer.data)
