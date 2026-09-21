@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from rest_framework import status
+from rest_framework import status, mixins
 from rest_framework.exceptions import NotFound
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -23,11 +23,13 @@ from drf_spectacular.utils import (
 from products.api.serializers.review import (
     ReviewSerializer,
     ReviewWriteSerializer,
+    UserReviewsSerializer,
 )
 from products.selectors import (
     get_product_by_slug,
     get_product_reviews,
     get_review_by_id,
+    get_user_reviews,
 )
 from products.services.review import (
     create_review,
@@ -306,3 +308,30 @@ class ReviewViewSet(
         return Response(
             status=status.HTTP_204_NO_CONTENT,
         )
+
+
+class UserReviewViewSet(
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    BaseGenericViewSet,
+):
+    """
+    مدیریت نظرات کاربر جاری
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return get_user_reviews(
+            user=self.request.user,
+        )
+
+    def get_serializer_class(self):
+        """
+        انتخاب Serializer بر اساس نوع درخواست
+        """
+
+        if self.action in ("update", "partial_update"):
+            return ReviewWriteSerializer
+
+        return UserReviewsSerializer
