@@ -98,6 +98,31 @@ class UserReviewsSerializer(serializers.ModelSerializer):
             "product",
         )
 
-    def get_product(self, object):
-        from products.api.serializers import ProductListSerializer
-        return ProductListSerializer(object.product).data
+    def get_product(self, obj):
+        """
+        دریافت اطلاعات محصول مربوط به نظر
+        """
+
+        product = obj.product
+
+        variant = product.variants.first()
+        image = product.images.first()
+
+        request = self.context.get("request")
+
+        return {
+            "id": product.id,
+            "name": product.name,
+            "slug": product.slug,
+            "brand": product.brand.name if product.brand else None,
+            "category": product.category.name if product.category else None,
+            "price": variant.price if variant else None,
+            "discount_amount": variant.discount_amount if variant else None,
+            "final_price": variant.final_price if variant else None,
+            "image": (
+                request.build_absolute_uri(image.url)
+                if image and request
+                else image.url if image else None
+            ),
+        }
+
