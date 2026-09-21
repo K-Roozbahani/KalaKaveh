@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from products.selectors import get_default_variant
+from products.api.serializers import ProductImageSerializer
+from products.selectors import get_default_variant, get_primary_product_image
 
 from favorites.models import Favorite
 
@@ -25,6 +26,8 @@ class FavoriteListSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    image = serializers.SerializerMethodField()
+
     price = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
     total = serializers.SerializerMethodField()
@@ -36,6 +39,7 @@ class FavoriteListSerializer(serializers.ModelSerializer):
             "brand",
             "category",
             "name",
+            "image",
             "price",
             "discount_amount",
             "total",
@@ -88,6 +92,27 @@ class FavoriteListSerializer(serializers.ModelSerializer):
             return None
 
         return variant.final_price
+
+    def get_image(self, obj):
+        """
+        دریافت URL کامل تصویر اصلی محصول.
+        """
+
+        image = get_primary_product_image(
+            product=obj.product,
+        )
+
+        if not image:
+            return None
+
+        request = self.context.get("request")
+
+        if not request:
+            return image.image.url
+
+        return request.build_absolute_uri(
+            image.image.url,
+        )
 
 
 class FavoriteAddSerializer(serializers.Serializer):
