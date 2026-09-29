@@ -57,7 +57,7 @@ def create_order_from_cart(
     coupon : Coupon = None,
     note="",
 ):
-    cart = get_user_active_cart(user)
+    cart = get_user_active_cart(user=user)
     note = note
 
     validate_cart_exists(cart)
