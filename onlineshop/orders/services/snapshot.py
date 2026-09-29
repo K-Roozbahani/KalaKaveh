@@ -23,13 +23,15 @@ def build_product_snapshot(
     product,
     variant,
 ):
+    image = product.images.first()
+
     return {
         "product_id": product.id,
         "product_name": product.name,
+        "product_image": image.image.url if image else None,
 
         "variant_id": variant.id,
         "variant_name": str(variant),
-
         "sku": variant.sku,
     }
 
