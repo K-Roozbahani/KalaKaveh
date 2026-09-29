@@ -20,6 +20,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 
+from products.api.schemas import schema_user_review
 from products.api.serializers.review import (
     ReviewSerializer,
     ReviewWriteSerializer,
@@ -310,6 +311,7 @@ class ReviewViewSet(
         )
 
 
+@schema_user_review
 class UserReviewViewSet(
     mixins.ListModelMixin,
     mixins.UpdateModelMixin,
