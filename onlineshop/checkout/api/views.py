@@ -116,7 +116,7 @@ class CheckoutViewSet(
 
         return Response(
             {
-                "payment_url": payment.payment_url,
+                "payment_url": payment["payment_url"],
             },
             status=status.HTTP_201_CREATED,
         )
