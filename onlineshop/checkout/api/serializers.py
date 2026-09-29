@@ -80,6 +80,22 @@ class CheckoutConfirmSerializer(serializers.Serializer):
     تایید نهایی Checkout.
     """
 
+    address_id = serializers.IntegerField(
+        required=False,
+        min_value=1,
+    )
+
+    shipping_method_id = serializers.IntegerField(
+        required=False,
+        min_value=1,
+    )
+
+    coupon_code = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=50,
+    )
+
     gateway_type = serializers.ChoiceField(
         choices=GatewayType.choices,
     )
