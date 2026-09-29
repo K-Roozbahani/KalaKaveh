@@ -1,3 +1,4 @@
+import uuid
 from abc import ABC
 from abc import abstractmethod
 
@@ -48,8 +49,11 @@ class ZarinpalGateway(BaseGateway):
         description,
         callback_url,
     ):
+        # ایجاد Authority یکتا برای هر درخواست پرداخت
+        authority = f"TEST_{uuid.uuid4().hex.upper()}"
+
         return {
-            "authority": "TEST_AUTHORITY",
+            "authority": authority,
             "payment_url": (
                 "https://www.zarinpal.com/pg/StartPay/"
                 "TEST_AUTHORITY"
