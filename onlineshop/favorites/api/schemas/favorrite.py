@@ -6,7 +6,7 @@ from drf_spectacular.utils import (
 
 from favorites.api.serializers.favorite import (
     FavoriteAddSerializer,
-    FavoriteListSerializer,
+    FavoriteListSerializer, FavoriteProductIDsSerializer,
 )
 
 
@@ -38,4 +38,12 @@ favorite_schema = extend_schema_view(
         },
         tags=["علاقه‌مندی‌ها"],
     ),
+    product_ids=extend_schema(
+        summary="لیست محصولات (فقط id)",
+        description="دریافت لیست id محصولات مورد علاقه کاربر",
+        responses={
+            200: FavoriteProductIDsSerializer,
+        },
+        tags=["علاقه‌مندی‌ها"],
+    )
 )
