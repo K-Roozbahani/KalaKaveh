@@ -1,3 +1,5 @@
+from rest_framework.exceptions import NotFound
+
 from addresses.models import Address
 from addresses.services.address import set_default_address
 from addresses.validators import validate_address_owner
@@ -42,6 +44,16 @@ def prepare_checkout(
     """
 
     cart = get_user_active_cart(user=user)
+    if cart is None or cart.items is None:
+        raise NotFound(
+            detail="سبد خرید فعالی برای شما وجود ندارد.",
+            code="cart_not_found",
+        )
+    elif not cart.items.exists():
+        raise NotFound(
+            detail="سبد خرید شما خلی است.",
+            code="cart_not_found",
+        )
 
     addresses = get_user_addresses(user=user)
     if addresses.first() is None:
