@@ -392,20 +392,19 @@ def get_default_variant(
     product: Product,
 ) -> ProductVariant | None:
     """
-    دریافت Variant پیش‌فرض محصول
-
-    این تابع هیچ Query جدیدی ایجاد نمی‌کند
-    در صورتی که variants قبلاً Prefetch شده باشند.
+    دریافت ارزان‌ترین Variant فعال و موجود محصول.
     """
 
-    variants = list(
-        product.variants.all()
+    return (
+        ProductVariant.objects
+        .filter(
+            is_active=True,
+            product=product,
+            stock__gt=0,
+        )
+        .order_by("final_price")
+        .first()
     )
-
-    if not variants:
-        return None
-
-    return variants[0]
 
 
 # =====================================================
