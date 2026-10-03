@@ -60,7 +60,23 @@ class OrderViewSet(
         return OrderDetailSerializer
 
     def list(self, request, *args, **kwargs):
+        """
+        دریافت لیست با صفحه‌بندی.
+        """
+
         queryset = self.get_queryset()
+
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+            )
+
+            return self.get_paginated_response(
+                serializer.data,
+            )
 
         serializer = self.get_serializer(
             queryset,
