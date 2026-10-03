@@ -120,7 +120,7 @@ class UserReviewsSerializer(serializers.ModelSerializer):
             "discount_amount": variant.discount_amount if variant else None,
             "final_price": variant.final_price if variant else None,
             "image": (
-                request.build_absolute_uri(image.url)
+                request.build_absolute_uri(image.image.url)
                 if image and request
                 else image.url if image else None
             ),
