@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from products.api.serializers import ProductImageSerializer
 from products.selectors import get_default_variant, get_primary_product_image
-
+from products.services.stock import ensure_variant_can_be_purchased
 from favorites.models import Favorite
 
 
@@ -31,15 +31,22 @@ class FavoriteListSerializer(serializers.ModelSerializer):
     price = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
     total = serializers.SerializerMethodField()
+    has_stock = serializers.SerializerMethodField()
+    slug = serializers.CharField(
+        source="product.slug",
+        read_only=True,
+    )
 
     class Meta:
         model = Favorite
         fields = [
             "id",
+            "slug",
             "brand",
             "category",
             "name",
             "image",
+            "has_stock",
             "price",
             "discount_amount",
             "total",
@@ -56,6 +63,18 @@ class FavoriteListSerializer(serializers.ModelSerializer):
         return get_default_variant(
             product=obj.product,
         )
+
+    def get_has_stock(self, obj):
+        """
+        برسی میکند آیا مصحول موجو می باشد
+        """
+        variant = self._get_default_variant(obj)
+
+        if variant is None:
+            return False
+
+        return True if variant.stock else False
+
 
     def get_price(self, obj):
         """
