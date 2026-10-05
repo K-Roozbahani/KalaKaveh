@@ -79,6 +79,6 @@ def list_user_favorite_product_ids(
     return Favorite.objects.filter(
         user=user,
     ).values_list(
+        "id"
         "product_id",
-        flat=True,
     )
