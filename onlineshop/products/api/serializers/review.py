@@ -131,11 +131,3 @@ class UserReviewsSerializer(serializers.ModelSerializer):
             ),
         }
 
-    def get_status(self, obj):
-        """
-        انمایش وضعیت نظر
-        """
-        if obj.is_valid:
-            return "معتبر"
-        else:
-            return "در انتظار تایید"
