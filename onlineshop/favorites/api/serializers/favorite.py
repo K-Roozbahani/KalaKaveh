@@ -148,12 +148,13 @@ class FavoriteAddSerializer(serializers.Serializer):
 
 class FavoriteProductIDsSerializer(serializers.Serializer):
     """
-    شناسه محصولات موجود در علاقه‌مندی‌های کاربر.
+    شناسه علاقه‌مندی و شناسه محصول مورد علاقه کاربر.
     """
+
     id = serializers.IntegerField(
         min_value=1,
         read_only=True,
-        label="شناسه علاقه مندی",
+        label="شناسه علاقه‌مندی",
     )
 
     product_id = serializers.IntegerField(
