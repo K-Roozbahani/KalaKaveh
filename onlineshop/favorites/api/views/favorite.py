@@ -114,9 +114,8 @@ class FavoriteViewSet(BaseGenericViewSet):
         )
 
         serializer = FavoriteProductIDsSerializer(
-            {
-                "ids": list(product_ids),
-            },
+            product_ids,
+            many=True
         )
 
         return Response(serializer.data)
