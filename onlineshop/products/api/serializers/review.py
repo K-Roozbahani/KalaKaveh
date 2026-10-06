@@ -81,21 +81,26 @@ class UserReviewsSerializer(serializers.ModelSerializer):
     """
 
     product = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
         fields = (
             "id",
+            "status",
             "user",
             "product",
             "rating",
             "comment",
+            "created_at",
         )
 
         read_only_fields = (
             "id",
             "user",
             "product",
+            "status",
+            "created_at",
         )
 
     def get_product(self, obj):
@@ -126,3 +131,11 @@ class UserReviewsSerializer(serializers.ModelSerializer):
             ),
         }
 
+    def get_status(self, obj):
+        """
+        انمایش وضعیت نظر
+        """
+        if obj.is_valid:
+            return "معتبر"
+        else:
+            return "در انتظار تایید"
