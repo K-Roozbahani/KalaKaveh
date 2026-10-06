@@ -73,12 +73,12 @@ def list_user_favorite_product_ids(
     user,
 ):
     """
-    دریافت شناسه محصولاتی که توسط کاربر به علاقه‌مندی‌ها اضافه شده‌اند.
+    دریافت شناسه علاقه‌مندی و شناسه محصول‌های مورد علاقه کاربر.
     """
 
     return Favorite.objects.filter(
         user=user,
-    ).values_list(
-        "id"
+    ).values(
+        "id",
         "product_id",
     )
