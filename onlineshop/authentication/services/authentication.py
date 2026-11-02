@@ -13,7 +13,7 @@ from authentication.services.otp import (
 
 from authentication.services.rate_limit import check_rate_limit
 from authentication.services.request_validation import validate_request_source
-from authentication.services.sms import send_otp
+from authentication.services.sms import SMSIRService
 from users.services.user import get_or_create_user_by_phone
 
 
@@ -43,9 +43,10 @@ def request_otp(
         otp=otp,
     )
 
-    send_otp(
-        phone_number=str(phone_number),
-        otp=otp,
+    sms = SMSIRService()
+    sms.send_otp(
+        phone_number=int(phone_number),
+        code=otp,
     )
 
 
