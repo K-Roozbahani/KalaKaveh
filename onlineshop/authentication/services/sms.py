@@ -16,10 +16,10 @@ class SMSIRService:
             settings.SMSIR["LINE_NUMBER"],
         )
 
-    def send_otp(self, phone_number: int, code: str):
+    def send_otp(self, phone_number: str, code: str):
         try:
             return self.client.send_verify_code(
-                number=phone_number,
+                number=int(phone_number),
                 template_id=settings.SMSIR["OTP_TEMPLATE_ID"],
                 parameters=[
                     {
@@ -32,3 +32,25 @@ class SMSIRService:
             raise SMSProviderError(
                 "Failed to send OTP through SMS.ir."
             ) from exc
+
+
+import logging
+logger = logging.getLogger("authentication")
+
+
+def send_otp(
+    *,
+    phone_number: str,
+    code: str,
+) -> None:
+    """
+ارسال کد یکبار مصرف
+در محیط توسعه، کد تأیید فقط در لاگ ثبت می‌شود.
+"""
+
+    logger.info(
+        "OTP | phone_number=%s | otp=%s",
+        phone_number,
+        code,
+    )
+    print(f"OTP | {phone_number} | {code}")
