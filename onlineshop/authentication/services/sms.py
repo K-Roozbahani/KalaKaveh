@@ -49,7 +49,7 @@ def send_otp(
 """
 
     logger.info(
-        "OTP | phone_number=%s | otp=%s",
+        "OTP | phone_number=%s | code=%s",
         phone_number,
         code,
     )
