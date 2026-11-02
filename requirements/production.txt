@@ -1,3 +1,4 @@
 -r base.txt
 
 gunicorn==23.0.0
+smsir-python==1.0.8
