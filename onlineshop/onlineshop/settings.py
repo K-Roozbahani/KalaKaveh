@@ -573,7 +573,10 @@ CSRF_COOKIE_SAMESITE = env(
 SESSION_COOKIE_HTTPONLY = True
 
 # در Production فقط روی HTTPS ارسال شود.
-SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = env.bool(
+    "SESSION_COOKIE_SECURE",
+    default=not DEBUG,
+)
 
 SESSION_COOKIE_SAMESITE = "Lax"
 
