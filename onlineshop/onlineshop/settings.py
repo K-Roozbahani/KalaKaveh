@@ -700,3 +700,13 @@ SPECTACULAR_SETTINGS = {
         }
     },
 }
+
+# ==========================================================
+# sms
+# ==========================================================
+
+SMSIR = {
+    "API_KEY": env("SMSIR_API_KEY"),
+    "LINE_NUMBER": env("SMSIR_LINE_NUMBER"),
+    "OTP_TEMPLATE_ID": env.int("SMSIR_OTP_TEMPLATE_ID"),
+}
