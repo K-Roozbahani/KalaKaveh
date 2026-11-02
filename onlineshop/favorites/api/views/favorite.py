@@ -51,6 +51,18 @@ class FavoriteViewSet(BaseGenericViewSet):
             user=request.user,
         )
 
+        page = self.paginate_queryset(favorites)
+
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+            )
+
+            return self.get_paginated_response(
+                serializer.data,
+            )
+
         serializer = self.get_serializer(
             favorites,
             many=True,
