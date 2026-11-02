@@ -1,5 +1,5 @@
 from phonenumber_field.phonenumber import PhoneNumber
-
+from django.conf import settings
 from users.constants import (
     RATE_LIMIT_ACTION_OTP_REQUEST,
     RATE_LIMIT_ACTION_OTP_VERIFY,
@@ -13,7 +13,7 @@ from authentication.services.otp import (
 
 from authentication.services.rate_limit import check_rate_limit
 from authentication.services.request_validation import validate_request_source
-from authentication.services.sms import SMSIRService
+from authentication.services.sms import SMSIRService, send_otp
 from users.services.user import get_or_create_user_by_phone
 
 
@@ -43,11 +43,19 @@ def request_otp(
         otp=otp,
     )
 
-    sms = SMSIRService()
-    sms.send_otp(
-        phone_number=int(phone_number),
-        code=otp,
-    )
+    if settings.DEBUG:
+
+        send_otp(
+            phone_number=str(phone_number),
+            code=otp,
+        )
+
+    elif not settings.DEBUG:
+        sms = SMSIRService()
+        sms.send_otp(
+            phone_number=str(phone_number),
+            code=otp,
+        )
 
 
 def authenticate_by_otp(
