@@ -707,6 +707,8 @@ SPECTACULAR_SETTINGS = {
 # ==========================================================
 # sms
 # ==========================================================
+# ارسال پیامک برای محیط production
+SEND_OTP_SMS = env.bool("SEND_OTP_SMS", default=False)
 
 SMSIR = {
     "API_KEY": env("SMSIR_API_KEY"),
