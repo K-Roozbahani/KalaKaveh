@@ -43,19 +43,21 @@ def request_otp(
         otp=otp,
     )
 
-    if settings.DEBUG:
+    if settings.SEND_OTP_SMS:
+        sms = SMSIRService()
+        sms.send_otp(
+            phone_number=str(phone_number),
+            code=otp,
+        )
+
+    elif not settings.SEND_OTP_SMS:
 
         send_otp(
             phone_number=str(phone_number),
             code=otp,
         )
 
-    elif not settings.DEBUG:
-        sms = SMSIRService()
-        sms.send_otp(
-            phone_number=str(phone_number),
-            code=otp,
-        )
+
 
 
 def authenticate_by_otp(
